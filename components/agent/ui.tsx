@@ -1,0 +1,505 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import {
+  Eye,
+  Loader2,
+  Lock,
+  MessageCircle,
+  Pencil,
+  Trash2,
+  UploadCloud,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { accessLabel } from "@/lib/agent/plans";
+import type { DocumentAccess, DocumentKind } from "@/lib/agent/types";
+import { isFeatureEnabled } from "@/lib/agent/features";
+import { useAgent } from "./AgentProvider";
+
+export function PageShell({ children, className, wide }: { children: React.ReactNode; className?: string; wide?: boolean }) {
+  return <div className={cn("mx-auto w-full px-4 py-6 sm:px-6 sm:py-8", wide ? "max-w-[1400px]" : "max-w-6xl", className)}>{children}</div>;
+}
+
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  actions,
+  back,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: React.ReactNode;
+  actions?: React.ReactNode;
+  back?: { href: string; label: string };
+}) {
+  return (
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        {back ? (
+          <Link href={back.href} className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-orange-600">
+            ← {back.label}
+          </Link>
+        ) : null}
+        {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--primary)]">{eyebrow}</p> : null}
+        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">{title}</h1>
+        {description ? <p className="mt-1 max-w-2xl text-sm text-slate-500">{description}</p> : null}
+      </div>
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    </div>
+  );
+}
+
+export function SectionCard({
+  title,
+  description,
+  icon: Icon,
+  children,
+  id,
+  className,
+  aside,
+}: {
+  title: string;
+  description?: React.ReactNode;
+  icon?: LucideIcon;
+  children: React.ReactNode;
+  id?: string;
+  className?: string;
+  aside?: React.ReactNode;
+}) {
+  return (
+    <section id={id} className={cn("scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-6", className)}>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          {Icon ? (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+              <Icon className="h-[18px] w-[18px]" />
+            </span>
+          ) : null}
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+            {description ? <p className="mt-0.5 text-sm text-slate-500">{description}</p> : null}
+          </div>
+        </div>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function Field({
+  label,
+  htmlFor,
+  required,
+  hint,
+  error,
+  children,
+  className,
+  id,
+}: {
+  label: React.ReactNode;
+  htmlFor?: string;
+  required?: boolean;
+  hint?: React.ReactNode;
+  error?: string;
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <div id={id} className={cn("space-y-1.5 scroll-mt-32", className)}>
+      <label htmlFor={htmlFor} className="text-sm font-medium text-slate-700">
+        {label}
+        {required ? <span className="text-orange-500"> *</span> : null}
+      </label>
+      {children}
+      {error ? <p className="text-xs font-medium text-rose-600">{error}</p> : hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
+    </div>
+  );
+}
+
+/** Native inputs styled for the panel; tinted once they hold a value (as in the reference form). */
+export const inputClass = (filled?: boolean, invalid?: boolean) =>
+  cn(
+    "h-10 w-full rounded-xl border px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60",
+    filled ? "border-orange-200 bg-orange-50/40" : "border-slate-200 bg-slate-50",
+    invalid && "border-rose-300 bg-rose-50/40 focus:border-rose-400 focus:ring-rose-100"
+  );
+
+export const TextInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
+  ({ className, invalid, ...props }, ref) => (
+    <input ref={ref} {...props} className={cn(inputClass(!!props.value && String(props.value).length > 0, invalid), className)} />
+  )
+);
+TextInput.displayName = "TextInput";
+
+export const TextArea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(({ className, ...props }, ref) => (
+  <textarea ref={ref} {...props} className={cn(inputClass(!!props.value && String(props.value).length > 0), "h-auto min-h-[84px] py-2.5", className)} />
+));
+TextArea.displayName = "TextArea";
+
+export function NativeSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+  className,
+  id,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: (string | { value: string; label: string })[];
+  placeholder?: string;
+  className?: string;
+  id?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <select id={id} disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)} className={cn(inputClass(!!value), "pr-8", className)}>
+      {placeholder !== undefined ? <option value="">{placeholder}</option> : null}
+      {options.map((o) => {
+        const opt = typeof o === "string" ? { value: o, label: o } : o;
+        return (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        );
+      })}
+    </select>
+  );
+}
+
+export function Segmented<T extends string>({
+  value,
+  onChange,
+  options,
+  className,
+  size = "md",
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string; hint?: string }[];
+  className?: string;
+  size?: "sm" | "md";
+}) {
+  return (
+    <div role="radiogroup" className={cn("inline-flex flex-wrap gap-1 rounded-2xl bg-slate-100 p-1", className)}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="radio"
+          aria-checked={value === o.value}
+          onClick={() => onChange(o.value)}
+          className={cn(
+            "rounded-xl text-left font-medium transition",
+            size === "sm" ? "px-3 py-1.5 text-xs" : "px-3.5 py-2 text-sm",
+            value === o.value ? "bg-white text-orange-600 shadow-sm ring-1 ring-orange-200" : "text-slate-600 hover:text-slate-900"
+          )}
+        >
+          <span className="block">{o.label}</span>
+          {o.hint ? <span className="block text-[11px] font-normal text-slate-500">{o.hint}</span> : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Stepper({ label, value, onChange, min = 0, max = 99 }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number }) {
+  return (
+    <div className="inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white">
+      <button type="button" aria-label={`Decrease ${label}`} disabled={value <= min} onClick={() => onChange(Math.max(min, value - 1))} className="h-full w-9 rounded-l-xl text-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30">
+        −
+      </button>
+      <span className="w-8 text-center text-sm font-semibold tabular-nums">{value}</span>
+      <button type="button" aria-label={`Increase ${label}`} disabled={value >= max} onClick={() => onChange(Math.min(max, value + 1))} className="h-full w-9 rounded-r-xl text-lg text-slate-500 hover:bg-slate-50 disabled:opacity-30">
+        +
+      </button>
+    </div>
+  );
+}
+
+export function FileDrop({
+  accept,
+  onFile,
+  title,
+  description,
+  buttonLabel,
+  disabled,
+  compact,
+}: {
+  accept: string;
+  onFile: (f: File) => void;
+  title: string;
+  description?: string;
+  buttonLabel: string;
+  disabled?: boolean;
+  compact?: boolean;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [over, setOver] = useState(false);
+  const accepts = (f: File) =>
+    accept.split(",").some((a) => {
+      const t = a.trim();
+      return t.endsWith("/*") ? f.type.startsWith(t.slice(0, -1)) : f.type === t;
+    });
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        if (!disabled) setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        const f = e.dataTransfer.files?.[0];
+        if (!f || disabled) return;
+        if (!accepts(f)) toast.error("Wrong file type");
+        else onFile(f);
+      }}
+      className={cn(
+        "flex flex-col items-center justify-center rounded-2xl border-2 border-dashed text-center transition",
+        compact ? "gap-1 px-4 py-4" : "gap-2 px-6 py-8",
+        over ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-slate-50/60",
+        disabled && "opacity-60"
+      )}
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-orange-500 shadow-sm ring-1 ring-slate-200">
+        <UploadCloud className="h-5 w-5" />
+      </span>
+      <p className="text-sm font-semibold text-slate-800">{title}</p>
+      {description ? <p className="text-xs text-slate-500">{description}</p> : null}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => ref.current?.click()}
+        className="mt-1 rounded-full border border-orange-200 bg-white px-4 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+      >
+        {buttonLabel}
+      </button>
+      <input
+        ref={ref}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f) onFile(f);
+        }}
+      />
+    </div>
+  );
+}
+
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  busyLabel,
+  onConfirm,
+  busy,
+  destructive = true,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  busyLabel?: string;
+  onConfirm: () => void;
+  busy?: boolean;
+  destructive?: boolean;
+}) {
+  return (
+    <Modal open={open} onOpenChange={onOpenChange} title={title} description={description} size="sm">
+      <div className="mt-5 flex justify-end gap-2">
+        <button type="button" onClick={() => onOpenChange(false)} className="h-10 rounded-xl border border-slate-200 px-4 text-sm font-medium hover:bg-slate-50">
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onConfirm}
+          className={cn("inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white disabled:opacity-60", destructive ? "bg-rose-600 hover:bg-rose-700" : "btn-flame rounded-full")}
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {busy ? busyLabel ?? confirmLabel : confirmLabel}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export function Modal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  size = "md",
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  title: string;
+  description?: React.ReactNode;
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+}) {
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-[2px] anim-fade" />
+        <DialogPrimitive.Content
+          className={cn(
+            "fixed left-1/2 top-1/2 z-[70] max-h-[90dvh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl anim-pop",
+            size === "sm" ? "max-w-md" : size === "lg" ? "max-w-2xl" : "max-w-lg"
+          )}
+        >
+          <DialogPrimitive.Title className="pr-8 text-lg font-bold text-slate-900">{title}</DialogPrimitive.Title>
+          {description ? (
+            <DialogPrimitive.Description className="mt-1 text-sm text-slate-500">{description}</DialogPrimitive.Description>
+          ) : (
+            <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
+          )}
+          {children}
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+}
+
+export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
+      <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+        <Icon className="h-6 w-6" />
+      </span>
+      <p className="text-base font-semibold text-slate-900">{title}</p>
+      <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p>
+      {action ? <div className="mt-5">{action}</div> : null}
+    </div>
+  );
+}
+
+export function AccessBadge({ access }: { access: DocumentAccess }) {
+  if (access.remainingDays == null && !access.locked) return null;
+  const urgent = !access.locked && (access.remainingDays ?? 99) <= 3;
+  return (
+    <span
+      title={
+        access.locked
+          ? "Locked — Silver keeps documents open for 30 days from creation. Upgrade to Gold or Platinum to open this again."
+          : "Access window"
+      }
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+        access.locked ? "bg-slate-100 text-slate-500" : urgent ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-700"
+      )}
+    >
+      {access.locked ? <Lock className="h-3 w-3" /> : null}
+      {access.locked ? "Locked" : `Open · ${accessLabel(access)}`}
+    </span>
+  );
+}
+
+export const primaryBtn =
+  "btn-flame inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm disabled:opacity-50";
+export const secondaryBtn =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50/50 disabled:opacity-50";
+export const iconBtn =
+  "inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-orange-50 hover:text-orange-600 disabled:opacity-40";
+
+/** View / share / edit / delete actions for a saved document row. */
+export function RowActions({
+  locked,
+  onView,
+  onShare,
+  onEdit,
+  onDelete,
+  extra,
+}: {
+  locked: boolean;
+  onView?: () => void;
+  onShare?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  extra?: React.ReactNode;
+}) {
+  if (locked) {
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <Link href="/dashboard/pricing" title="Locked on Silver plan" className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-orange-50 hover:text-orange-600">
+          <Lock className="h-3.5 w-3.5" /> Locked
+        </Link>
+        {onDelete ? (
+          <button type="button" onClick={onDelete} className={iconBtn} aria-label="Delete">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center justify-end gap-0.5">
+      {onView ? (
+        <button type="button" onClick={onView} className={iconBtn} title="View PDF" aria-label="View PDF">
+          <Eye className="h-4 w-4" />
+        </button>
+      ) : null}
+      {extra}
+      {onShare ? (
+        <button type="button" onClick={onShare} className={cn(iconBtn, "hover:bg-emerald-50 hover:text-emerald-600")} title="Share PDF on WhatsApp" aria-label="Share PDF on WhatsApp">
+          <MessageCircle className="h-4 w-4" />
+        </button>
+      ) : null}
+      {onEdit ? (
+        <button type="button" onClick={onEdit} className={iconBtn} title="Edit" aria-label="Edit">
+          <Pencil className="h-4 w-4" />
+        </button>
+      ) : null}
+      {onDelete ? (
+        <button type="button" onClick={onDelete} className={cn(iconBtn, "hover:bg-rose-50 hover:text-rose-600")} title="Delete" aria-label="Delete">
+          <Trash2 className="h-4 w-4" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** Bounce back to the dashboard when an admin has switched this document type off. */
+export function useFeatureGate(kind: DocumentKind, label: string) {
+  const { agent } = useAgent();
+  const router = useRouter();
+  const enabled = agent ? isFeatureEnabled(agent, kind) : true;
+  useEffect(() => {
+    if (!enabled) {
+      toast.message(`${label} is not enabled for your account.`, { description: "Ask your admin to turn it on, or upgrade your plan if needed." });
+      router.replace("/dashboard");
+    }
+  }, [enabled, label, router]);
+  return enabled;
+}
+
+export function Spinner({ label }: { label?: string }) {
+  return (
+    <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
+      <Loader2 className="h-5 w-5 animate-spin text-orange-500" /> {label ?? "Loading…"}
+    </div>
+  );
+}

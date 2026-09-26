@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #fff7ed;
+  --secondary-foreground: #7c2d12;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #fff7ed;
+  --accent-foreground: #7c2d12;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #f97316;
+  --radius: 0.5rem;
+  --sidebar-bg: #0f172a;
+  --sidebar-fg: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+* {
+  border-color: var(--border);
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Focus ring utility */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.focus-ring:focus-visible {
+  outline-color: var(--ring);
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, select, textarea {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Hide scrollbar on mobile nav */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Agent panel motion ───────────────────────────────────────────────── */
+@keyframes anim-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes anim-pop { from { opacity: 0; transform: translate(-50%, -48%) scale(.96) } to { opacity: 1; transform: translate(-50%, -50%) scale(1) } }
+@keyframes anim-sheet-up { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes anim-slide-down { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes anim-rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes prompt-glow { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(249,115,22,.45), 0 0 0 0 rgba(249,115,22,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(249,115,22,.45), 0 0 0 10px rgba(249,115,22,0) } }
+@keyframes prompt-glow-amber { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 0 rgba(251,191,36,.45) } 50% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 10px rgba(251,191,36,0) } }
+@keyframes anchor-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0) } 30% { box-shadow: 0 0 0 6px rgba(249,115,22,.35) } }
+
+.anim-fade { animation: anim-fade .18s ease-out }
+.anim-pop { animation: anim-pop .2s cubic-bezier(.2,.8,.2,1) }
+.anim-sheet { animation: anim-sheet-up .24s cubic-bezier(.2,.8,.2,1) }
+@media (min-width: 640px) { .anim-sheet { animation: anim-pop .2s cubic-bezier(.2,.8,.2,1) } }
+.anim-slide-down { animation: anim-slide-down .2s ease-out }
+.anim-rise { animation: anim-rise .3s ease-out both }
+.prompt-glow { animation: prompt-glow 2.4s ease-in-out infinite }
+.prompt-glow-amber { animation: prompt-glow-amber 2.4s ease-in-out infinite }
+.ring-anchor-flash { animation: anchor-flash 1.1s ease-in-out 2; border-radius: 1rem }
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade, .anim-pop, .anim-sheet, .anim-slide-down, .anim-rise, .prompt-glow, .prompt-glow-amber, .ring-anchor-flash { animation: none }
+}
+
+/* Voucher quick-start printer animation */
+@keyframes printer-feed { 0% { transform: translateY(-100%) } 100% { transform: translateY(0) } }
+.printer-sheet { animation: printer-feed 2.6s ease-in-out both }
+
+/* ─── Flame buttons (same look as components/ui/flame-button.tsx) ──────────
+   Applied with the `btn-flame` class; components/ui/flame-pointer.tsx feeds
+   the cursor position. Unlayered so it wins over bg-/text- utilities, while
+   size, spacing and radius utilities still apply. */
+@property --glow { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --edge { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+.btn-flame {
+  --mx: 50%;
+  --side: 1;
+  position: relative;
+  color: #5a250a;
+  border-color: transparent;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background-color: #d6d6d6;
+  background-image:
+    radial-gradient(60px circle at var(--mx) 50%,
+      rgb(255 255 245 / calc(var(--glow) * 1)) 3.5%,
+      rgb(255 106 45 / calc(var(--glow) * 1)) 26.5%,
+      rgb(255 218 159 / calc(var(--glow) * 1)) 37.5%,
+      rgb(255 106 45 / calc(var(--glow) * 0.5)) 49%,
+      rgb(255 45 85 / 0) 92.5%),
+    radial-gradient(102px 52px at var(--mx) 50%,
+      rgb(255 255 247 / calc(var(--glow) * 0.9)) 29%,
+      rgb(255 250 205 / calc(var(--glow) * 0.8)) 48.5%,
+      rgb(244 210 191 / calc(var(--glow) * 0.6)) 60.7%,
+      rgb(214 211 210 / 0) 100%),
+    linear-gradient(100deg, #cfcfcf 0%, #d6d6d6 40%, #e4e2e0 70%, #f0eeec 100%);
+  box-shadow:
+    calc(var(--side) * 5px) 0 16px 2px rgb(255 106 45 / calc(var(--edge) * 0.85)),
+    calc(var(--side) * 2px) 0 6px 0 rgb(255 214 130 / calc(var(--edge) * 0.95)),
+    0 1px 2px rgb(15 23 42 / 0.08);
+  transition: --glow 150ms ease-out, --edge 220ms ease-out, box-shadow 220ms ease-out, opacity 150ms;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-flame:hover { color: #5a250a; }
+.btn-flame:focus-visible { outline: 2px solid #ff6a2d; outline-offset: 2px; }
+.btn-flame:disabled, .btn-flame[aria-disabled="true"] { --glow: 0; --edge: 0; }
+/* The pulsing attention ring would hide the flame halo while hovered. */
+.btn-flame.prompt-glow:hover { animation: none; }
+
+/* ─── Marquee (components/ui/marquee-01-utils/marquee.tsx) ─────────────── */
+@theme inline {
+  --animate-marquee: marquee var(--duration) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-vertical { animation: none; }
+}

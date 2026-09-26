@@ -1,0 +1,106 @@
+import React from "react";
+import Link from "next/link";
+import { FileText, ExternalLink } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
+const footerLinks = {
+  Product: [
+    { href: "/#services", label: "Services" },
+    { href: "/#documents", label: "Documents" },
+    { href: "/#how-it-works", label: "How It Works" },
+    { href: "/#pricing", label: "Pricing" },
+    { href: "/faq", label: "FAQ" },
+  ],
+  Company: [
+    { href: "/about", label: "About" },
+  ],
+  Legal: [
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/terms", label: "Terms of Service" },
+    { href: "/refunds", label: "Refund Policy" },
+  ],
+};
+
+export default function Footer() {
+  return (
+    <footer className="bg-[var(--foreground)] text-slate-300">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
+          {/* Brand */}
+          <div className="lg:col-span-2">
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]">
+                <FileText className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-bold text-lg text-white">
+                TravelDoc<span className="text-[var(--primary)]">Pro</span>
+              </span>
+            </Link>
+            <p className="text-sm leading-relaxed max-w-xs text-slate-400">
+              Travel document software for travel agents, agencies and tour operators. Create professional travel documents from one centralized workspace.
+            </p>
+            <div className="flex items-center gap-3 mt-6">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                aria-label="Twitter"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                aria-label="LinkedIn"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                aria-label="GitHub"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+
+          {/* Links */}
+          {Object.entries(footerLinks).map(([section, links]) => (
+            <div key={section}>
+              <h4 className="text-white font-semibold text-sm mb-4">{section}</h4>
+              <ul className="space-y-2.5">
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-[var(--primary)] transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="my-10 bg-white/10" />
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            © {new Date().getFullYear()} TravelDoc Pro. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-500">
+            Built for travel professionals
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}

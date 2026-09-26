@@ -1,0 +1,16 @@
+{
+  "name": "TravelDoc Pro",
+  "short_name": "TravelDoc Pro",
+  "description": "Travel document software for travel agents, agencies and tour operators",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
