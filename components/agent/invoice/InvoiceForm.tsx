@@ -44,6 +44,7 @@ import {
 } from "@/lib/agent/documents";
 import type { Agent, DocumentSummary } from "@/lib/agent/types";
 import { CustomerDetailsDialog, CustomerPickerDialog, NumberSettingsDialog, type NumberInfo, type SavedCustomer } from "./dialogs";
+import { FormSkeleton } from "@/components/agent/skeletons";
 
 const fmt = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -97,7 +98,7 @@ export function InvoiceForm({
   const totals = useMemo(() => invoiceTotals(data, agent?.state), [data, agent?.state]);
   const checklist = useMemo(() => invoiceChecklist(data, agent?.companyName, agent?.state), [data, agent?.companyName, agent?.state]);
   if (!agent) return null;
-  if (loading) return <p className="py-16 text-center text-sm text-slate-500">Loading…</p>;
+  if (loading) return <FormSkeleton label="Loading invoice" />;
 
   const labels = INVOICE_LABELS[data.docType];
   const inter = isInterState(agent.state, data.billTo.placeOfSupply);

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ToolShell from "@/components/marketing/ToolShell";
 
 export const metadata: Metadata = {
-  title: "Document Polish — TravelDoc Pro",
+  title: "Document Polish",
   description: "Improve document wording and clarity while keeping travel terminology accurate.",
 };
 

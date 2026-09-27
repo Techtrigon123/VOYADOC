@@ -8,11 +8,12 @@ import { toast } from "sonner";
 import { useAgent } from "@/components/agent/AgentProvider";
 import { usePlacardFonts } from "@/components/agent/usePlacardFonts";
 import { useDocuments } from "@/components/agent/useDocuments";
-import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, Spinner, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
+import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
 import { api, formatDay, sharePdfOnWhatsApp } from "@/lib/agent/client";
 import { placardFileName, placardPdf } from "@/lib/agent/placardCanvas";
 import type { PlacardData } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { ListSkeleton } from "@/components/agent/skeletons";
 
 export default function PlacardsPage() {
   usePlacardFonts();
@@ -83,7 +84,7 @@ export default function PlacardsPage() {
         }
       />
       {docs === null ? (
-        <Spinner label="Loading saved welcome placards…" />
+        <ListSkeleton label="Loading welcome placards" />
       ) : error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">Could not load saved welcome placards</p>
       ) : docs.length === 0 ? (

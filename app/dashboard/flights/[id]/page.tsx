@@ -6,10 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 import { Download, Loader2, Mail, MessageCircle, Pencil, Plane, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Field, Modal, PageShell, Segmented, Spinner, TextArea, TextInput, primaryBtn, secondaryBtn, useFeatureGate } from "@/components/agent/ui";
+import { Field, Modal, PageShell, Segmented, TextArea, TextInput, primaryBtn, secondaryBtn, useFeatureGate } from "@/components/agent/ui";
 import { api, downloadPdf, pdfUrl, sharePdfOnWhatsApp } from "@/lib/agent/client";
 import { TICKET_LAYOUTS, type AirTicketData, type FareMode, type TicketLayout } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { DetailSkeleton } from "@/components/agent/skeletons";
 
 const STATUS: Record<string, [string, string]> = {
   CONFIRMED: ["Confirmed", "bg-emerald-50 text-emerald-700"],
@@ -51,7 +52,7 @@ export default function AirTicketDetailPage() {
   }, [id, router]);
 
   if (!enabled) return null;
-  if (!doc || !data) return <Spinner />;
+  if (!doc || !data) return <DetailSkeleton label="Loading ticket" />;
 
   // Layout switches save straight to the ticket and refresh the preview.
   const update = async (p: Partial<AirTicketData>) => {

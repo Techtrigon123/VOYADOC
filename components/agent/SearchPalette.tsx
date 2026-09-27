@@ -3,13 +3,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { FileText, Loader2, Search, SearchX } from "lucide-react";
+import { FileText, Search, SearchX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/agent/client";
 import { KIND_LABELS } from "@/lib/agent/documents";
 import type { DocumentKind } from "@/lib/agent/types";
 import { KIND_ICONS } from "./DocumentAccessWarning";
 import { documentHref } from "./nav-config";
+import { RowsSkeleton } from "@/components/agent/skeletons";
 
 interface Hit {
   id: string;
@@ -92,7 +93,7 @@ export function SearchPalette({ open, onOpenChange }: { open: boolean; onOpenCha
 
   const term = q.trim();
   let body: React.ReactNode;
-  if (loading) body = <Empty icon={<Loader2 className="h-7 w-7 animate-spin text-orange-400" />} title="Searching…" />;
+  if (loading) body = <RowsSkeleton rows={4} label="Searching" className="py-2" />;
   else if (error) body = <Empty icon={<SearchX className="h-5 w-5" />} title={error} tone="error" />;
   else if (term.length < MIN_CHARS)
     body = (

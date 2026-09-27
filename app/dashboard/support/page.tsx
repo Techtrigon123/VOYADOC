@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PageHeader, PageShell } from "@/components/agent/ui";
 import { api } from "@/lib/agent/client";
+import { ChatSkeleton } from "@/components/agent/skeletons";
 
 interface Msg {
   id: string;
@@ -53,7 +54,7 @@ export default function SupportPage() {
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/60 px-5 py-4">
           {msgs === null ? (
-            <div className="flex justify-center py-10 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /></div>
+            <ChatSkeleton />
           ) : msgs.length === 0 ? (
             <div className="mx-auto max-w-sm py-10 text-center text-sm text-slate-500">
               <p className="font-medium text-slate-700">Start a conversation</p>

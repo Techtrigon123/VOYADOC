@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 import { useDocuments } from "@/components/agent/useDocuments";
 import { InvoiceForm } from "@/components/agent/invoice/InvoiceForm";
 import { ExportDialog, RecordPaymentDialog, type NumberInfo } from "@/components/agent/invoice/dialogs";
-import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, Spinner, iconBtn, primaryBtn, secondaryBtn } from "@/components/agent/ui";
+import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, iconBtn, primaryBtn, secondaryBtn } from "@/components/agent/ui";
 import { api, formatDay, openPdf, sharePdfOnWhatsApp } from "@/lib/agent/client";
 import { INVOICE_LABELS, type InvoiceKind } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { ListSkeleton } from "@/components/agent/skeletons";
 
 const TABS: { kind: InvoiceKind; label: string; icon: typeof FileText }[] = [
   { kind: "invoice", label: "Invoices", icon: FileSpreadsheet },
@@ -114,7 +115,7 @@ export default function InvoicesPage() {
           }}
         />
       ) : docs === null ? (
-        <Spinner label="Loading saved documents" />
+        <ListSkeleton label="Loading saved documents" />
       ) : error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
       ) : docs.length === 0 ? (

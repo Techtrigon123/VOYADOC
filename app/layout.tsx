@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import CookieConsent from "@/components/consent/CookieConsent";
+import { SITE } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,50 +11,43 @@ const inter = Inter({
   display: "swap",
 });
 
+const defaultTitle = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | TravelDoc Pro";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Travel Document Software for Travel Agents | TravelDoc Pro",
+    default: defaultTitle,
     template: "%s | TravelDoc Pro",
   },
-  description:
-    "Create professional hotel vouchers, invoices, receipts, quotations and other travel documents from one centralized workspace.",
+  description: SITE.description,
+  applicationName: SITE.name,
   keywords: [
     "travel document software",
     "travel agency software",
-    "travel agent document generator",
     "hotel voucher generator",
-    "travel invoice generator",
-    "travel quotation software",
-    "travel document management",
-    "travel agency invoice software",
-    "travel voucher generator",
-    "tour operator software",
+    "air ticket generator",
+    "pickup voucher",
+    "welcome placard maker",
+    "travel GST invoice software",
+    "proforma invoice for travel agents",
+    "tour operator software India",
+    "DMC software",
   ],
-  authors: [{ name: "TravelDoc Pro" }],
-  creator: "TravelDoc Pro",
+  authors: [{ name: SITE.name }],
+  creator: SITE.name,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://traveldocpro.com",
-    siteName: "TravelDoc Pro",
-    title: "Travel Document Software for Travel Agents | TravelDoc Pro",
-    description:
-      "Create professional hotel vouchers, invoices, receipts, quotations and other travel documents from one centralized workspace.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "TravelDoc Pro",
-      },
-    ],
+    url: "/",
+    siteName: SITE.name,
+    title: defaultTitle,
+    description: SITE.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "TravelDoc Pro — Travel Document Software for Travel Agents",
-    description:
-      "Create professional hotel vouchers, invoices, receipts, quotations and other travel documents from one centralized workspace.",
-    images: ["/og-image.png"],
+    title: defaultTitle,
+    description: SITE.description,
   },
   robots: {
     index: true,
@@ -65,12 +60,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
-  },
   manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f97316",
 };
 
 export default function RootLayout({
@@ -79,9 +73,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en-IN" className={inter.variable}>
       <body className="min-h-screen bg-[var(--background)] antialiased">
         {children}
+        <CookieConsent />
         <Toaster
           position="top-right"
           toastOptions={{

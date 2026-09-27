@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ToolShell from "@/components/marketing/ToolShell";
 
 export const metadata: Metadata = {
-  title: "Hotel Voucher Generator — TravelDoc Pro",
+  title: "Hotel Voucher Generator",
   description: "Create professional hotel vouchers with guest, hotel, booking, room and agency details.",
 };
 

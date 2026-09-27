@@ -10,7 +10,6 @@ import {
   FileSpreadsheet,
   FileText,
   Hotel,
-  Loader2,
   MessageCircle,
   Plane,
   Plus,
@@ -47,6 +46,7 @@ import {
 import { planLabel } from "@/lib/agent/plans";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import type { Agent, DocumentKind } from "@/lib/agent/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Summary {
   documentCounts: { key: DocumentKind; count: number }[];
@@ -273,13 +273,18 @@ export default function DashboardPage() {
               ) : null}
             </div>
             {loading ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div role="status" aria-busy="true" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <span className="sr-only">Loading your numbers</span>
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-[112px] animate-pulse rounded-2xl bg-slate-100" />
+                  <div key={i} className="flex flex-col rounded-2xl border border-slate-200 p-3.5">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-9 w-9 rounded-xl" />
+                      <Skeleton className="h-6 w-8" />
+                    </div>
+                    <Skeleton className="mt-3 h-3 w-3/4" />
+                    <Skeleton className="mt-2 h-3 w-1/3" />
+                  </div>
                 ))}
-                <p className="col-span-full flex items-center gap-2 text-xs text-slate-500">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading your numbers…
-                </p>
               </div>
             ) : error ? (
               <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
@@ -349,7 +354,7 @@ export default function DashboardPage() {
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Usage rank</p>
               {loading ? (
-                <div className="mt-1 h-10 animate-pulse rounded-lg bg-slate-100" />
+                <div className="mt-1 space-y-1.5"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-48" /></div>
               ) : error ? (
                 <p className="text-sm text-rose-600">{error}</p>
               ) : (

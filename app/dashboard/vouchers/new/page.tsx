@@ -30,7 +30,6 @@ import {
   PageShell,
   SectionCard,
   Segmented,
-  Spinner,
   Stepper,
   TextArea,
   TextInput,
@@ -59,6 +58,7 @@ import {
 } from "@/lib/agent/documents";
 import type { ExtractedVoucher } from "@/lib/agent/extract";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { FormSkeleton } from "@/components/agent/skeletons";
 
 interface Suggestion {
   name: string;
@@ -461,7 +461,7 @@ export default function VoucherEditorPage() {
     setGenerating(false);
   };
 
-  if (loading || !agent) return <Spinner />;
+  if (loading || !agent) return <FormSkeleton label="Loading voucher" />;
 
   return (
     <PageShell wide>

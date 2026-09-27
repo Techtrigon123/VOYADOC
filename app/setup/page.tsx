@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AgentProvider, useAgent } from "@/components/agent/AgentProvider";
 import { QuickSetupForm } from "@/components/agent/QuickSetupForm";
 import { needsQuickSetup } from "@/lib/agent/profile";
+import { CardFormSkeleton } from "@/components/agent/skeletons";
 
 function safeReturn(v: string | null) {
   return v && v.startsWith("/dashboard") ? v : "/dashboard";
@@ -27,9 +28,7 @@ function SetupInner() {
 
   if (loading || !agent || !needsQuickSetup(agent)) {
     return (
-      <div className="grid min-h-[60vh] place-items-center">
-        <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-orange-500 border-t-transparent" />
-      </div>
+      <CardFormSkeleton label="Loading your account" className="min-h-[60vh] w-full" />
     );
   }
 

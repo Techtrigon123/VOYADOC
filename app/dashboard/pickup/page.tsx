@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { Car, Copy, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useDocuments } from "@/components/agent/useDocuments";
-import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, Spinner, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
+import { AccessBadge, ConfirmDialog, EmptyState, PageHeader, PageShell, RowActions, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
 import { api, formatDay, openPdf } from "@/lib/agent/client";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { ListSkeleton } from "@/components/agent/skeletons";
 
 export default function PickupListPage() {
   const enabled = useFeatureGate("pickup_voucher", "Pickup vouchers");
@@ -51,7 +52,7 @@ export default function PickupListPage() {
       />
 
       {docs === null ? (
-        <Spinner label="Loading saved vouchers…" />
+        <ListSkeleton label="Loading pickup vouchers" />
       ) : error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
       ) : docs.length === 0 ? (

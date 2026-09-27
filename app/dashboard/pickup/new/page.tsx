@@ -13,7 +13,6 @@ import {
   PageHeader,
   PageShell,
   SectionCard,
-  Spinner,
   Stepper,
   TextArea,
   TextInput,
@@ -33,6 +32,7 @@ import {
   type PickupVoucherData,
 } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { FormSkeleton } from "@/components/agent/skeletons";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -70,7 +70,7 @@ export default function PickupEditorPage() {
   const dirty = JSON.stringify(data) !== savedSnap;
 
   if (!enabled) return null;
-  if (loading || !agent) return <Spinner />;
+  if (loading || !agent) return <FormSkeleton label="Loading pickup voucher" preview={false} />;
 
   const agencyMissing = !(agent.brandName?.trim() || agent.companyName?.trim());
 

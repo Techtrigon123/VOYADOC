@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ToolShell from "@/components/marketing/ToolShell";
 
 export const metadata: Metadata = {
-  title: "Payment Receipt — TravelDoc Pro",
+  title: "Payment Receipt",
   description: "Create clear payment receipts for advances, full payments and customer transactions.",
 };
 

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ToolShell from "@/components/marketing/ToolShell";
 
 export const metadata: Metadata = {
-  title: "Travel Quotation — TravelDoc Pro",
+  title: "Travel Quotation",
   description: "Prepare professional travel quotations for packages, accommodations, transfers and services.",
 };
 

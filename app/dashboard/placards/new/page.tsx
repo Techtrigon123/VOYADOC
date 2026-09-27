@@ -7,12 +7,13 @@ import { ChevronDown, Download, ImageDown, Loader2, Printer, RotateCcw, Signpost
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAgent } from "@/components/agent/AgentProvider";
-import { Field, NativeSelect, PageHeader, PageShell, SectionCard, Spinner, TextInput, primaryBtn, secondaryBtn, useFeatureGate } from "@/components/agent/ui";
+import { Field, NativeSelect, PageHeader, PageShell, SectionCard, TextInput, primaryBtn, secondaryBtn, useFeatureGate } from "@/components/agent/ui";
 import { api, saveBlob } from "@/lib/agent/client";
 import { usePlacardFonts } from "@/components/agent/usePlacardFonts";
 import { drawPlacard, isLandscape, placardFileName, placardPdf, placardPng, resolveStyle } from "@/lib/agent/placardCanvas";
 import { PLACARD_FONTS, PLACARD_THEMES, defaultPlacard, validatePlacard, type PlacardCustom, type PlacardData } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { FormSkeleton } from "@/components/agent/skeletons";
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
@@ -64,7 +65,7 @@ export default function PlacardEditorPage() {
   }, [data, agent, loading]);
 
   if (!enabled) return null;
-  if (loading || !agent) return <Spinner />;
+  if (loading || !agent) return <FormSkeleton label="Loading placard editor" />;
 
   const agencyName = agent.brandName?.trim() || agent.companyName?.trim() || "";
   const style = resolveStyle(data);

@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, FileText, Download, Printer, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ShaderBackground } from "@/components/ui/rds-silk";
 
 export default function HeroSection() {
@@ -25,25 +24,20 @@ export default function HeroSection() {
               Create professional hotel vouchers, invoices, receipts, quotations and other travel documents from one centralized workspace.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
-              <Link href="/signup">
-                <Button
-                  size="xl"
-                  className="btn-glow bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-900/30 w-full sm:w-auto"
-                >
-                  Create Your First Document
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+            <div className="flex flex-col items-center gap-3 mb-10">
+              <Link
+                href="/signup"
+                className="btn-glow inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl px-10 text-base font-semibold sm:w-auto"
+              >
+                Start free — create your first voucher
+                <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/#how-it-works">
-                <Button
-                  size="xl"
-                  variant="ghost"
-                  className="text-slate-300 hover:text-white hover:bg-white/10 w-full sm:w-auto"
-                >
-                  Explore Documents
-                </Button>
-              </Link>
+              <p className="text-sm text-slate-400">
+                Free forever plan · No card needed ·{" "}
+                <Link href="/#how-it-works" className="text-slate-300 underline underline-offset-4 hover:text-white">
+                  See how it works
+                </Link>
+              </p>
             </div>
 
             {/* Trust badges */}

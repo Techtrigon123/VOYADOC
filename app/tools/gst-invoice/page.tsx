@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ToolShell from "@/components/marketing/ToolShell";
 
 export const metadata: Metadata = {
-  title: "GST Invoice Generator — TravelDoc Pro",
+  title: "GST Invoice Generator",
   description: "Generate professional GST/tax invoices with customer, business, pricing and tax details.",
 };
 

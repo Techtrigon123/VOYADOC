@@ -5,6 +5,7 @@ import ContactForm from "./ContactForm";
 export const metadata = {
   title: "Contact us",
   description: "Talk to the TravelDoc Pro team about plans, onboarding, or help with your account.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

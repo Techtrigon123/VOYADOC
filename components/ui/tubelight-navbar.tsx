@@ -90,9 +90,12 @@ export function NavBar({ items, className }: NavBarProps) {
 
         {/* Right side: CTA + mobile icons */}
         <div className="flex items-center gap-3">
-          <Link href="/contact" className="hidden md:inline-flex">
-            <span className="inline-flex items-center btn-glow rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)]/90 transition-colors">
-              Talk to Us
+          <Link href="/login" className="hidden md:inline-flex text-sm font-medium text-slate-700 hover:text-[var(--primary)]">
+            Log in
+          </Link>
+          <Link href="/signup" className="hidden sm:inline-flex">
+            <span className="inline-flex items-center whitespace-nowrap btn-glow rounded-lg px-4 py-2 text-sm font-semibold md:px-5 md:py-2.5">
+              Start free
             </span>
           </Link>
 

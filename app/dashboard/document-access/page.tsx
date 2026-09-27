@@ -8,9 +8,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAgent } from "@/components/agent/AgentProvider";
 import { KIND_ICONS, type AccessSummary } from "@/components/agent/DocumentAccessWarning";
-import { PageHeader, PageShell, Spinner, primaryBtn, secondaryBtn } from "@/components/agent/ui";
+import { PageHeader, PageShell, primaryBtn, secondaryBtn } from "@/components/agent/ui";
 import { api, downloadPdf, formatDay } from "@/lib/agent/client";
 import { accessLabel, formatInr, PAID_PLAN_PRICE_INR } from "@/lib/agent/plans";
+import { StatsListSkeleton } from "@/components/agent/skeletons";
 
 export default function DocumentAccessPage() {
   const { agent } = useAgent();
@@ -47,7 +48,7 @@ export default function DocumentAccessPage() {
       {error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
       ) : !summary ? (
-        <Spinner label="Loading file access status" />
+        <StatsListSkeleton label="Loading file access status" />
       ) : (
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-3">

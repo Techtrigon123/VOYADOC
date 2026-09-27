@@ -11,6 +11,7 @@ import { Field, Modal, PageShell, TextInput, primaryBtn, secondaryBtn } from "@/
 import { api, fileToDataUrl } from "@/lib/agent/client";
 import { formatInr, PLAN_COMPARISON, PLANS, PRICING_FAQ, isPaidPlan, type PaidPlanId } from "@/lib/agent/plans";
 import type { PlanId } from "@/lib/agent/types";
+import { PaymentDetailsSkeleton } from "@/components/agent/skeletons";
 
 interface PendingPayment {
   id: string;
@@ -307,7 +308,7 @@ function CheckoutDialog({
             loadError ? (
               <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{loadError}</p>
             ) : !config ? (
-              <p className="flex items-center gap-2 text-sm text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Loading payment details…</p>
+              <PaymentDetailsSkeleton />
             ) : (
               <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-4">
                 <p className="text-xs text-slate-500">Amount due (1 year · GST inclusive)</p>

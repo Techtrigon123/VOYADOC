@@ -2,8 +2,9 @@ import Link from "next/link";
 import { FileText } from "lucide-react";
 
 export const metadata = {
-  title: "About — TravelDoc Pro",
+  title: "About",
   description: "Built to make travel documentation easier for travel agents, agencies and tour operators.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

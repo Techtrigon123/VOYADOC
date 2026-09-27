@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default function CTASection() {
   return (
@@ -13,25 +12,20 @@ export default function CTASection() {
         <p className="text-lg text-slate-400 mb-10 max-w-xl mx-auto">
           Create a free account and start generating professional travel documents in minutes.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/signup">
-            <Button
-              size="xl"
-              className="btn-glow bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-900/30 w-full sm:w-auto"
-            >
-              Create Your First Document
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+        <div className="flex flex-col items-center gap-4">
+          <Link
+            href="/signup"
+            className="btn-glow inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl px-10 text-base font-semibold sm:w-auto"
+          >
+            Start free
+            <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link href="/login">
-            <Button
-              size="xl"
-              variant="ghost"
-              className="text-slate-300 hover:text-white hover:bg-white/10 w-full sm:w-auto"
-            >
+          <p className="text-sm text-slate-400">
+            Already have an account?{" "}
+            <Link href="/login" className="text-slate-300 underline underline-offset-4 hover:text-white">
               Log in
-            </Button>
-          </Link>
+            </Link>
+          </p>
         </div>
       </div>
     </section>

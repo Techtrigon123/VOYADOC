@@ -7,9 +7,10 @@ import { ChevronDown, Hotel, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useDocuments } from "@/components/agent/useDocuments";
-import { AccessBadge, EmptyState, NativeSelect, PageHeader, PageShell, RowActions, Spinner, TextInput, primaryBtn } from "@/components/agent/ui";
+import { AccessBadge, EmptyState, NativeSelect, PageHeader, PageShell, RowActions, TextInput, primaryBtn } from "@/components/agent/ui";
 import { formatDay, openPdf, sharePdfOnWhatsApp } from "@/lib/agent/client";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { ListSkeleton } from "@/components/agent/skeletons";
 
 const SEARCH_FIELDS = [
   { value: "all", label: "All fields", placeholder: "Guest, HCN, booking ref…" },
@@ -105,7 +106,7 @@ export default function VouchersPage() {
       ) : null}
 
       {docs === null ? (
-        <Spinner />
+        <ListSkeleton label="Loading vouchers" />
       ) : error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
       ) : groups.length === 0 ? (

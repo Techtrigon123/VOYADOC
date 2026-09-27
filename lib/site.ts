@@ -1,0 +1,28 @@
+/**
+ * Site-wide identity and legal details — used by metadata, legal pages and the footer.
+ *
+ * ⚠️ Before launch, replace every value marked TODO with your real details.
+ * Indian law (IT Rules 2011, DPDP Act 2023) expects a named Grievance Officer
+ * with contact details on your Privacy Policy.
+ */
+export const SITE = {
+  name: "TravelDoc Pro",
+  url: (process.env.NEXT_PUBLIC_APP_URL || "https://traveldocpro.com").replace(/\/+$/, ""),
+  tagline: "Travel document software for travel agents",
+  description:
+    "Create hotel vouchers, air tickets, pickup vouchers, welcome placards, GST invoices, proforma invoices and receipts as branded PDFs — built for Indian travel agents, tour operators and DMCs.",
+
+  legal: {
+    /** TODO: registered legal name of the business (e.g. "Techtrigon Solutions Pvt Ltd"). */
+    entityName: "TravelDoc Pro",
+    /** TODO: registered office address. */
+    address: "Registered office address to be updated",
+    /** TODO: city whose courts have jurisdiction over disputes. */
+    jurisdictionCity: "Mumbai, Maharashtra",
+    /** TODO: Grievance Officer's name and a monitored email address. */
+    grievanceOfficer: "Grievance Officer",
+    grievanceEmail: "",
+    /** Date shown as "Last updated" on the legal pages. */
+    lastUpdated: "27 September 2026",
+  },
+} as const;

@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { Plane, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDocuments } from "@/components/agent/useDocuments";
-import { AccessBadge, EmptyState, NativeSelect, PageHeader, PageShell, Spinner, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
+import { AccessBadge, EmptyState, NativeSelect, PageHeader, PageShell, TextInput, primaryBtn, useFeatureGate } from "@/components/agent/ui";
 import { formatDay } from "@/lib/agent/client";
+import { ListSkeleton } from "@/components/agent/skeletons";
 
 const STATUS_STYLE: Record<string, string> = {
   CONFIRMED: "bg-emerald-50 text-emerald-700",
@@ -69,7 +70,7 @@ export default function FlightsPage() {
       </form>
 
       {docs === null ? (
-        <Spinner label="Loading tickets…" />
+        <ListSkeleton label="Loading tickets" />
       ) : error ? (
         <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
       ) : docs.length === 0 ? (

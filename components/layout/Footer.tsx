@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { FileText, ExternalLink } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import CookieSettingsButton from "@/components/consent/CookieSettingsButton";
 
 const footerLinks = {
   Product: [
@@ -13,10 +14,12 @@ const footerLinks = {
   ],
   Company: [
     { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+    { href: "/signup", label: "Start free" },
   ],
   Legal: [
     { href: "/privacy", label: "Privacy Policy" },
-    { href: "/terms", label: "Terms of Service" },
+    { href: "/terms", label: "Terms and Conditions" },
     { href: "/refunds", label: "Refund Policy" },
   ],
 };
@@ -85,6 +88,11 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
+                {section === "Legal" && (
+                  <li>
+                    <CookieSettingsButton className="text-sm text-slate-400 hover:text-[var(--primary)] transition-colors" />
+                  </li>
+                )}
               </ul>
             </div>
           ))}

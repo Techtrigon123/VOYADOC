@@ -18,6 +18,7 @@ import {
   type InvoiceKind,
 } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
+import { RowsSkeleton } from "@/components/agent/skeletons";
 
 export interface SavedCustomer extends BillTo {
   id: string;
@@ -71,7 +72,7 @@ export function CustomerPickerDialog({
           {error ? (
             <p className="p-4 text-sm text-rose-600">{error}</p>
           ) : items === null ? (
-            <p className="flex items-center gap-2 p-4 text-sm text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Loading saved customers…</p>
+            <RowsSkeleton rows={4} label="Loading saved customers" />
           ) : items.length === 0 ? (
             <p className="p-4 text-sm text-slate-500">{q ? "Nothing matches — try fewer letters or scroll when you clear the search." : "No saved customers yet. Use Add customer below."}</p>
           ) : (
@@ -340,7 +341,7 @@ export function RecordPaymentDialog({
   return (
     <Modal open={!!doc} onOpenChange={onOpenChange} size="lg" title="Record payment" description={doc ? `${doc.title} · ${doc.subtitle ?? ""}` : undefined}>
       {!info && !error ? (
-        <p className="mt-4 flex items-center gap-2 text-sm text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</p>
+        <RowsSkeleton rows={3} label="Loading payment details" className="mt-4 rounded-2xl border border-slate-200" />
       ) : info ? (
         <div className="mt-4 space-y-4">
           <div className="rounded-2xl border border-slate-200 p-4">

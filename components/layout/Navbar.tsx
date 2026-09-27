@@ -48,9 +48,12 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/contact">
-            <span className="inline-flex items-center btn-glow rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)]/90 transition-colors">
-              Talk to Us
+          <Link href="/login" className="text-sm font-medium text-slate-700 hover:text-[var(--primary)]">
+            Log in
+          </Link>
+          <Link href="/signup">
+            <span className="inline-flex items-center btn-glow rounded-lg px-5 py-2.5 text-sm font-semibold">
+              Start free
             </span>
           </Link>
         </div>
@@ -79,10 +82,11 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link href="/contact" className="block mt-2">
-              <Button className="btn-glow w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90">
-                Talk to Us
-              </Button>
+            <Link href="/signup" className="btn-glow mt-2 flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold">
+              Start free
+            </Link>
+            <Link href="/login" className="block py-2 text-center text-sm font-medium text-slate-600">
+              Log in
             </Link>
           </nav>
         </div>
