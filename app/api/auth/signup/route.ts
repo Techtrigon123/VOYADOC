@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { createUser, findUserByEmail } from "@/lib/db/repo";
-import { signToken, setAuthCookie } from "@/lib/auth/jwt";
+import { signToken, setAuthCookie, passwordVersion, passwordTooLong } from "@/lib/auth/jwt";
 
 const signupSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email(),
-  password: z.string().min(8),
-  organization: z.string().max(200).optional(),
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().email().max(200),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+  organization: z.string().trim().max(200).optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
     const parsed = signupSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -24,6 +24,12 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, password, organization } = parsed.data;
+    if (passwordTooLong(password)) {
+      return NextResponse.json(
+        { success: false, error: "Password is too long (maximum 72 characters)." },
+        { status: 400 }
+      );
+    }
 
     // Check if email already exists
     if (await findUserByEmail(email)) {
@@ -33,12 +39,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const passwordHash = await bcrypt.hash(password, 12);
     const user = await createUser({
-      name: name.trim(),
+      name,
       email,
-      passwordHash: await bcrypt.hash(password, 12),
-      organization: organization?.trim() || undefined,
-      companyName: organization?.trim() || undefined,
+      passwordHash,
+      organization: organization || undefined,
+      companyName: organization || undefined,
     });
 
     const token = signToken({
@@ -46,6 +53,7 @@ export async function POST(req: NextRequest) {
       email: user.email,
       name: user.name,
       role: user.role,
+      pv: passwordVersion(passwordHash),
     });
 
     const response = NextResponse.json(

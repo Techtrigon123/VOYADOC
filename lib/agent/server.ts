@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth/jwt";
-import { documentExists, findUserById, updateUser, type DocRecord, type UserRecord } from "@/lib/db/repo";
+import { getSession, passwordVersion } from "@/lib/auth/jwt";
+import { documentExists, findUserWithPassword, updateUser, type DocRecord, type UserRecord } from "@/lib/db/repo";
 import type { Agent, DocumentSummary } from "./types";
 import { computeAutoVerified, missingActivationFields } from "./profile";
 import { documentAccess, effectivePlan } from "./plans";
@@ -27,8 +27,12 @@ export async function requireAgent(): Promise<Guarded> {
   if (!session) return { response: fail("Your session expired. Please sign in again.", 401, "UNAUTHORIZED") };
   // Sessions issued before the Supabase move carry MongoDB ids — treat them as signed out.
   if (!isUuid(session.userId)) return { response: fail("Your session expired. Please sign in again.", 401, "UNAUTHORIZED") };
-  const user = await findUserById(session.userId);
-  if (!user) return { response: fail("Account not found.", 404, "ACCOUNT_NOT_FOUND") };
+  const withHash = await findUserWithPassword({ id: session.userId });
+  if (!withHash) return { response: fail("Account not found.", 404, "ACCOUNT_NOT_FOUND") };
+  // A password change or reset invalidates every session issued before it.
+  const { passwordHash, ...user } = withHash;
+  if (!session.pv || session.pv !== passwordVersion(passwordHash))
+    return { response: fail("Your session expired. Please sign in again.", 401, "UNAUTHORIZED") };
   if (user.status === "SUSPENDED")
     return { response: fail("Your account is suspended. Please contact support.", 403, "SUSPENDED") };
   return { user };

@@ -134,3 +134,20 @@ export function retryMessage(seconds: number): string {
     ? `Too many attempts. Please wait ${seconds} seconds and try again.`
     : `Too many attempts. Please wait ${minutes} minutes and try again.`;
 }
+
+/**
+ * Per-account limits, checked inside the login / forgot-password routes (the
+ * proxy can't see the email in the body). These still hold if an attacker
+ * rotates IPs or spoofs X-Forwarded-For. Login gets a little more room than
+ * the per-IP limit so a real user can still sign in while someone else is
+ * guessing from elsewhere; the lockout lasts 15 minutes at most.
+ */
+const never = () => false;
+export const ACCOUNT_RULES = {
+  login: { id: "account:login", test: never, limit: 10, windowSeconds: FIFTEEN_MIN, store: "db", scope: "ip" } as RateRule,
+  forgot: { id: "account:forgot", test: never, limit: 5, windowSeconds: FIFTEEN_MIN, store: "db", scope: "ip" } as RateRule,
+};
+
+export function accountKey(email: string): string {
+  return `email:${email.trim().toLowerCase()}`;
+}

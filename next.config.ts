@@ -1,6 +1,30 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
+/** Sent on every response. */
+const securityHeaders = [
+  // Only this site may frame its pages (clickjacking); the ticket PDF preview is a same-origin iframe.
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; form-action 'self'" },
+  // Browsers must not guess content types (e.g. treat an upload as script).
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // HTTPS only, once deployed (never on localhost).
+  ...(isProd ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }] : []),
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Authenticated API data must never be cached by browsers or proxies.
+      { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+    ];
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ["localhost:3000"],

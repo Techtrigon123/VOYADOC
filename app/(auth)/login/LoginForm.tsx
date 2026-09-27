@@ -22,6 +22,20 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+/**
+ * Only follow callback URLs that stay on this site. Rejects "//evil.com" and
+ * "/evil.com" (browsers treat a backslash like a slash) and absolute URLs.
+ */
+function safeCallback(cb: string | null): string {
+  if (!cb || !cb.startsWith("/") || cb.includes("\\")) return "/dashboard";
+  try {
+    const url = new URL(cb, window.location.origin);
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : "/dashboard";
+  } catch {
+    return "/dashboard";
+  }
+}
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,7 +71,7 @@ export default function LoginForm() {
 
       toast.success("Welcome back!");
       const cb = searchParams.get("callbackUrl");
-      router.push(cb && cb.startsWith("/") && !cb.startsWith("//") ? cb : "/dashboard");
+      router.push(safeCallback(cb));
       router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");

@@ -127,4 +127,8 @@ export interface AuthSession {
   email: string;
   name: string;
   role: "owner" | "admin" | "staff";
+  /** Password version — see passwordVersion() in lib/auth/jwt.ts. */
+  pv?: string;
+  iat?: number;
+  exp?: number;
 }
