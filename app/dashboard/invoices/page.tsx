@@ -96,7 +96,7 @@ export default function InvoicesPage() {
             type="button"
             aria-selected={kind === t.kind}
             onClick={() => go({ type: t.kind })}
-            className={cn("inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition", kind === t.kind ? "bg-white text-orange-600 shadow-sm ring-1 ring-orange-200" : "text-slate-600 hover:text-slate-900")}
+            className={cn("inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition", kind === t.kind ? "bg-white text-brand-600 shadow-sm ring-1 ring-brand-200" : "text-slate-600 hover:text-slate-900")}
           >
             <t.icon className="h-4 w-4" /> {t.label}
           </button>
@@ -146,7 +146,7 @@ export default function InvoicesPage() {
                 {docs.map((d) => {
                   const due = Math.max(0, (d.total ?? 0) - (d.paidAmount ?? 0));
                   return (
-                    <tr key={d.id} className="hover:bg-orange-50/30">
+                    <tr key={d.id} className="hover:bg-brand-50/30">
                       <td className="px-5 py-3">
                         <p className="font-mono font-semibold text-slate-900">{d.number}</p>
                         <AccessBadge access={d.access} />
@@ -155,7 +155,7 @@ export default function InvoicesPage() {
                       <td className="px-3 py-3 text-right">
                         <p className="font-semibold tabular-nums">{fmt(d.total)} {d.currency}</p>
                         {kind !== "receipt" && (d.paidAmount ?? 0) > 0 ? (
-                          <p className={cn("text-xs", due > 0 ? "text-orange-600" : "text-emerald-600")}>
+                          <p className={cn("text-xs", due > 0 ? "text-brand-600" : "text-emerald-600")}>
                             {due > 0 ? `Paid ${fmt(d.paidAmount)} · Due ${due.toFixed(2)}` : `Paid ${fmt(d.paidAmount)}`}
                           </p>
                         ) : null}
@@ -191,7 +191,7 @@ export default function InvoicesPage() {
 
       {!showForm ? (
         <p className="mt-4 text-xs text-slate-500">
-          Receipts created with Record payment are listed under <Link href="/dashboard/invoices?type=receipt" className="font-semibold text-orange-600 hover:underline">Receipts</Link>.
+          Receipts created with Record payment are listed under <Link href="/dashboard/invoices?type=receipt" className="font-semibold text-brand-600 hover:underline">Receipts</Link>.
         </p>
       ) : null}
 

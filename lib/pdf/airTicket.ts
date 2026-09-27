@@ -99,7 +99,7 @@ const NOTES =
   "Carry a valid government photo ID. Report at the check-in counter at least 2 hours before departure for domestic and 3 hours for international flights. Web check-in opens as per airline policy. Baggage allowance and fare rules are subject to airline terms.";
 
 export async function renderAirTicket(d: AirTicketData, agent: Agent, plan: PlanId): Promise<Uint8Array> {
-  const c = await createDoc({ agent, plan, title: `E-ticket ${d.airlinePnr}`, accent: d.layout === "confirmation" ? "#0f766e" : "#f97316" });
+  const c = await createDoc({ agent, plan, title: `E-ticket ${d.airlinePnr}`, accent: d.layout === "confirmation" ? "#0f766e" : "#3b7d0c" });
   c.footer = `Airline e-ticket - Airline PNR ${d.airlinePnr.toUpperCase()}${d.crsPnr ? ` - CRS PNR ${d.crsPnr.toUpperCase()}` : ""}`;
   // The agency header honours the ticket's GST / IATA switches.
   c.agent = {

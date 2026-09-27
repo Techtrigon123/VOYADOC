@@ -79,8 +79,8 @@ export function CustomerPickerDialog({
             <ul className="divide-y divide-slate-100">
               {items.map((c) => (
                 <li key={c.id}>
-                  <button type="button" onClick={() => onPick(c)} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-orange-50/60">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-50 text-orange-600"><UserRound className="h-4 w-4" /></span>
+                  <button type="button" onClick={() => onPick(c)} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-brand-50/60">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-50 text-brand-600"><UserRound className="h-4 w-4" /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-slate-900">{c.name}{c.company && c.company !== c.name ? ` · ${c.company}` : ""}</span>
                       <span className="block truncate text-xs text-slate-500">{[c.email, c.phone, c.placeOfSupply].filter(Boolean).join(" · ") || "—"}</span>
@@ -224,7 +224,7 @@ export function NumberSettingsDialog({
       description="Choose how we build the next number for each document type. We look at your saved documents — including custom references you typed — and pick one higher than the largest matching number."
     >
       {info ? (
-        <div className="mt-3 rounded-2xl bg-orange-50/70 p-3 text-sm">
+        <div className="mt-3 rounded-2xl bg-brand-50/70 p-3 text-sm">
           <p className="font-semibold text-slate-900">Next suggested numbers</p>
           <p className="mt-1 text-slate-600">
             Tax invoice: <span className="font-mono font-semibold">{info.invoice.next}</span> · Proforma: <span className="font-mono font-semibold">{info.proforma.next}</span> · Receipt:{" "}
@@ -254,7 +254,7 @@ export function NumberSettingsDialog({
         </div>
       </div>
       <div className="mt-5 flex flex-wrap justify-between gap-2">
-        <button type="button" onClick={() => setS({ invoicePrefix: "INV-", proformaPrefix: "PI-", receiptPrefix: "RCPT-", digits: 4 })} className="text-sm font-medium text-slate-500 hover:text-orange-600">Reset to defaults</button>
+        <button type="button" onClick={() => setS({ invoicePrefix: "INV-", proformaPrefix: "PI-", receiptPrefix: "RCPT-", digits: 4 })} className="text-sm font-medium text-slate-500 hover:text-brand-600">Reset to defaults</button>
         <div className="flex gap-2">
           <button type="button" onClick={() => onOpenChange(false)} className={secondaryBtn}>Cancel</button>
           <button type="button" onClick={save} disabled={saving} className={primaryBtn}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save</button>
@@ -348,9 +348,9 @@ export function RecordPaymentDialog({
             <div className="grid grid-cols-3 gap-2 text-center text-sm">
               <div><p className="text-xs text-slate-500">Total</p><p className="font-bold">{cur} {info.total.toFixed(2)}</p></div>
               <div><p className="text-xs text-slate-500">Paid</p><p className="font-bold text-emerald-600">{cur} {info.paid.toFixed(2)}</p></div>
-              <div><p className="text-xs text-slate-500">{info.balanceDue > 0 ? "Still due" : "Balance"}</p><p className="font-bold text-orange-600">{cur} {info.balanceDue.toFixed(2)}</p></div>
+              <div><p className="text-xs text-slate-500">{info.balanceDue > 0 ? "Still due" : "Balance"}</p><p className="font-bold text-brand-600">{cur} {info.balanceDue.toFixed(2)}</p></div>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-orange-100" aria-label={`Paid ${paidPct} percent, ${100 - paidPct} percent still due`}>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-brand-100" aria-label={`Paid ${paidPct} percent, ${100 - paidPct} percent still due`}>
               <div className="h-full bg-emerald-500" style={{ width: `${paidPct}%` }} />
             </div>
             <p className="mt-1 text-xs text-slate-500">{info.balanceDue <= 0 ? "Fully received" : `${paidPct}% paid · ${100 - paidPct}% still due`}</p>
@@ -477,14 +477,14 @@ export function ExportDialog({ open, onOpenChange, kind }: { open: boolean; onOp
               ["xls", "XLS (Microsoft Excel 1997-2004 Compatible)"],
               ["xlsx", "XLSX (Microsoft Excel)"],
             ].map(([v, l]) => (
-              <label key={v} className={cn("flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm", format === v ? "border-orange-300 bg-orange-50" : "border-slate-200")}>
-                <input type="radio" name="format" checked={format === v} onChange={() => setFormat(v)} className="accent-orange-500" /> {l}
+              <label key={v} className={cn("flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm", format === v ? "border-brand-300 bg-brand-50" : "border-slate-200")}>
+                <input type="radio" name="format" checked={format === v} onChange={() => setFormat(v)} className="accent-brand-500" /> {l}
               </label>
             ))}
           </div>
         </Field>
         <label className="flex cursor-pointer items-start gap-2 text-sm sm:col-span-2">
-          <input type="checkbox" checked={pii} onChange={(e) => setPii(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange-500" />
+          <input type="checkbox" checked={pii} onChange={(e) => setPii(e.target.checked)} className="mt-0.5 h-4 w-4 accent-brand-500" />
           <span>
             Include sensitive personally identifiable information (PII) while exporting.
             <span className="block text-xs text-slate-500">When off, customer GSTIN, email, phone, and address are left blank in the file.</span>

@@ -65,7 +65,7 @@ export default function CookieConsent() {
     >
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/15">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
             <Cookie className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -75,7 +75,7 @@ export default function CookieConsent() {
             <p className="mt-1 text-sm leading-relaxed text-slate-600">
               We use essential cookies to run the site. With your permission we may also use analytics and marketing
               cookies. See our{" "}
-              <Link href="/privacy#cookies" className="font-medium text-orange-600 underline underline-offset-2">
+              <Link href="/privacy#cookies" className="font-medium text-brand-600 underline underline-offset-2">
                 Privacy Policy
               </Link>
               .
@@ -101,11 +101,11 @@ export default function CookieConsent() {
               return (
                 <li key={o.key}>
                   <label
-                    className={`flex items-start gap-3 rounded-xl border border-slate-200 p-3 ${essential ? "bg-slate-50" : "cursor-pointer hover:border-orange-300"}`}
+                    className={`flex items-start gap-3 rounded-xl border border-slate-200 p-3 ${essential ? "bg-slate-50" : "cursor-pointer hover:border-brand-300"}`}
                   >
                     <input
                       type="checkbox"
-                      className="mt-0.5 h-4 w-4 accent-orange-500"
+                      className="mt-0.5 h-4 w-4 accent-brand-500"
                       checked={checked}
                       disabled={essential}
                       onChange={(e) => !essential && setChoice((c) => ({ ...c, [o.key]: e.target.checked }))}

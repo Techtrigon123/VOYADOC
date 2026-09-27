@@ -4,7 +4,7 @@ import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Log in",
-  description: "Log in to TravelDoc Pro to create and manage your hotel vouchers, air tickets, placards and invoices.",
+  description: "Log in to Voyenta to create and manage your hotel vouchers, air tickets, placards and invoices.",
   alternates: { canonical: "/login" },
 };
 

@@ -69,7 +69,7 @@ interface Suggestion {
   rooms: string[];
 }
 
-const COLORS = ["#f97316", "#dc2626", "#db2777", "#7c3aed", "#1e3a8a", "#0ea5e9", "#0f766e", "#15803d", "#a16207", "#0f172a"];
+const COLORS = ["#3b7d0c", "#2879f8", "#f97316", "#dc2626", "#db2777", "#7c3aed", "#1e3a8a", "#0ea5e9", "#0f766e", "#15803d", "#a16207", "#0f172a"];
 
 function HotelNameInput({ value, onChange, onPick }: { value: string; onChange: (v: string) => void; onPick: (s: Suggestion) => void }) {
   const [items, setItems] = useState<Suggestion[]>([]);
@@ -145,7 +145,7 @@ function HotelNameInput({ value, onChange, onPick }: { value: string; onChange: 
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(s)}
-                className={cn("flex w-full flex-col items-start px-4 py-2.5 text-left", i === active ? "bg-orange-50" : "hover:bg-slate-50")}
+                className={cn("flex w-full flex-col items-start px-4 py-2.5 text-left", i === active ? "bg-brand-50" : "hover:bg-slate-50")}
               >
                 <span className="text-sm font-medium text-slate-900">{s.name}</span>
                 <span className="text-xs text-slate-500">{[s.address, s.city].filter(Boolean).join(", ") || "—"}</span>
@@ -267,7 +267,7 @@ function RoomCard({
         </Field>
         {room.children > 0 ? (
           <div className="sm:col-span-2">
-            <p className="mb-1.5 text-sm font-medium text-slate-700">Child ages <span className="text-orange-500">*</span></p>
+            <p className="mb-1.5 text-sm font-medium text-slate-700">Child ages <span className="text-brand-500">*</span></p>
             <div className="flex flex-wrap gap-2">
               {room.childAges.slice(0, room.children).map((age, ci) => (
                 <select
@@ -546,14 +546,14 @@ export default function VoucherEditorPage() {
 
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               <label className="flex cursor-pointer items-start gap-2 text-sm">
-                <input type="checkbox" checked={data.sameDates} onChange={(e) => patch({ sameDates: e.target.checked })} className="mt-0.5 h-4 w-4 accent-orange-500" />
+                <input type="checkbox" checked={data.sameDates} onChange={(e) => patch({ sameDates: e.target.checked })} className="mt-0.5 h-4 w-4 accent-brand-500" />
                 <span>
                   <span className="font-medium text-slate-800">Same dates for all rooms</span>
                   {!data.sameDates ? <span className="block text-xs text-slate-500">Room 1 keeps the main check-in; the last room keeps the main check-out. Change the other dates per room.</span> : null}
                 </span>
               </label>
               <label className="flex cursor-pointer items-start gap-2 text-sm">
-                <input type="checkbox" checked={data.sameRoomType} onChange={(e) => patch({ sameRoomType: e.target.checked })} className="mt-0.5 h-4 w-4 accent-orange-500" />
+                <input type="checkbox" checked={data.sameRoomType} onChange={(e) => patch({ sameRoomType: e.target.checked })} className="mt-0.5 h-4 w-4 accent-brand-500" />
                 <span>
                   <span className="font-medium text-slate-800">Same room type for all rooms</span>
                   <span className="block text-xs text-slate-500">If rooms are different, uncheck this to enter a room name for each room.</span>
@@ -688,12 +688,12 @@ export default function VoucherEditorPage() {
                     key={t.id}
                     type="button"
                     onClick={() => patch({ template: t.id, color: t.color })}
-                    className={cn("overflow-hidden rounded-2xl border text-left transition", selected ? "border-orange-400 ring-4 ring-orange-100" : "border-slate-200 hover:border-orange-200")}
+                    className={cn("overflow-hidden rounded-2xl border text-left transition", selected ? "border-brand-400 ring-4 ring-brand-100" : "border-slate-200 hover:border-brand-200")}
                   >
                     <TemplateThumb id={t.id} color={selected ? data.color : t.color} />
                     <div className="flex items-center justify-between px-3 py-2">
                       <span className="text-sm font-semibold text-slate-900">{t.label}</span>
-                      {selected ? <Check className="h-4 w-4 text-orange-500" /> : null}
+                      {selected ? <Check className="h-4 w-4 text-brand-500" /> : null}
                     </div>
                   </button>
                 );
@@ -702,7 +702,7 @@ export default function VoucherEditorPage() {
             <p className="mt-2 text-xs text-slate-500">Selected: {VOUCHER_TEMPLATES.find((t) => t.id === data.template)?.description}</p>
             <div className="mt-5">
               <p className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                Voucher colour <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-orange-700">Beta</span>
+                Voucher colour <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-700">Beta</span>
               </p>
               <p className="text-xs text-slate-500">Pick a colour for headers, accents, and highlights on your PDF. Each template starts with its original colour — change it anytime.</p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -740,7 +740,7 @@ export default function VoucherEditorPage() {
             </dl>
           </div>
 
-          <div className="rounded-3xl border border-orange-200 bg-gradient-to-b from-orange-50 to-white p-5">
+          <div className="rounded-3xl border border-brand-200 bg-gradient-to-b from-brand-50 to-white p-5">
             <Field label="Who is preparing this voucher?" htmlFor="preparedBy" required hint="Enter your name. It will appear on the PDF and in your saved voucher history.">
               <TextInput id="preparedBy" value={data.preparedBy} onChange={(e) => patch({ preparedBy: e.target.value })} placeholder="Your name" />
             </Field>
@@ -749,13 +749,13 @@ export default function VoucherEditorPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={agent.brandLogo} alt="Brand logo" className="h-10 w-14 object-contain" />
                 <label className="flex items-center gap-2 text-xs text-slate-600">
-                  <input type="checkbox" checked={!data.withoutLogo} onChange={(e) => patch({ withoutLogo: !e.target.checked })} className="h-4 w-4 accent-orange-500" />
+                  <input type="checkbox" checked={!data.withoutLogo} onChange={(e) => patch({ withoutLogo: !e.target.checked })} className="h-4 w-4 accent-brand-500" />
                   Show my logo on this voucher
                 </label>
               </div>
             ) : (
-              <button type="button" onClick={() => setLogoPrompt("entry")} className="mt-3 w-full rounded-2xl border border-dashed border-orange-300 bg-white p-3 text-left text-xs text-slate-600 hover:bg-orange-50">
-                Without your logo, the hotel voucher feels incomplete. <span className="font-semibold text-orange-600">Add brand logo</span>
+              <button type="button" onClick={() => setLogoPrompt("entry")} className="mt-3 w-full rounded-2xl border border-dashed border-brand-300 bg-white p-3 text-left text-xs text-slate-600 hover:bg-brand-50">
+                Without your logo, the hotel voucher feels incomplete. <span className="font-semibold text-brand-600">Add brand logo</span>
               </button>
             )}
             {error ? <p role="alert" className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</p> : null}
@@ -771,7 +771,7 @@ export default function VoucherEditorPage() {
             </div>
             <p className="mt-2 text-center text-[11px] text-slate-500">Ready to make a voucher? Fill details, then save &amp; generate a PDF.</p>
             {docId ? (
-              <Link href="/dashboard/vouchers" className="mt-2 block text-center text-xs font-medium text-slate-500 hover:text-orange-600">Back to your vouchers</Link>
+              <Link href="/dashboard/vouchers" className="mt-2 block text-center text-xs font-medium text-slate-500 hover:text-brand-600">Back to your vouchers</Link>
             ) : null}
           </div>
         </aside>
@@ -802,7 +802,7 @@ export default function VoucherEditorPage() {
 function TemplateThumb({ id, color }: { id: string; color: string }) {
   return (
     <div className="aspect-[4/3] bg-slate-50 p-2.5">
-      <div className="h-full rounded-lg bg-white p-2 shadow-sm ring-1 ring-slate-200">
+      <div className="keep-light h-full rounded-lg bg-white p-2 shadow-sm ring-1 ring-slate-200">
         {id === "light" ? <div className="-m-2 mb-1.5 h-4 rounded-t-lg" style={{ background: color }} /> : null}
         {id === "corporate" ? <div className="mb-1 h-[3px] rounded" style={{ background: color }} /> : null}
         <div className="flex gap-1.5">

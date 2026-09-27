@@ -7,7 +7,7 @@ import { PAID_PLAN_PRICE_INR, SILVER_RETENTION_DAYS, formatInr } from "@/lib/age
 export const metadata: Metadata = {
   title: "Terms and Conditions",
   description:
-    "The terms for using TravelDoc Pro: accounts, Silver, Gold and Platinum plans, payments, your documents and customer data, acceptable use, liability and governing law.",
+    "The terms for using Voyenta: accounts, Silver, Gold and Platinum plans, payments, your documents and customer data, acceptable use, liability and governing law.",
   alternates: { canonical: "/terms" },
 };
 

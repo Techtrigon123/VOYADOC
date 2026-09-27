@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import HomePage from "@/app/(marketing)/page";
 import { NavBarDemo } from "@/components/ui/navbar-demo";
 import Footer from "@/components/layout/Footer";
+import ThemeToggle from "@/components/marketing/ThemeToggle";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -16,6 +17,7 @@ export default function RootPage() {
       <NavBarDemo />
       <HomePage />
       <Footer />
+      <ThemeToggle />
     </>
   );
 }

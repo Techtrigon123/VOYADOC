@@ -176,7 +176,7 @@ export function InvoiceForm({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button type="button" onClick={onBack} className="text-sm font-medium text-slate-500 hover:text-orange-600">← Back to list</button>
+        <button type="button" onClick={onBack} className="text-sm font-medium text-slate-500 hover:text-brand-600">← Back to list</button>
         <p className="text-xs text-slate-500">Customer, invoice details, and line items in order — labels on the left, same spacing as standard invoicing tools.</p>
       </div>
 
@@ -193,7 +193,7 @@ export function InvoiceForm({
                 <span className="hidden sm:inline">{data.customerId ? "Change" : "Select"}</span>
               </button>
             </div>
-            <button type="button" onClick={() => setDetailsOpen(true)} className="mt-1 text-xs font-semibold text-orange-600 hover:underline">
+            <button type="button" onClick={() => setDetailsOpen(true)} className="mt-1 text-xs font-semibold text-brand-600 hover:underline">
               {data.customerId ? "Edit customer details" : "Customer details"}
             </button>
           </Field>
@@ -207,7 +207,7 @@ export function InvoiceForm({
           <Field label="Customer GST on PDF">
             <div className="flex gap-2">
               {[true, false].map((v) => (
-                <button key={String(v)} type="button" onClick={() => patch({ showCustomerGst: v })} className={cn("h-10 flex-1 rounded-xl border text-sm font-medium", data.showCustomerGst === v ? "border-orange-300 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-600")}>
+                <button key={String(v)} type="button" onClick={() => patch({ showCustomerGst: v })} className={cn("h-10 flex-1 rounded-xl border text-sm font-medium", data.showCustomerGst === v ? "border-brand-300 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-600")}>
                   {v ? "Show" : "Hide"}
                 </button>
               ))}
@@ -225,7 +225,7 @@ export function InvoiceForm({
               </button>
             </div>
             {numbers && data.number !== numbers[data.docType].next && !editId ? (
-              <button type="button" onClick={() => patch({ number: numbers[data.docType].next })} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:underline">
+              <button type="button" onClick={() => patch({ number: numbers[data.docType].next })} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-brand-600 hover:underline">
                 <Wand2 className="h-3 w-3" /> Use next suggested number ({numbers[data.docType].next})
               </button>
             ) : null}
@@ -300,7 +300,7 @@ export function InvoiceForm({
               <TextArea rows={4} value={data.terms} onChange={(e) => patch({ terms: e.target.value })} />
             </Field>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="flex items-center gap-2 text-sm font-medium text-slate-700"><Stamp className="h-4 w-4 text-orange-500" /> Company stamp</p>
+              <p className="flex items-center gap-2 text-sm font-medium text-slate-700"><Stamp className="h-4 w-4 text-brand-500" /> Company stamp</p>
               <p className="text-xs text-slate-500">Optional. Appears on the PDF above “Authorised signatory”. Saved to your profile for next time.</p>
               <div className="mt-3 flex items-center gap-3">
                 {agent.companyStamp ? (
@@ -337,7 +337,7 @@ export function InvoiceForm({
                 <dt className="text-slate-500">Round off / adjustment</dt>
                 <dd><TextInput aria-label="Round off amount" inputMode="decimal" value={data.roundOff} onChange={(e) => patch({ roundOff: e.target.value })} placeholder="0.00" className="h-8 w-24 text-right" /></dd>
               </div>
-              <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold"><dt>Total ({data.currency})</dt><dd className="tabular-nums text-orange-600">{fmt(totals.total)}</dd></div>
+              <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold"><dt>Total ({data.currency})</dt><dd className="tabular-nums text-brand-600">{fmt(totals.total)}</dd></div>
               <div className="flex justify-between text-xs text-slate-500"><dt>Total qty (all rows)</dt><dd>{totals.qty}</dd></div>
             </dl>
           </div>
@@ -362,7 +362,7 @@ export function InvoiceForm({
           </button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <button type="button" disabled={!!busy} aria-label="More save options" className="inline-flex h-10 items-center btn-glow rounded-r-lg bg-[var(--primary)] px-2.5 text-white hover:bg-orange-600 disabled:opacity-50">
+              <button type="button" disabled={!!busy} aria-label="More save options" className="inline-flex h-10 items-center btn-glow rounded-r-lg bg-[var(--primary)] px-2.5 text-white hover:bg-brand-600 disabled:opacity-50">
                 <ChevronDown className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>

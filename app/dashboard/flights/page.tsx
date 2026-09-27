@@ -101,7 +101,7 @@ export default function FlightsPage() {
                 <tr
                   key={d.id}
                   onClick={() => (d.access.locked ? router.push("/dashboard/pricing") : router.push(`/dashboard/flights/${d.id}`))}
-                  className="cursor-pointer hover:bg-orange-50/40"
+                  className="cursor-pointer hover:bg-brand-50/40"
                 >
                   <td className="px-5 py-3">
                     <p className="font-medium text-slate-900">{d.title}</p>

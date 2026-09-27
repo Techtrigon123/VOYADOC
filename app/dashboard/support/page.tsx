@@ -44,11 +44,11 @@ export default function SupportPage() {
       <PageHeader eyebrow="Help" title="Support" description="Chat with our support team about vouchers, invoices, plans, or your account." />
       <div className="flex h-[min(70vh,640px)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white">
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
             <Headphones className="h-[18px] w-[18px]" />
           </span>
           <div>
-            <p className="text-sm font-semibold text-slate-900">TravelDoc Pro support</p>
+            <p className="text-sm font-semibold text-slate-900">Voyenta support</p>
             <p className="text-xs text-slate-500">We usually reply within a few hours on working days.</p>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function SupportPage() {
               <div key={m.id} className={cn("flex", m.from === "agent" ? "justify-end" : "justify-start")}>
                 <div className={cn("max-w-[80%] rounded-2xl px-4 py-2.5 text-sm", m.from === "agent" ? "rounded-br-md bg-[var(--primary)] text-white" : "rounded-bl-md border border-slate-200 bg-white text-slate-800")}>
                   <p className="whitespace-pre-wrap">{m.body}</p>
-                  <p className={cn("mt-1 text-[10px]", m.from === "agent" ? "text-orange-100" : "text-slate-400")}>
+                  <p className={cn("mt-1 text-[10px]", m.from === "agent" ? "text-brand-100" : "text-slate-400")}>
                     {new Date(m.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
@@ -80,9 +80,9 @@ export default function SupportPage() {
             onChange={(e) => setText(e.target.value)}
             placeholder="Type your message…"
             aria-label="Message"
-            className="h-11 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            className="h-11 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
           />
-          <button type="submit" disabled={sending || !text.trim()} className="inline-flex h-11 w-11 items-center justify-center btn-glow rounded-lg bg-[var(--primary)] text-white hover:bg-orange-600 disabled:opacity-50" aria-label="Send">
+          <button type="submit" disabled={sending || !text.trim()} className="inline-flex h-11 w-11 items-center justify-center btn-glow rounded-lg bg-[var(--primary)] text-white hover:bg-brand-600 disabled:opacity-50" aria-label="Send">
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>
         </form>

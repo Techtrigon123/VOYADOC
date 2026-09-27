@@ -77,7 +77,7 @@ export default function PickupListPage() {
             <ul className="divide-y divide-slate-100">
               {shown.map((d) => (
                 <li key={d.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                  <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 sm:flex">
+                  <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 sm:flex">
                     <Car className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ export default function PickupListPage() {
                             void navigator.clipboard.writeText(d.number ?? "");
                             toast.success("Copied");
                           }}
-                          className="text-slate-400 hover:text-orange-600"
+                          className="text-slate-400 hover:text-brand-600"
                         >
                           <Copy className="h-3 w-3" />
                         </button>

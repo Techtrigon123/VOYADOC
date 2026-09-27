@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://traveldocpro.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://voyenta.com";
 
 type Entry = [path: string, priority: number, changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]];
 

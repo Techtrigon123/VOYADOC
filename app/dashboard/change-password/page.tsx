@@ -32,7 +32,7 @@ export default function ChangePasswordPage() {
   return (
     <PageShell className="max-w-md">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
           <KeyRound className="h-5 w-5" />
         </span>
         <h1 className="mt-3 text-xl font-bold text-slate-900">Change password</h1>
@@ -68,8 +68,8 @@ export default function ChangePasswordPage() {
               {saving ? "Updating…" : "Update password"}
             </button>
             <div className="flex items-center justify-between text-xs text-slate-500">
-              <Link href="/dashboard/profile" className="hover:text-orange-600">Back to profile</Link>
-              <Link href="/forgot-password" className="hover:text-orange-600">Signed out? Reset with email instead</Link>
+              <Link href="/dashboard/profile" className="hover:text-brand-600">Back to profile</Link>
+              <Link href="/forgot-password" className="hover:text-brand-600">Signed out? Reset with email instead</Link>
             </div>
           </form>
         )}

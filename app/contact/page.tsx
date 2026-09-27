@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Clock, FileText, LifeBuoy, MessageSquare } from "lucide-react";
+import { Clock, LifeBuoy, MessageSquare } from "lucide-react";
 import ContactForm from "./ContactForm";
+import BrandMark from "@/components/brand/BrandMark";
 
 export const metadata = {
   title: "Contact us",
-  description: "Talk to the TravelDoc Pro team about plans, onboarding, or help with your account.",
+  description: "Talk to the Voyenta team about plans, onboarding, or help with your account.",
   alternates: { canonical: "/contact" },
 };
 
@@ -13,12 +14,8 @@ export default function ContactPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="h-16 flex items-center justify-between px-6 border-b border-[var(--border)] bg-white">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-base text-[var(--foreground)]">
-            TravelDoc<span className="text-[var(--primary)]">Pro</span>
-          </span>
+          <BrandMark className="h-7" />
+          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
         </Link>
         <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[var(--primary)]">Log in</Link>
       </header>
@@ -39,7 +36,7 @@ export default function ContactPage() {
                 { icon: LifeBuoy, title: "Refunds & payments", body: "Include your transaction ID so we can find your payment quickly." },
               ].map(({ icon: Icon, title, body }) => (
                 <li key={title} className="flex gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
@@ -59,7 +56,7 @@ export default function ContactPage() {
       </main>
 
       <footer className="py-4 text-center text-xs text-[var(--muted-foreground)]">
-        © {new Date().getFullYear()} TravelDoc Pro
+        © {new Date().getFullYear()} Voyenta
       </footer>
     </div>
   );

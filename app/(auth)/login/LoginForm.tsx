@@ -86,7 +86,7 @@ export default function LoginForm() {
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>
-            Log in to your TravelDoc Pro account
+            Log in to your Voyenta account
           </CardDescription>
         </CardHeader>
 
@@ -174,7 +174,7 @@ export default function LoginForm() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-[var(--muted-foreground)]">
-                 New to TravelDoc Pro?
+                 New to Voyenta?
               </span>
             </div>
           </div>

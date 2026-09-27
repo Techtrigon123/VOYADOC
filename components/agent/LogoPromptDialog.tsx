@@ -68,7 +68,7 @@ export function LogoPromptDialog({
           <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Brand logo" className="h-20 w-28 rounded-xl bg-white object-contain ring-1 ring-slate-200" />
-            <button type="button" onClick={() => setPreview(null)} className="text-sm font-medium text-slate-600 hover:text-orange-600">
+            <button type="button" onClick={() => setPreview(null)} className="text-sm font-medium text-slate-600 hover:text-brand-600">
               Choose another
             </button>
           </div>

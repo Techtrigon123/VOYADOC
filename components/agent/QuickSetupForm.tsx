@@ -30,7 +30,7 @@ const ICONS: Record<PartnerType, React.ComponentType<{ className?: string }>> = 
 };
 
 const inputCls = "h-11 rounded-xl";
-const Req = () => <span className="text-orange-500"> *</span>;
+const Req = () => <span className="text-brand-500"> *</span>;
 /** Capitalise the first letter of each word as the user types. */
 const titleCase = (v: string) => v.replace(/(^|\s)(\p{L})/gu, (_m, s: string, c: string) => s + c.toUpperCase());
 
@@ -124,7 +124,7 @@ export function QuickSetupForm({ initial, onSuccess }: { initial: Agent; onSucce
                     key={t}
                     className={cn(
                       "group flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-3 transition-all",
-                      selected ? "border-orange-400 bg-orange-50 shadow-sm ring-4 ring-orange-100" : "border-slate-200 bg-white hover:border-orange-200 hover:bg-orange-50/40"
+                      selected ? "border-brand-400 bg-brand-50 shadow-sm ring-4 ring-brand-100" : "border-slate-200 bg-white hover:border-brand-200 hover:bg-brand-50/40"
                     )}
                   >
                     <input
@@ -138,7 +138,7 @@ export function QuickSetupForm({ initial, onSuccess }: { initial: Agent; onSucce
                       }}
                       className="sr-only"
                     />
-                    <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", selected ? "bg-[var(--primary)] text-white" : "bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-600")}>
+                    <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", selected ? "bg-[var(--primary)] text-white" : "bg-slate-100 text-slate-500 group-hover:bg-brand-100 group-hover:text-brand-600")}>
                       <Icon className="h-[18px] w-[18px]" />
                     </span>
                     <span className="flex-1 text-sm font-semibold text-slate-900">{PARTNER_TYPE_LABELS[t]}</span>
@@ -222,7 +222,7 @@ export function QuickSetupForm({ initial, onSuccess }: { initial: Agent; onSucce
           <button
             type="submit"
             disabled={saving || (step === 0 ? !roleOk : !profileOk)}
-            className={cn("inline-flex h-11 items-center justify-center gap-1.5 btn-glow rounded-lg bg-[var(--primary)] text-sm font-semibold text-white shadow-sm hover:bg-orange-600 disabled:opacity-50", step > 0 ? "flex-[1.4]" : "w-full")}
+            className={cn("inline-flex h-11 items-center justify-center gap-1.5 btn-glow rounded-lg bg-[var(--primary)] text-sm font-semibold text-white shadow-sm hover:bg-brand-600 disabled:opacity-50", step > 0 ? "flex-[1.4]" : "w-full")}
           >
             {saving ? "Saving…" : step === 0 ? "Continue" : "Continue to dashboard"}
             {!saving ? <ArrowRight className="h-4 w-4" /> : null}

@@ -7,7 +7,7 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How TravelDoc Pro collects, uses, stores and protects your data and your customers' data, the cookies we use, and your rights under India's DPDP Act 2023.",
+    "How Voyenta collects, uses, stores and protects your data and your customers' data, the cookies we use, and your rights under India's DPDP Act 2023.",
   alternates: { canonical: "/privacy" },
 };
 

@@ -1,4 +1,4 @@
--- TravelDoc Pro — initial schema.
+-- Voyenta — initial schema.
 -- Run once in Supabase: Dashboard → SQL Editor → paste → Run
 -- (or `supabase db push` with the Supabase CLI).
 --

@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { SITE } from "@/lib/site";
 
@@ -7,7 +9,8 @@ export const contentType = "image/png";
 
 const DOCS = ["Hotel vouchers", "Air tickets", "Pickup vouchers", "Welcome placards", "GST invoices", "Receipts"];
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const mark = `data:image/png;base64,${(await readFile(join(process.cwd(), "public/voyenta-logo-mark.png"))).toString("base64")}`;
   return new ImageResponse(
     (
       <div
@@ -18,29 +21,15 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          background: "linear-gradient(135deg, #ffffff 0%, #fff7ed 60%, #ffedd5 100%)",
+          background: "linear-gradient(135deg, #ffffff 0%, #f3fce8 60%, #e4f9cc 100%)",
           fontFamily: "sans-serif",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 14,
-              background: "#f97316",
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 30,
-              fontWeight: 800,
-            }}
-          >
-            T
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={mark} width={94} height={64} alt="" />
           <div style={{ display: "flex", fontSize: 36, fontWeight: 800, color: "#0f172a" }}>
-            TravelDoc<span style={{ color: "#f97316" }}>Pro</span>
+            Voyenta
           </div>
         </div>
 
@@ -62,8 +51,8 @@ export default function OpengraphImage() {
                 padding: "10px 20px",
                 borderRadius: 999,
                 background: "white",
-                border: "2px solid #fed7aa",
-                color: "#c2410c",
+                border: "2px solid #caf29d",
+                color: "#2f640d",
                 fontSize: 24,
                 fontWeight: 600,
               }}

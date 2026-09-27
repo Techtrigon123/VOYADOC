@@ -80,7 +80,7 @@ export default function FAQSection() {
             Common questions
           </h2>
           <p className="max-w-xl mx-auto text-[var(--muted-foreground)]">
-            Everything you need to know about TravelDoc Pro.
+            Everything you need to know about Voyenta.
           </p>
         </div>
 

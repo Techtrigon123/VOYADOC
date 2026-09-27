@@ -22,7 +22,7 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm">
       <span className="font-medium text-slate-700">{label}</span>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-orange-500" />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-brand-500" />
     </label>
   );
 }
@@ -85,10 +85,10 @@ export default function AirTicketDetailPage() {
 
   return (
     <PageShell wide>
-      <Link href="/dashboard/flights" className="mb-3 inline-flex text-sm font-medium text-slate-500 hover:text-orange-600">← Airline tickets</Link>
+      <Link href="/dashboard/flights" className="mb-3 inline-flex text-sm font-medium text-slate-500 hover:text-brand-600">← Airline tickets</Link>
       <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
             <Plane className="h-5 w-5" />
           </span>
           <div>
@@ -126,7 +126,7 @@ export default function AirTicketDetailPage() {
                   key={l.id}
                   type="button"
                   onClick={() => update({ layout: l.id as TicketLayout })}
-                  className={cn("rounded-2xl border px-3 py-2.5 text-left", data.layout === l.id ? "border-orange-300 bg-orange-50" : "border-slate-200 hover:border-orange-200")}
+                  className={cn("rounded-2xl border px-3 py-2.5 text-left", data.layout === l.id ? "border-brand-300 bg-brand-50" : "border-slate-200 hover:border-brand-200")}
                 >
                   <p className="text-sm font-semibold text-slate-900">{l.label}</p>
                   <p className="text-xs text-slate-500">{l.description}</p>

@@ -141,7 +141,7 @@ function SegmentForm({ seg, index, onChange, onRemove, showErrors }: { seg: Flig
         </Field>
         <div className="flex items-end">
           <p className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-200">
-            <Clock className="h-3.5 w-3.5 text-orange-500" />
+            <Clock className="h-3.5 w-3.5 text-brand-500" />
             {dur ? <>Flight duration: <span className="font-semibold">{dur}</span></> : "Duration appears after you set departure and arrival times."}
           </p>
         </div>
@@ -314,7 +314,7 @@ export function AirTicketComposer({ editId }: { editId?: string }) {
               type="button"
               onClick={() => i < step && setStep(i)}
               disabled={i > step}
-              className={cn("flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left transition", i === step ? "border-orange-300 bg-orange-50" : i < step ? "border-emerald-200 bg-white hover:bg-emerald-50/50" : "border-slate-200 bg-white opacity-60")}
+              className={cn("flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left transition", i === step ? "border-brand-300 bg-brand-50" : i < step ? "border-emerald-200 bg-white hover:bg-emerald-50/50" : "border-slate-200 bg-white opacity-60")}
             >
               <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold", i === step ? "bg-[var(--primary)] text-white" : i < step ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500")}>
                 {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
@@ -395,8 +395,8 @@ export function AirTicketComposer({ editId }: { editId?: string }) {
                   <TextInput inputMode="decimal" value={data.discount} onChange={(e) => patch({ discount: e.target.value })} placeholder="0.00" />
                 </Field>
               </div>
-              <p className="mt-3 rounded-2xl bg-orange-50 px-4 py-3 text-sm">
-                Grand total: <span className="font-bold text-orange-700">{money(total, data.currency)}</span>
+              <p className="mt-3 rounded-2xl bg-brand-50 px-4 py-3 text-sm">
+                Grand total: <span className="font-bold text-brand-700">{money(total, data.currency)}</span>
               </p>
             </div>
           </div>

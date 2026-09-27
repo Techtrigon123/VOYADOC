@@ -1,4 +1,5 @@
 "use client"
+import BrandMark from "@/components/brand/BrandMark";
 
 import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
@@ -38,15 +39,11 @@ export function NavBar({ items, className }: NavBarProps) {
         className,
       )}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between bg-white/10 border border-white/10 backdrop-blur-xl shadow-sm rounded-3xl px-6 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between bg-white/85 border border-white/40 backdrop-blur-xl shadow-sm rounded-3xl px-6 py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]">
-            <span className="text-white font-bold text-sm">T</span>
-          </div>
-          <span className="font-bold text-lg text-[var(--foreground)]">
-            TravelDoc<span className="text-[var(--primary)]">Pro</span>
-          </span>
+          <BrandMark className="h-8" />
+          <span className="font-bold text-lg text-[var(--foreground)]">Voyenta</span>
         </Link>
 
         {/* Desktop nav links */}

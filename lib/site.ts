@@ -6,15 +6,15 @@
  * with contact details on your Privacy Policy.
  */
 export const SITE = {
-  name: "TravelDoc Pro",
-  url: (process.env.NEXT_PUBLIC_APP_URL || "https://traveldocpro.com").replace(/\/+$/, ""),
+  name: "Voyenta",
+  url: (process.env.NEXT_PUBLIC_APP_URL || "https://voyenta.com").replace(/\/+$/, ""),
   tagline: "Travel document software for travel agents",
   description:
     "Create hotel vouchers, air tickets, pickup vouchers, welcome placards, GST invoices, proforma invoices and receipts as branded PDFs — built for Indian travel agents, tour operators and DMCs.",
 
   legal: {
     /** TODO: registered legal name of the business (e.g. "Techtrigon Solutions Pvt Ltd"). */
-    entityName: "TravelDoc Pro",
+    entityName: "Voyenta",
     /** TODO: registered office address. */
     address: "Registered office address to be updated",
     /** TODO: city whose courts have jurisdiction over disputes. */

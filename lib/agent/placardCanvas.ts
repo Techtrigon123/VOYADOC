@@ -23,8 +23,8 @@ const font = (id: string) => PLACARD_FONTS.find((f) => f.id === id)?.css ?? "";
 
 const THEMES: Record<PlacardTheme, ThemeStyle> = {
   minimal: {
-    background: "#ffffff", border: "#e2e8f0", guestColor: "#0f172a", welcomeColor: "#f97316", agencyColor: "#334155",
-    guestFont: "montserrat", welcomeFont: "montserrat", agencyFont: "inter", spacing: "normal", frame: "thin", accent: "#f97316",
+    background: "#ffffff", border: "#e2e8f0", guestColor: "#0f172a", welcomeColor: "#3b7d0c", agencyColor: "#334155",
+    guestFont: "montserrat", welcomeFont: "montserrat", agencyFont: "inter", spacing: "normal", frame: "thin", accent: "#3b7d0c",
     guestFontCss: "", welcomeFontCss: "", agencyFontCss: "",
   },
   corporate: {
@@ -38,8 +38,8 @@ const THEMES: Record<PlacardTheme, ThemeStyle> = {
     guestFontCss: "", welcomeFontCss: "", agencyFontCss: "", gradient: ["#115e59", "#14b8a6"],
   },
   airport: {
-    background: "#ffffff", border: "#f97316", guestColor: "#0f172a", welcomeColor: "#f97316", agencyColor: "#ffffff",
-    guestFont: "bebas", welcomeFont: "montserrat", agencyFont: "montserrat", spacing: "normal", frame: "thin", accent: "#f97316",
+    background: "#ffffff", border: "#3b7d0c", guestColor: "#0f172a", welcomeColor: "#3b7d0c", agencyColor: "#ffffff",
+    guestFont: "bebas", welcomeFont: "montserrat", agencyFont: "montserrat", spacing: "normal", frame: "thin", accent: "#3b7d0c",
     guestFontCss: "", welcomeFontCss: "", agencyFontCss: "",
   },
   classic: {
@@ -324,7 +324,7 @@ export async function drawPlacard(canvas: HTMLCanvasElement, d: PlacardData, age
     ctx.fillStyle = "#0f172a";
     ctx.font = "800 96px Inter, Arial, sans-serif";
     ctx.textAlign = "center";
-    for (const dy of [-360, 0, 360]) ctx.fillText("TravelDoc Pro  -  Silver", 0, dy);
+    for (const dy of [-360, 0, 360]) ctx.fillText("Voyenta  -  Silver", 0, dy);
     ctx.restore();
   }
 }

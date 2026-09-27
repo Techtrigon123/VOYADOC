@@ -156,7 +156,7 @@ export default function PickupEditorPage() {
               <Field label="Pickup From" required error={errors.pickupFrom} hint="Airport, railway station, hotel, etc." className="md:col-span-3">
                 <div className="flex flex-wrap gap-2">
                   {PICKUP_POINTS.map((p) => (
-                    <button key={p} type="button" onClick={() => patch({ pickupFrom: p })} className={cn("rounded-full border px-3 py-1.5 text-sm font-medium transition", data.pickupFrom === p ? "border-orange-400 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-600 hover:border-orange-200")}>
+                    <button key={p} type="button" onClick={() => patch({ pickupFrom: p })} className={cn("rounded-full border px-3 py-1.5 text-sm font-medium transition", data.pickupFrom === p ? "border-brand-400 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-600 hover:border-brand-200")}>
                       {p}
                     </button>
                   ))}
@@ -253,7 +253,7 @@ export default function PickupEditorPage() {
             </div>
             <div className="mt-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
               <span className="flex-1 font-mono text-sm font-semibold text-slate-800">{data.voucherNumber}</span>
-              <button type="button" aria-label="Copy Voucher Number" onClick={() => { void navigator.clipboard.writeText(data.voucherNumber); toast.success("Copied"); }} className="text-slate-400 hover:text-orange-600">
+              <button type="button" aria-label="Copy Voucher Number" onClick={() => { void navigator.clipboard.writeText(data.voucherNumber); toast.success("Copied"); }} className="text-slate-400 hover:text-brand-600">
                 <Copy className="h-4 w-4" />
               </button>
             </div>
@@ -262,7 +262,7 @@ export default function PickupEditorPage() {
                 <span>Form Progress</span>
                 <span className="tabular-nums">{progress.done}/{progress.total}</span>
               </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-orange-100">
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-brand-100">
                 <div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${progress.percent}%` }} />
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function PickupEditorPage() {
             <p className="text-sm font-semibold text-slate-900">PDF Layout</p>
             <div className="mt-3 grid gap-2">
               {PICKUP_LAYOUTS.map((l) => (
-                <button key={l.id} type="button" onClick={() => patch({ layout: l.id })} className={cn("rounded-2xl border px-3 py-2.5 text-left", data.layout === l.id ? "border-orange-300 bg-orange-50" : "border-slate-200 hover:border-orange-200")}>
+                <button key={l.id} type="button" onClick={() => patch({ layout: l.id })} className={cn("rounded-2xl border px-3 py-2.5 text-left", data.layout === l.id ? "border-brand-300 bg-brand-50" : "border-slate-200 hover:border-brand-200")}>
                   <p className="text-sm font-semibold text-slate-900">{l.label}</p>
                   <p className="text-xs text-slate-500">{l.description}</p>
                 </button>

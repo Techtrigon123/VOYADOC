@@ -114,7 +114,7 @@ export function ExtractUploader<T>({ type, onFields }: { type: "voucher" | "tick
         : null;
 
   return (
-    <div className="rounded-3xl border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-white p-5">
+    <div className="rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] text-white">
@@ -140,7 +140,7 @@ export function ExtractUploader<T>({ type, onFields }: { type: "voucher" | "tick
           <p className="mt-1 text-sm text-slate-500">
             Free limit used ({status!.used}/{status!.limit} {status!.period === "day" ? "today" : "this year"}). {copy.manual}
           </p>
-          <Link href="/dashboard/pricing" className="mt-3 inline-flex text-sm font-semibold text-orange-600 hover:underline">
+          <Link href="/dashboard/pricing" className="mt-3 inline-flex text-sm font-semibold text-brand-600 hover:underline">
             View paid plans →
           </Link>
         </div>
@@ -168,7 +168,7 @@ export function ExtractUploader<T>({ type, onFields }: { type: "voucher" | "tick
             </button>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={fill} disabled={phase === "filling"} className="inline-flex h-9 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60">
+            <button type="button" onClick={fill} disabled={phase === "filling"} className="inline-flex h-9 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60">
               {phase === "filling" ? <Loader2 className="h-4 w-4 animate-spin" /> : phase === "done" ? <CheckCircle2 className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
               {phase === "filling" ? "Filling form…" : phase === "done" ? "Fill again" : "Fill form from this file"}
             </button>

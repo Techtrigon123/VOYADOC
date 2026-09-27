@@ -3,7 +3,6 @@
 import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import BrandMark from "@/components/brand/BrandMark";
 
 type ToolShellProps = {
   title: string;
@@ -84,12 +84,8 @@ function ToolShellInner({
     <div className="min-h-screen bg-slate-50">
       <header className="h-16 flex items-center px-6 border-b border-[var(--border)] bg-white">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-base text-[var(--foreground)]">
-            TravelDoc<span className="text-[var(--primary)]">Pro</span>
-          </span>
+          <BrandMark className="h-7" />
+          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
         </Link>
       </header>
 

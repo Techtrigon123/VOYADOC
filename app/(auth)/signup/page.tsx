@@ -3,7 +3,7 @@ import SignupForm from "./SignupForm";
 
 export const metadata: Metadata = {
   title: "Start free — create your account",
-  description: "Create a free TravelDoc Pro account in under a minute and make your first branded hotel voucher, air ticket or invoice. No card needed.",
+  description: "Create a free Voyenta account in under a minute and make your first branded hotel voucher, air ticket or invoice. No card needed.",
   alternates: { canonical: "/signup" },
 };
 

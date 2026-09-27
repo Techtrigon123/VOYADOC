@@ -54,7 +54,7 @@ export default function DocumentAccessPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             {[
               { label: "At risk", sub: "Files closing or locked", value: summary.totalAtRiskCount, icon: AlertTriangle, tone: "text-rose-600 bg-rose-50" },
-              { label: "Closing soon", sub: "Still open — download now", value: summary.expiringSoonCount, icon: Clock, tone: "text-orange-600 bg-orange-50" },
+              { label: "Closing soon", sub: "Still open — download now", value: summary.expiringSoonCount, icon: Clock, tone: "text-amber-600 bg-amber-50" },
               { label: "Urgent", sub: "3 days or less", value: summary.urgentCount, icon: Lock, tone: "text-slate-600 bg-slate-100" },
             ].map((c) => (
               <div key={c.label} className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-4">
@@ -79,7 +79,7 @@ export default function DocumentAccessPage() {
                   ["Step 3", "Access pauses", "File stays saved. Upgrade to Gold or Platinum to open it again."],
                 ].map(([k, t, d]) => (
                   <li key={k} className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-orange-600">{k}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-600">{k}</p>
                     <p className="mt-1 font-semibold text-slate-900">{t}</p>
                     <p className="text-sm text-slate-500">{d}</p>
                   </li>
@@ -119,7 +119,7 @@ export default function DocumentAccessPage() {
                         <tr key={s.id}>
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-600"><Icon className="h-4 w-4" /></span>
+                              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-600"><Icon className="h-4 w-4" /></span>
                               <div className="min-w-0">
                                 <p className="truncate font-medium text-slate-900">{s.title}</p>
                                 <p className="text-xs text-slate-500">{s.documentTypeLabel}</p>
@@ -129,17 +129,17 @@ export default function DocumentAccessPage() {
                           <td className="px-3 py-3 text-slate-600">{formatDay(s.createdAt)}</td>
                           <td className="px-3 py-3 text-slate-600">{formatDay(s.accessUntil ?? undefined)}</td>
                           <td className="px-3 py-3">
-                            <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", s.locked ? "bg-slate-100 text-slate-500" : (s.remainingDays ?? 9) <= 3 ? "bg-rose-50 text-rose-600" : "bg-orange-50 text-orange-700")}>
+                            <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", s.locked ? "bg-slate-100 text-slate-500" : (s.remainingDays ?? 9) <= 3 ? "bg-rose-50 text-rose-600" : "bg-brand-50 text-brand-700")}>
                               {s.locked ? "Locked" : accessLabel({ locked: false, remainingDays: s.remainingDays, accessUntil: s.accessUntil })}
                             </span>
                           </td>
                           <td className="px-5 py-3 text-right">
                             {s.locked ? (
-                              <button type="button" onClick={() => router.push("/dashboard/pricing")} className="text-xs font-semibold text-orange-600 hover:underline">Upgrade to reopen</button>
+                              <button type="button" onClick={() => router.push("/dashboard/pricing")} className="text-xs font-semibold text-brand-600 hover:underline">Upgrade to reopen</button>
                             ) : s.documentType === "welcome_placard" ? (
-                              <Link href={`/dashboard/placards/new?edit=${s.id}`} className="text-xs font-semibold text-orange-600 hover:underline">Open</Link>
+                              <Link href={`/dashboard/placards/new?edit=${s.id}`} className="text-xs font-semibold text-brand-600 hover:underline">Open</Link>
                             ) : (
-                              <button type="button" disabled={busy === s.id} onClick={() => download(s.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:underline disabled:opacity-50">
+                              <button type="button" disabled={busy === s.id} onClick={() => download(s.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-600 hover:underline disabled:opacity-50">
                                 <Download className="h-3.5 w-3.5" /> {busy === s.id ? "Downloading…" : "Download now"}
                               </button>
                             )}
@@ -155,8 +155,8 @@ export default function DocumentAccessPage() {
 
           {!paid ? (
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-3xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-5">
-                <Sparkles className="h-6 w-6 text-orange-500" />
+              <div className="rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5">
+                <Sparkles className="h-6 w-6 text-brand-500" />
                 <p className="mt-2 text-lg font-bold text-slate-900">Gold · {formatInr(PAID_PLAN_PRICE_INR.gold)}/yr</p>
                 <p className="text-sm text-slate-600">Keep every file forever. Unlimited file access — no {summary.retentionDays}-day limit. Reopen locked vouchers, invoices &amp; tickets.</p>
                 <Link href="/dashboard/pricing?plan=gold" className={`${primaryBtn} mt-4`}>Choose Gold</Link>
@@ -169,7 +169,7 @@ export default function DocumentAccessPage() {
               </div>
               <p className="text-sm text-slate-500 md:col-span-2">
                 <span className="font-semibold text-slate-700">Need help?</span> Your files are never deleted — they are only hidden on Silver after the access window. Upgrade anytime to view and download them again.{" "}
-                <Link href="/dashboard/pricing" className="font-semibold text-orange-600 hover:underline">Compare all plans</Link>
+                <Link href="/dashboard/pricing" className="font-semibold text-brand-600 hover:underline">Compare all plans</Link>
               </p>
             </div>
           ) : null}

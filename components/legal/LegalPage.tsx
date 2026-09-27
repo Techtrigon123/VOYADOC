@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 import { SITE } from "@/lib/site";
+import BrandMark from "@/components/brand/BrandMark";
 
 export interface LegalSection {
   id: string;
@@ -23,12 +23,8 @@ export default function LegalPage({
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b border-[var(--border)] bg-white/90 backdrop-blur">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-base text-[var(--foreground)]">
-            TravelDoc<span className="text-[var(--primary)]">Pro</span>
-          </span>
+          <BrandMark className="h-7" />
+          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
         </Link>
         <Link href="/signup" className="btn-glow inline-flex h-9 items-center rounded-lg px-4 text-sm">
           Start free
@@ -50,7 +46,7 @@ export default function LegalPage({
               <ol className="space-y-1.5 text-sm">
                 {sections.map((s, i) => (
                   <li key={s.id}>
-                    <a href={`#${s.id}`} className="block rounded-md px-2 py-1 text-slate-600 hover:bg-orange-50 hover:text-orange-700">
+                    <a href={`#${s.id}`} className="block rounded-md px-2 py-1 text-slate-600 hover:bg-brand-50 hover:text-brand-700">
                       {i + 1}. {s.title}
                     </a>
                   </li>

@@ -79,7 +79,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label="Open steps to activate your account"
-                className="prompt-glow pointer-events-auto inline-flex h-11 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600"
+                className="prompt-glow pointer-events-auto inline-flex h-11 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:bg-brand-600"
               >
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">Activate account</span>
@@ -137,9 +137,9 @@ function ActivationDialog({
         <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-[2px] anim-fade" />
         <DialogPrimitive.Content
           aria-describedby="activation-description"
-          className="fixed inset-x-0 bottom-0 z-[70] flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-orange-100 bg-white shadow-2xl anim-sheet sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl"
+          className="fixed inset-x-0 bottom-0 z-[70] flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-brand-100 bg-white shadow-2xl anim-sheet sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl"
         >
-          <div className="relative border-b border-slate-100 bg-gradient-to-br from-orange-50 via-white to-white px-5 pb-4 pt-6 sm:px-6">
+          <div className="relative border-b border-slate-100 bg-gradient-to-br from-brand-50 via-white to-white px-5 pb-4 pt-6 sm:px-6">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[var(--primary)]">
               <Sparkles className="h-3.5 w-3.5" /> Activate your account
             </p>
@@ -156,7 +156,7 @@ function ActivationDialog({
               </span>
               <span className="tabular-nums text-[var(--primary)]">{progress.percent}%</span>
             </div>
-            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-orange-100">
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-brand-100">
               <div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${progress.percent}%` }} />
             </div>
 
@@ -173,7 +173,7 @@ function ActivationDialog({
                     aria-label={`${s.label}${s.done ? ", completed" : ""}${locked ? ", locked" : ""}`}
                     title={s.label}
                     onClick={() => setIndex(i)}
-                    className="flex justify-center rounded-xl py-1 outline-none hover:bg-orange-50 focus-visible:ring-2 focus-visible:ring-orange-300"
+                    className="flex justify-center rounded-xl py-1 outline-none hover:bg-brand-50 focus-visible:ring-2 focus-visible:ring-brand-300"
                   >
                     <span
                       className={cn(
@@ -197,7 +197,7 @@ function ActivationDialog({
               className={cn(
                 "rounded-2xl border p-4",
                 step.done && "border-emerald-200 bg-emerald-50/60",
-                actionable && "border-orange-200 bg-white ring-4 ring-orange-50",
+                actionable && "border-brand-200 bg-white ring-4 ring-brand-50",
                 step.locked && !step.done && "border-slate-200 bg-slate-50"
               )}
             >
@@ -215,12 +215,12 @@ function ActivationDialog({
                 <button
                   type="button"
                   onClick={() => go(step)}
-                  className="mt-3 w-full rounded-xl border border-dashed border-orange-300 bg-orange-50/60 p-3 text-left transition hover:bg-orange-50"
+                  className="mt-3 w-full rounded-xl border border-dashed border-brand-300 bg-brand-50/60 p-3 text-left transition hover:bg-brand-50"
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-700">Where to find it</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-700">Where to find it</p>
                   <p className="mt-1 text-sm text-slate-700">
                     <span className="font-medium">{step.pageName}</span> → {step.sectionName} →{" "}
-                    <span className="rounded bg-white px-1.5 py-0.5 font-medium text-slate-900 ring-1 ring-orange-200">{step.fieldName}</span>
+                    <span className="rounded bg-white px-1.5 py-0.5 font-medium text-slate-900 ring-1 ring-brand-200">{step.fieldName}</span>
                   </p>
                   {step.id !== "document" && step.id !== "mobile" ? (
                     <p className="mt-1 text-xs text-slate-500">Fill it in, then press Save Profile.</p>
@@ -253,7 +253,7 @@ function ActivationDialog({
               type="button"
               disabled={!actionable && !progress.nextStep}
               onClick={() => (actionable ? go(step) : progress.nextStep ? go(progress.nextStep) : onOpenChange(false))}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 btn-glow rounded-lg bg-[var(--primary)] font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 btn-glow rounded-lg bg-[var(--primary)] font-semibold text-white hover:bg-brand-600 disabled:opacity-50"
             >
               {actionable ? (
                 <>

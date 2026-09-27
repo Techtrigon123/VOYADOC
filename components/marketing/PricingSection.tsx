@@ -28,13 +28,13 @@ export default function PricingSection() {
                   className={cn(
                     "relative rounded-xl border p-6 flex flex-col h-full",
                     featured
-                      ? "border-orange-500 bg-orange-50/60 shadow-xl shadow-orange-100 ring-1 ring-orange-500"
+                      ? "border-ink bg-white shadow-2xl shadow-brand-300/30 ring-1 ring-ink"
                       : "border-[var(--border)] bg-white",
                   )}
                 >
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-500 text-white text-xs font-bold px-3 py-1">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-ink text-brand-neon text-xs font-bold px-3 py-1">
                         <Zap className="h-3 w-3" />
                         {plan.badge}
                       </span>
@@ -66,7 +66,7 @@ export default function PricingSection() {
                       "mb-6 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors",
                       plan.yearlyPrice == null || featured
                         ? "btn-glow"
-                        : "border border-slate-300 bg-white text-slate-800 hover:border-orange-400 hover:text-orange-700",
+                        : "border border-slate-300 bg-white text-slate-800 hover:border-brand-400 hover:text-brand-700",
                     )}
                   >
                     {plan.yearlyPrice == null ? "Start free" : `Start free, upgrade to ${plan.name}`}
@@ -75,7 +75,7 @@ export default function PricingSection() {
                   <ul className="space-y-2.5 flex-1">
                     {[...plan.highlights.map((h) => `${h.value} ${h.label.toLowerCase()}`), ...plan.features].map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 shrink-0 mt-0.5 text-orange-500" />
+                        <Check className="h-4 w-4 shrink-0 mt-0.5 text-brand-500" />
                         <span className="text-sm text-[var(--muted-foreground)]">{feature}</span>
                       </li>
                     ))}

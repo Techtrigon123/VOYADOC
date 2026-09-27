@@ -8,7 +8,7 @@ export interface MarqueeReview {
   body: string;
   /** Avatar URL. Without one, the reviewer's initials are shown. */
   profile?: string;
-  /** Classes for the initials avatar, e.g. "bg-orange-100 text-orange-700". */
+  /** Classes for the initials avatar, e.g. "bg-brand-100 text-brand-700". */
   avatarClassName?: string;
 }
 
@@ -79,7 +79,7 @@ export const ReviewCard = ({ profile, name, username, body, avatarClassName, cla
               aria-hidden
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                avatarClassName ?? "bg-orange-100 text-orange-700"
+                avatarClassName ?? "bg-brand-100 text-brand-700"
               )}
             >
               {initialsOf(name)}

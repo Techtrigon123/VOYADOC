@@ -86,7 +86,7 @@ export default function ProfilePage() {
 
       <div className="space-y-5">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-          <div className="h-20 bg-gradient-to-r from-orange-400 via-[var(--primary)] to-amber-400" />
+          <div className="h-20 bg-gradient-to-r from-ink via-brand-900 to-brand-500" />
           <div className="flex flex-col gap-5 px-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:px-6">
             <div className="-mt-10 flex items-end gap-4">
               <span className="rounded-full bg-white p-1 shadow-md">
@@ -101,9 +101,9 @@ export default function ProfilePage() {
             <div className="w-full max-w-xs">
               <div className="flex items-center justify-between text-xs font-medium text-slate-500">
                 <span>Profile strength</span>
-                <span className="text-base font-bold tabular-nums text-orange-600">{strength}%</span>
+                <span className="text-base font-bold tabular-nums text-brand-600">{strength}%</span>
               </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-orange-100" aria-label="Profile completeness" role="progressbar" aria-valuenow={strength}>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-brand-100" aria-label="Profile completeness" role="progressbar" aria-valuenow={strength}>
                 <div className="h-full rounded-full bg-[var(--primary)]" style={{ width: `${strength}%` }} />
               </div>
               <p className="mt-1.5 text-xs text-slate-500">
@@ -128,7 +128,7 @@ export default function ProfilePage() {
         </div>
 
         {actMsg ? (
-          <div className="flex flex-col gap-3 rounded-3xl border border-orange-200 bg-orange-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-3xl border border-brand-200 bg-brand-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-semibold text-slate-900">Activate your account</p>
               <p className="text-sm text-slate-600">{actMsg}</p>

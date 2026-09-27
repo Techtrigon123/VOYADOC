@@ -27,7 +27,7 @@ function Gate({ children }: { children: React.ReactNode }) {
   return (
     <ActivationProvider>
       <DocumentAccessProvider>
-        <div className="min-h-screen bg-[#fafaf9]">
+        <div className="min-h-screen bg-slate-50">
           <Suspense
             fallback={
               <div className="flex h-[75px] items-center border-b border-slate-200 bg-white px-4 sm:px-6">

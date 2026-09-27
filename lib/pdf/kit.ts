@@ -21,7 +21,7 @@ export const LINE = rgb(0.88, 0.9, 0.93);
 export const SOFT = rgb(0.97, 0.98, 0.99);
 export const WHITE = rgb(1, 1, 1);
 
-export function hexToRgb(hex: string, fallback = "#f97316"): RGB {
+export function hexToRgb(hex: string, fallback = "#3b7d0c"): RGB {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex?.trim() ?? "") ?? /^#?([0-9a-f]{6})$/i.exec(fallback)!;
   const n = parseInt(m[1], 16);
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
@@ -99,8 +99,8 @@ export async function createDoc(opts: {
 }): Promise<Ctx> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(clean(opts.title));
-  pdf.setProducer("TravelDoc Pro");
-  pdf.setCreator(clean(opts.agent.brandName || opts.agent.companyName || "TravelDoc Pro"));
+  pdf.setProducer("Voyenta");
+  pdf.setCreator(clean(opts.agent.brandName || opts.agent.companyName || "Voyenta"));
   const fonts: Fonts = {
     regular: await pdf.embedFont(StandardFonts.Helvetica),
     bold: await pdf.embedFont(StandardFonts.HelveticaBold),
@@ -115,7 +115,7 @@ export async function createDoc(opts: {
     pdf,
     page,
     fonts,
-    accent: hexToRgb(opts.accent ?? "#f97316"),
+    accent: hexToRgb(opts.accent ?? "#3b7d0c"),
     y: h - MARGIN,
     width: w,
     height: h,
@@ -370,7 +370,7 @@ export function numberedList(c: Ctx, lines: string[], size = 8) {
 /** Diagonal Silver watermark + footer on every page. Call last. */
 export async function finish(c: Ctx): Promise<Uint8Array> {
   const pages = c.pdf.getPages();
-  const mark = "TravelDoc Pro  -  Silver";
+  const mark = "Voyenta  -  Silver";
   pages.forEach((p, i) => {
     const { width, height } = p.getSize();
     if (c.plan === "silver") {
@@ -388,7 +388,7 @@ export async function finish(c: Ctx): Promise<Uint8Array> {
         });
       }
     }
-    const footer = clean(c.footer || `Generated with TravelDoc Pro for ${agencyName(c.agent)}`);
+    const footer = clean(c.footer || `Generated with Voyenta for ${agencyName(c.agent)}`);
     p.drawLine({ start: { x: MARGIN, y: 32 }, end: { x: width - MARGIN, y: 32 }, thickness: 0.5, color: LINE });
     p.drawText(footer, { x: MARGIN, y: 20, size: 7, font: c.fonts.regular, color: GREY });
     const pn = `Page ${i + 1} of ${pages.length}`;

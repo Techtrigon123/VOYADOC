@@ -15,7 +15,7 @@ export default function CTASection() {
         <div className="flex flex-col items-center gap-4">
           <Link
             href="/signup"
-            className="btn-glow inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl px-10 text-base font-semibold sm:w-auto"
+            className="btn-neon h-14 w-full rounded-xl px-10 text-base sm:w-auto"
           >
             Start free
             <ArrowRight className="h-4 w-4" />

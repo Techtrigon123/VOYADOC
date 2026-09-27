@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import BrandMark from "@/components/brand/BrandMark";
 
 export const metadata = {
   title: "About",
@@ -12,12 +12,8 @@ export default function AboutPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="h-16 flex items-center px-6 border-b border-[var(--border)] bg-white">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-base text-[var(--foreground)]">
-            TravelDoc<span className="text-[var(--primary)]">Pro</span>
-          </span>
+          <BrandMark className="h-7" />
+          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
         </Link>
       </header>
 
@@ -45,7 +41,7 @@ export default function AboutPage() {
       </main>
 
       <footer className="py-4 text-center text-xs text-[var(--muted-foreground)]">
-        © {new Date().getFullYear()} TravelDoc Pro
+        © {new Date().getFullYear()} Voyenta
       </footer>
     </div>
   );

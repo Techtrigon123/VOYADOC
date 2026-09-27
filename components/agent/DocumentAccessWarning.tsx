@@ -149,12 +149,12 @@ export function DocumentAccessProvider({ children }: { children: React.ReactNode
   );
 }
 
-function Pill({ label, value, tone, icon: Icon }: { label: string; value: number; tone: "orange" | "red" | "slate"; icon: React.ComponentType<{ className?: string }> }) {
+function Pill({ label, value, tone, icon: Icon }: { label: string; value: number; tone: "amber" | "red" | "slate"; icon: React.ComponentType<{ className?: string }> }) {
   return (
     <div
       className={cn(
         "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs ring-1",
-        tone === "orange" && "bg-orange-50 text-orange-700 ring-orange-200",
+        tone === "amber" && "bg-amber-50 text-amber-700 ring-amber-200",
         tone === "red" && "bg-rose-50 text-rose-700 ring-rose-200",
         tone === "slate" && "bg-slate-100 text-slate-600 ring-slate-200"
       )}
@@ -194,7 +194,7 @@ function FileStrip({ items, locked }: { items: AccessSample[]; locked?: boolean 
               )}
             >
               <div className="flex items-center gap-2">
-                <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", locked ? "bg-slate-200 text-slate-500" : urgent ? "bg-rose-50 text-rose-600" : "bg-orange-50 text-orange-600")}>
+                <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", locked ? "bg-slate-200 text-slate-500" : urgent ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600")}>
                   <Icon className="h-4 w-4" />
                 </span>
                 <span className="text-[11px] font-medium text-slate-500">{item.documentTypeLabel}</span>
@@ -205,7 +205,7 @@ function FileStrip({ items, locked }: { items: AccessSample[]; locked?: boolean 
               <span
                 className={cn(
                   "mt-2 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                  locked ? "bg-slate-200 text-slate-600" : urgent ? "bg-rose-100 text-rose-700" : "bg-orange-100 text-orange-800"
+                  locked ? "bg-slate-200 text-slate-600" : urgent ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-800"
                 )}
               >
                 {accessLabel({ locked: item.locked, remainingDays: item.remainingDays, accessUntil: item.accessUntil })}
@@ -236,7 +236,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Pill label="Closing" value={summary.expiringSoonCount} tone="orange" icon={Clock} />
+          <Pill label="Closing" value={summary.expiringSoonCount} tone="amber" icon={Clock} />
           <Pill label="Urgent" value={summary.urgentCount} tone="red" icon={AlertTriangle} />
           <Pill label="Locked" value={summary.lockedCount} tone="slate" icon={Lock} />
         </div>
@@ -245,7 +245,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
         {open.length ? (
           <section>
             <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Clock className="h-4 w-4 text-orange-500" /> Closing soon <span className="rounded-full bg-slate-100 px-2 text-xs">{open.length}</span>
+              <Clock className="h-4 w-4 text-amber-500" /> Closing soon <span className="rounded-full bg-slate-100 px-2 text-xs">{open.length}</span>
             </h2>
             <FileStrip items={open} />
           </section>
@@ -258,7 +258,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
             <FileStrip items={locked} locked />
           </section>
         ) : null}
-        <div className="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-3 text-sm text-slate-600">
+        <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm text-slate-600">
           <span className="font-semibold text-slate-900">Gold &amp; Platinum</span> partners get forever file access — no {summary.retentionDays}-day limit. We&apos;d love to welcome you when you&apos;re ready.
         </div>
       </div>

@@ -186,7 +186,7 @@ export function PaymentDetailsSkeleton() {
 /** Whole dashboard shell while the session loads: navbar + page body. */
 export function DashboardSkeleton() {
   return (
-    <Loading label="Loading your dashboard" className="min-h-screen bg-[#fafaf9]">
+    <Loading label="Loading your dashboard" className="min-h-screen bg-slate-50">
       <div className="flex h-[75px] items-center gap-6 border-b border-slate-200 bg-white px-4 sm:px-6">
         <Skeleton className="h-8 w-36" />
         <div className="hidden flex-1 items-center gap-5 lg:flex">

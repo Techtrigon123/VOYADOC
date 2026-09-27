@@ -1,16 +1,13 @@
 {
-  "name": "TravelDoc Pro",
-  "short_name": "TravelDoc Pro",
+  "name": "Voyenta",
+  "short_name": "Voyenta",
   "description": "Travel document software for travel agents, agencies and tour operators",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#f97316",
+  "theme_color": "#0a0a0a",
   "icons": [
-    {
-      "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
-    }
+    { "src": "/favicon.ico", "sizes": "16x16 32x32 48x48", "type": "image/x-icon" },
+    { "src": "/logo-mark.png", "sizes": "256x256", "type": "image/png" }
   ]
 }

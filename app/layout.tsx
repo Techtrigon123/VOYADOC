@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
 import CookieConsent from "@/components/consent/CookieConsent";
+import ThemedToaster from "@/components/ThemedToaster";
+import { THEME_SCRIPT } from "@/lib/theme-script";
 import { SITE } from "@/lib/site";
 
 const inter = Inter({
@@ -11,13 +12,13 @@ const inter = Inter({
   display: "swap",
 });
 
-const defaultTitle = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | TravelDoc Pro";
+const defaultTitle = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | Voyenta";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: defaultTitle,
-    template: "%s | TravelDoc Pro",
+    template: "%s | Voyenta",
   },
   description: SITE.description,
   applicationName: SITE.name,
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f97316",
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -73,20 +74,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-IN" className={inter.variable}>
+    <html lang="en-IN" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Applies the saved light/dark choice before first paint, on every page. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-screen bg-[var(--background)] antialiased">
         {children}
         <CookieConsent />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              borderRadius: "8px",
-              fontSize: "14px",
-            },
-          }}
-          richColors
-        />
+        <ThemedToaster />
       </body>
     </html>
   );

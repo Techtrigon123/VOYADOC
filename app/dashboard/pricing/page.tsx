@@ -35,7 +35,7 @@ const PLAN_ICONS = { silver: ShieldCheck, gold: Sparkles, platinum: Gem };
 function Cell({ value }: { value: boolean | string }) {
   if (typeof value === "string") return <span className="text-xs font-medium text-slate-700">{value}</span>;
   return value ? (
-    <span aria-label="Included" className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-orange-600"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>
+    <span aria-label="Included" className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-brand-600"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>
   ) : (
     <span aria-label="Not included" className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><X className="h-3.5 w-3.5" /></span>
   );
@@ -63,9 +63,9 @@ export default function PricingPage() {
 
   return (
     <PageShell wide>
-      <section className="relative overflow-hidden rounded-[2rem] border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-amber-50/60 px-6 py-10 text-center sm:px-10">
-        <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl" aria-hidden />
-        <p className="relative text-[11px] font-semibold uppercase tracking-widest text-orange-600">Built for travel agents who mean business</p>
+      <section className="relative overflow-hidden rounded-[2rem] border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 px-6 py-10 text-center sm:px-10">
+        <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-brand-200/40 blur-3xl" aria-hidden />
+        <p className="relative text-[11px] font-semibold uppercase tracking-widest text-brand-600">Built for travel agents who mean business</p>
         <h1 className="relative mx-auto mt-2 max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Send vouchers &amp; tickets your clients actually trust</h1>
         <p className="relative mx-auto mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
           Hotel vouchers, invoices, air tickets, pickup PDFs &amp; welcome placards — create in minutes, not hours. Start free on Silver. Upgrade when your agency is ready to grow.
@@ -86,7 +86,7 @@ export default function PricingPage() {
               key={p.id}
               className={cn(
                 "relative flex flex-col rounded-3xl border bg-white p-6",
-                p.featured ? "border-orange-300 shadow-xl shadow-orange-500/10 ring-4 ring-orange-100" : "border-slate-200"
+                p.featured ? "border-brand-300 shadow-xl shadow-brand-500/10 ring-4 ring-brand-100" : "border-slate-200"
               )}
             >
               {p.badge ? (
@@ -95,7 +95,7 @@ export default function PricingPage() {
                 </span>
               ) : null}
               <div className="flex items-center justify-between">
-                <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", p.featured ? "bg-[var(--primary)] text-white" : "bg-orange-50 text-orange-600")}>
+                <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", p.featured ? "bg-[var(--primary)] text-white" : "bg-brand-50 text-brand-600")}>
                   <Icon className="h-5 w-5" />
                 </span>
                 {isCurrent ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Current plan</span> : null}
@@ -124,7 +124,7 @@ export default function PricingPage() {
               <ul className="mt-2 flex-1 space-y-2">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" strokeWidth={3} /> {f}
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" strokeWidth={3} /> {f}
                   </li>
                 ))}
               </ul>
@@ -150,7 +150,7 @@ export default function PricingPage() {
               <tr className="border-b border-slate-100 text-left">
                 <th className="px-5 py-4 font-semibold text-slate-500">Feature</th>
                 {PLANS.map((p) => (
-                  <th key={p.id} className={cn("px-3 py-4 text-center font-bold", p.featured ? "text-orange-600" : "text-slate-900")}>{p.name}</th>
+                  <th key={p.id} className={cn("px-3 py-4 text-center font-bold", p.featured ? "text-brand-600" : "text-slate-900")}>{p.name}</th>
                 ))}
               </tr>
             </thead>
@@ -159,7 +159,7 @@ export default function PricingPage() {
                 <tr key={row.label}>
                   <td className="px-5 py-3 text-slate-700">{row.label}</td>
                   <td className="px-3 py-3 text-center"><Cell value={row.silver} /></td>
-                  <td className="bg-orange-50/40 px-3 py-3 text-center"><Cell value={row.gold} /></td>
+                  <td className="bg-brand-50/40 px-3 py-3 text-center"><Cell value={row.gold} /></td>
                   <td className="px-3 py-3 text-center"><Cell value={row.platinum} /></td>
                 </tr>
               ))}
@@ -185,9 +185,9 @@ export default function PricingPage() {
 
       <section className="mt-12 rounded-3xl bg-gradient-to-r from-[var(--primary)] to-amber-500 px-6 py-8 text-center text-white">
         <h2 className="text-2xl font-bold">Ready to look more professional?</h2>
-        <p className="mt-1 text-orange-50">Start free on Silver. Upgrade to Gold or Platinum when your business is ready.</p>
+        <p className="mt-1 text-brand-50">Start free on Silver. Upgrade to Gold or Platinum when your business is ready.</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <Link href="/dashboard" className="inline-flex h-10 items-center rounded-xl bg-white px-5 text-sm font-semibold text-orange-600">Go to workspace</Link>
+          <Link href="/dashboard" className="inline-flex h-10 items-center rounded-xl bg-white px-5 text-sm font-semibold text-brand-600">Go to workspace</Link>
           <Link href="/dashboard/support" className="inline-flex h-10 items-center rounded-xl bg-white/15 px-5 text-sm font-semibold text-white ring-1 ring-white/40">Talk to sales</Link>
         </div>
       </section>
@@ -291,7 +291,7 @@ function CheckoutDialog({
           <div>
             <p className="mb-1 text-xs text-slate-500">Payment screenshot</p>
             {saved.proofType === "application/pdf" ? (
-              <a href={saved.proof} target="_blank" rel="noreferrer" className="text-sm font-semibold text-orange-600 hover:underline">View uploaded proof</a>
+              <a href={saved.proof} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-600 hover:underline">View uploaded proof</a>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={saved.proof} alt="Uploaded payment proof" className="max-h-56 rounded-xl border border-slate-200" />
@@ -310,11 +310,11 @@ function CheckoutDialog({
             ) : !config ? (
               <PaymentDetailsSkeleton />
             ) : (
-              <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-4">
+              <div className="rounded-2xl border border-brand-200 bg-brand-50/50 p-4">
                 <p className="text-xs text-slate-500">Amount due (1 year · GST inclusive)</p>
                 <p className="text-2xl font-bold text-slate-900">{formatInr(config.amountInr)}</p>
                 {config.qr ? (
-                  <div className="mt-3 flex flex-col items-center gap-2 rounded-xl bg-white p-3 ring-1 ring-orange-100 sm:flex-row sm:items-start">
+                  <div className="mt-3 flex flex-col items-center gap-2 rounded-xl bg-white p-3 ring-1 ring-brand-100 sm:flex-row sm:items-start">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={config.qr} alt={`Payment QR for ${name} plan`} className="h-40 w-40" />
                     <div className="text-sm text-slate-600">
@@ -337,8 +337,8 @@ function CheckoutDialog({
           <div>
             <p className="text-sm font-medium text-slate-700">{editing ? "Payment screenshot" : "Upload payment proof"}</p>
             <p className="mb-2 text-xs text-slate-500">{editing ? "Upload a new screenshot only if you want to replace the current one." : "After paying, upload a screenshot or photo of the successful payment."}</p>
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-4 hover:border-orange-300">
-              <FileUp className="h-5 w-5 text-orange-500" />
+            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-4 hover:border-brand-300">
+              <FileUp className="h-5 w-5 text-brand-500" />
               <span className="text-sm font-medium text-slate-700">{proof ? "Change file" : editing ? "Upload new image or PDF" : "Choose image or PDF"}</span>
               <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void pickProof(f); }} />
             </label>

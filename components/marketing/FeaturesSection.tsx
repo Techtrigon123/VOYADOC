@@ -73,7 +73,7 @@ const services = [
     title: "Custom Documents",
     description:
       "Create additional business documents required by your travel workflow using reusable document structures.",
-    color: "bg-orange-50 text-orange-600",
+    color: "bg-brand-50 text-brand-600",
     image: "https://images.unsplash.com/photo-1523240794352-6a386f20230a?w=600&q=80",
   },
 ];

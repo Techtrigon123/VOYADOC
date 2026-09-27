@@ -200,7 +200,7 @@ export default function PlacardEditorPage() {
           <SectionCard title="Premium theme">
             <div className="grid grid-cols-2 gap-2">
               {PLACARD_THEMES.map((t) => (
-                <button key={t.id} type="button" onClick={() => patch({ theme: t.id, custom: {} })} className={cn("rounded-2xl border px-3 py-2.5 text-left transition", data.theme === t.id ? "border-orange-300 bg-orange-50 ring-4 ring-orange-50" : "border-slate-200 hover:border-orange-200")}>
+                <button key={t.id} type="button" onClick={() => patch({ theme: t.id, custom: {} })} className={cn("rounded-2xl border px-3 py-2.5 text-left transition", data.theme === t.id ? "border-brand-300 bg-brand-50 ring-4 ring-brand-50" : "border-slate-200 hover:border-brand-200")}>
                   <p className="text-sm font-semibold text-slate-900">{t.label}</p>
                   <p className="text-[11px] leading-snug text-slate-500">{t.description}</p>
                 </button>
@@ -210,7 +210,7 @@ export default function PlacardEditorPage() {
               <label className="flex items-center justify-between text-sm font-medium text-slate-700">
                 Logo size: <span className="tabular-nums text-slate-500">{data.logoSize}%</span>
               </label>
-              <input type="range" min={60} max={160} step={10} value={data.logoSize} onChange={(e) => patch({ logoSize: Number(e.target.value) })} className="mt-2 w-full accent-orange-500" />
+              <input type="range" min={60} max={160} step={10} value={data.logoSize} onChange={(e) => patch({ logoSize: Number(e.target.value) })} className="mt-2 w-full accent-brand-500" />
             </div>
 
             <button type="button" onClick={() => setCustomOpen((v) => !v)} className="mt-4 flex w-full items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700">
@@ -242,7 +242,7 @@ export default function PlacardEditorPage() {
                     <NativeSelect value={data.custom.frame ?? ""} onChange={(v) => setCustom({ frame: (v || undefined) as PlacardCustom["frame"] })} placeholder="Theme default" options={[{ value: "none", label: "None" }, { value: "thin", label: "Thin" }, { value: "double", label: "Double" }, { value: "ornate", label: "Ornate" }]} />
                   </Field>
                 </div>
-                <button type="button" onClick={() => patch({ custom: {} })} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-orange-600">
+                <button type="button" onClick={() => patch({ custom: {} })} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-brand-600">
                   <RotateCcw className="h-4 w-4" /> Reset customization
                 </button>
               </div>
@@ -259,7 +259,7 @@ export default function PlacardEditorPage() {
               <div className="min-w-0">
                 <p className="truncate font-medium text-slate-900">{agencyName || "—"}</p>
                 {!agent.brandLogo ? (
-                  <Link href="/dashboard/profile/edit#agent-activation-brandLogo" className="text-xs text-orange-600 hover:underline">No logo uploaded — add one in Agent profile settings</Link>
+                  <Link href="/dashboard/profile/edit#agent-activation-brandLogo" className="text-xs text-brand-600 hover:underline">No logo uploaded — add one in Agent profile settings</Link>
                 ) : null}
               </div>
             </div>

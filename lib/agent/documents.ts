@@ -48,7 +48,7 @@ export const MEAL_PLANS = [
 
 export type VoucherTemplate = "classic" | "light" | "bold" | "corporate";
 export const VOUCHER_TEMPLATES: { id: VoucherTemplate; label: string; description: string; color: string }[] = [
-  { id: "classic", label: "Classic", description: "Classic — agency letterhead with booking tables", color: "#f97316" },
+  { id: "classic", label: "Classic", description: "Classic — agency letterhead with booking tables", color: "#3b7d0c" },
   { id: "light", label: "Light card", description: "Light card — agency hero + room cards", color: "#0ea5e9" },
   { id: "bold", label: "Bold card", description: "Bold card — right sidebar + room cards", color: "#7c3aed" },
   { id: "corporate", label: "Corporate", description: "Corporate — agency header + stay summary", color: "#1e3a8a" },
@@ -145,7 +145,7 @@ export const defaultHotelVoucher = (): HotelVoucherData => ({
   markupType: "none",
   markupValue: "",
   template: "classic",
-  color: "#f97316",
+  color: "#3b7d0c",
   preparedBy: "",
   withoutLogo: false,
 });

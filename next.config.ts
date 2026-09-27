@@ -18,6 +18,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Hide the Next.js "N" dev-tools badge in the corner during development.
+  devIndicators: false,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

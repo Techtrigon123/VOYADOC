@@ -6,7 +6,7 @@ const testimonials: MarqueeReview[] = [
   {
     name: "Rahul Sharma",
     username: "Owner, Sunrise Travels",
-    avatarClassName: "bg-orange-100 text-orange-700",
+    avatarClassName: "bg-brand-100 text-brand-700",
     body: "“We used to prepare hotel vouchers and invoices manually. Now we generate professional travel documents in minutes. It has streamlined our entire booking workflow.”",
   },
   {
@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
           <p className="max-w-xl mx-auto text-[var(--muted-foreground)]">
             Used by travel agents, tour operators and travel agencies across India.
           </p>
-          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-1.5 text-sm shadow-sm">
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white px-4 py-1.5 text-sm shadow-sm">
             <span className="flex items-center gap-0.5" aria-hidden>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
@@ -71,7 +71,7 @@ export default function TestimonialsSection() {
       <TestimonialMarquee
         reviews={testimonials}
         duration="40s"
-        cardClassName="w-80 rounded-2xl border-slate-200 bg-white transition-colors hover:border-orange-200"
+        cardClassName="w-80 rounded-2xl border-slate-200 bg-white transition-colors hover:border-brand-200"
         bodyClassName="line-clamp-5 leading-relaxed text-slate-700"
         fadeClassName="from-slate-50"
       />

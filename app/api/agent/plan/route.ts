@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     const plan = req.nextUrl.searchParams.get("plan") ?? "";
     if (isPaidPlan(plan)) {
       const upiId = process.env.PLAN_PAYMENT_UPI_ID?.trim();
-      const payee = process.env.PLAN_PAYMENT_PAYEE_NAME?.trim() || "TravelDoc Pro";
+      const payee = process.env.PLAN_PAYMENT_PAYEE_NAME?.trim() || "Voyenta";
       const amountInr = PAID_PLAN_PRICE_INR[plan];
       let qr: string | null = null;
       if (upiId) {

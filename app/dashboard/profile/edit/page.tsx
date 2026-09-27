@@ -52,7 +52,7 @@ function ImageSlot({
     <div id={anchor} className="scroll-mt-32 space-y-2 rounded-2xl">
       <p className="text-sm font-medium text-slate-700">
         {label}
-        {required ? <span className="text-orange-500"> *</span> : null}
+        {required ? <span className="text-brand-500"> *</span> : null}
       </p>
       <p className="text-xs text-slate-500">{help}</p>
       {shown ? (
@@ -60,9 +60,9 @@ function ImageSlot({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={shown} alt={label} className="h-20 w-28 rounded-xl bg-white object-contain ring-1 ring-slate-200" />
           <div className="flex-1 text-xs text-slate-500">
-            {pending ? <p className="font-medium text-orange-600">Preview only — saved when you click Save Profile.</p> : <p>Saved on your profile.</p>}
+            {pending ? <p className="font-medium text-brand-600">Preview only — saved when you click Save Profile.</p> : <p>Saved on your profile.</p>}
           </div>
-          <label className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold hover:border-orange-300">
+          <label className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold hover:border-brand-300">
             Change
             <input type="file" accept={IMAGE_ACCEPT} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) onPick(f); }} />
           </label>

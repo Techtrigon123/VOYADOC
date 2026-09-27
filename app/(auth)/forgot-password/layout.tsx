@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Reset the password for your TravelDoc Pro account.",
+  description: "Reset the password for your Voyenta account.",
   robots: { index: false, follow: false },
 };
 

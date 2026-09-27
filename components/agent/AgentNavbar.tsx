@@ -3,17 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  ChevronDown,
-  FileText,
-  KeyRound,
-  LogOut,
-  Menu,
-  Search,
-  Settings,
-  UserRound,
-  X,
-} from "lucide-react";
+import { ChevronDown, KeyRound, LogOut, Menu, Search, Settings, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -28,6 +18,7 @@ import { displayName, initials } from "@/lib/agent/profile";
 import { useAgent } from "./AgentProvider";
 import { SearchPalette } from "./SearchPalette";
 import { isItemActive, visibleNavItems, type NavItem } from "./nav-config";
+import BrandMark from "@/components/brand/BrandMark";
 
 const PLAN_STYLES: Record<PlanId, string> = {
   silver: "from-slate-100 via-white to-slate-300 text-slate-700 ring-slate-300",
@@ -56,7 +47,7 @@ export function AgentAvatar({ agent, size = 36 }: { agent: Agent; size?: number 
   const [broken, setBroken] = useState(false);
   return (
     <span
-      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-100 text-sm font-bold text-orange-700 ring-2 ring-white"
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-sm font-bold text-brand-700 ring-2 ring-white"
       style={{ width: size, height: size }}
     >
       {agent.brandLogo && !broken ? (
@@ -75,10 +66,10 @@ function NavPill({ item, active, currentType }: { item: NavItem; active: boolean
     <span
       className={cn(
         "group relative inline-flex flex-col items-center gap-1 rounded-2xl px-3.5 py-2 text-[13px] font-semibold transition-colors",
-        active ? "bg-orange-50 text-orange-600" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        active ? "bg-brand-50 text-brand-600" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       )}
     >
-      <Icon className={cn("h-[18px] w-[18px]", active ? "text-orange-500" : "text-slate-500 group-hover:text-slate-800")} strokeWidth={1.9} />
+      <Icon className={cn("h-[18px] w-[18px]", active ? "text-brand-500" : "text-slate-500 group-hover:text-slate-800")} strokeWidth={1.9} />
       <span className="flex items-center gap-0.5 leading-none">
         {item.label}
         {item.subItems ? <ChevronDown className="h-3 w-3 opacity-60 transition group-data-[state=open]:rotate-180" /> : null}
@@ -89,14 +80,14 @@ function NavPill({ item, active, currentType }: { item: NavItem; active: boolean
 
   if (!item.subItems) {
     return (
-      <Link href={item.href} aria-current={active ? "page" : undefined} className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300">
+      <Link href={item.href} aria-current={active ? "page" : undefined} className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">
         {pill}
       </Link>
     );
   }
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300" aria-label={`More ${item.label} options`}>
+      <DropdownMenuTrigger className="group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label={`More ${item.label} options`}>
         {pill}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={12} className="w-72 rounded-2xl border-slate-200 p-1.5 shadow-xl">
@@ -105,9 +96,9 @@ function NavPill({ item, active, currentType }: { item: NavItem; active: boolean
           const subType = new URLSearchParams(sub.href.split("?")[1] ?? "").get("type");
           const subActive = subType ? item.key === "invoice" && active && currentType === subType : false;
           return (
-            <DropdownMenuItem key={sub.href} asChild className="cursor-pointer rounded-xl p-0 focus:bg-orange-50">
-              <Link href={sub.href} className={cn("flex items-start gap-3 px-3 py-2.5", subActive && "bg-orange-50")}>
-                <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", subActive ? "bg-[var(--primary)] text-white" : "bg-orange-100 text-orange-600")}>
+            <DropdownMenuItem key={sub.href} asChild className="cursor-pointer rounded-xl p-0 focus:bg-brand-50">
+              <Link href={sub.href} className={cn("flex items-start gap-3 px-3 py-2.5", subActive && "bg-brand-50")}>
+                <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", subActive ? "bg-[var(--primary)] text-white" : "bg-brand-100 text-brand-600")}>
                   <SubIcon className="h-4 w-4" />
                 </span>
                 <span>
@@ -175,15 +166,11 @@ export default function AgentNavbar() {
           hidden && !mobileOpen && "-translate-y-full"
         )}
       >
-        <div className="h-[3px] bg-gradient-to-r from-orange-400 via-[var(--primary)] to-amber-400" />
+        <div className="h-[3px] bg-gradient-to-r from-ink via-brand-500 to-brand-neon" />
         <div className="mx-auto flex h-[72px] max-w-[1400px] items-center gap-3 px-4 sm:px-6">
-          <Link href="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="TravelDoc Pro dashboard">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--primary)] shadow-sm shadow-orange-500/30">
-              <FileText className="h-[18px] w-[18px] text-white" />
-            </span>
-            <span className="hidden text-[17px] font-bold tracking-tight text-slate-900 sm:inline">
-              TravelDoc<span className="text-[var(--primary)]">Pro</span>
-            </span>
+          <Link href="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="Voyenta dashboard">
+            <BrandMark className="h-9" />
+            <span className="hidden text-[17px] font-bold tracking-tight text-slate-900 sm:inline">Voyenta</span>
           </Link>
 
           <nav aria-label="Main" className="mx-auto hidden items-center gap-0.5 lg:flex">
@@ -201,14 +188,14 @@ export default function AgentNavbar() {
               onClick={() => setSearchOpen(true)}
               aria-label="Search documents"
               title="Search (/ or Ctrl+K)"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 hover:bg-brand-50 hover:text-brand-600"
             >
               <Search className="h-5 w-5" />
             </button>
 
             <DropdownMenu modal={false}>
-              <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300" aria-label="Account menu">
-                <span className="flex items-center rounded-full p-0.5 ring-2 ring-orange-100 transition hover:ring-orange-200">
+              <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label="Account menu">
+                <span className="flex items-center rounded-full p-0.5 ring-2 ring-brand-100 transition hover:ring-brand-200">
                   <AgentAvatar agent={agent} size={40} />
                 </span>
               </DropdownMenuTrigger>
@@ -257,17 +244,17 @@ export default function AgentNavbar() {
                 const Icon = item.icon;
                 const active = isItemActive(item, pathname);
                 return (
-                  <div key={item.key} className={cn("rounded-2xl", active && "bg-orange-50/70")}>
+                  <div key={item.key} className={cn("rounded-2xl", active && "bg-brand-50/70")}>
                     <Link
                       href={item.href}
-                      className={cn("flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold", active ? "text-orange-600" : "text-slate-800")}
+                      className={cn("flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold", active ? "text-brand-600" : "text-slate-800")}
                     >
                       <Icon className="h-5 w-5" /> {item.label}
                     </Link>
                     {item.subItems ? (
                       <div className="flex flex-wrap gap-2 px-3 pb-3 pl-11">
                         {item.subItems.map((sub) => (
-                          <Link key={sub.href} href={sub.href} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:border-orange-300 hover:text-orange-600">
+                          <Link key={sub.href} href={sub.href} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:border-brand-300 hover:text-brand-600">
                             {sub.label}
                           </Link>
                         ))}

@@ -2,27 +2,46 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #0a0a0a;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #0a0a0a;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #f97316;
+  --popover-foreground: #0a0a0a;
+  /* Black is the primary colour; neon green (--color-brand-neon) is the accent. */
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #fff7ed;
-  --secondary-foreground: #7c2d12;
+  --secondary: #f3fce8;
+  --secondary-foreground: #1d3a0c;
   --muted: #f8fafc;
   --muted-foreground: #64748b;
-  --accent: #fff7ed;
-  --accent-foreground: #7c2d12;
+  --accent: #f3fce8;
+  --accent-foreground: #1d3a0c;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #f97316;
+  --ring: #5fb81a;
   --radius: 0.5rem;
-  --sidebar-bg: #0f172a;
-  --sidebar-fg: #e2e8f0;
+  --sidebar-bg: #0a0a0a;
+  --sidebar-fg: #e5e5e5;
+}
+
+/* Brand scale: neon light green on black.
+   neon/300/400 are for dark surfaces and glows; 600+ are dark enough for green text on white (≥4.5:1). */
+@theme {
+  --color-brand-50: #f3fce8;
+  --color-brand-100: #e4f9cc;
+  --color-brand-200: #caf29d;
+  --color-brand-300: #b2f46a;
+  --color-brand-400: #93e33f;
+  --color-brand-500: #5fb81a;
+  --color-brand-600: #3b7d0c;
+  --color-brand-700: #2f640d;
+  --color-brand-800: #264f10;
+  --color-brand-900: #1d3a0c;
+  --color-brand-950: #0c1f04;
+  --color-brand-neon: #a3ff47;
+  --color-ink: #0a0a0a;
 }
 
 @theme inline {
@@ -109,9 +128,9 @@ button, a, input, select, textarea {
 @keyframes anim-sheet-up { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes anim-slide-down { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes anim-rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
-@keyframes prompt-glow { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(249,115,22,.45), 0 0 0 0 rgba(249,115,22,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(249,115,22,.45), 0 0 0 10px rgba(249,115,22,0) } }
+@keyframes prompt-glow { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(143,227,61,.45), 0 0 0 0 rgba(143,227,61,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(143,227,61,.45), 0 0 0 10px rgba(143,227,61,0) } }
 @keyframes prompt-glow-amber { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 0 rgba(251,191,36,.45) } 50% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 10px rgba(251,191,36,0) } }
-@keyframes anchor-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0) } 30% { box-shadow: 0 0 0 6px rgba(249,115,22,.35) } }
+@keyframes anchor-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(143,227,61,0) } 30% { box-shadow: 0 0 0 6px rgba(143,227,61,.35) } }
 
 .anim-fade { animation: anim-fade .18s ease-out }
 .anim-pop { animation: anim-pop .2s cubic-bezier(.2,.8,.2,1) }
@@ -139,7 +158,7 @@ button, a, input, select, textarea {
 @property --glow-w { syntax: "<percentage>"; inherits: true; initial-value: 15%; }
 
 .btn-glow {
-  --glow-color: 249 115 22; /* brand orange (rgb) — set 255 255 255 for white */
+  --glow-color: 163 255 71; /* neon green (rgb) — set 255 255 255 for white */
   --stroke-w: 10.7%;
   --glow-w: 15%;
   position: relative;
@@ -236,3 +255,180 @@ button, a, input, select, textarea {
 @media (prefers-reduced-motion: reduce) {
   .skeleton::after { animation: none; }
 }
+
+/* ── Neon button: the main call to action on black surfaces ──────── */
+.btn-neon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #a3ff47;
+  color: #0a0a0a;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgb(163 255 71 / 0.4), 0 10px 40px -10px rgb(163 255 71 / 0.55);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn-neon:hover { background: #b8ff70; box-shadow: 0 0 0 1px rgb(163 255 71 / 0.6), 0 14px 48px -10px rgb(163 255 71 / 0.75); transform: translateY(-1px); }
+.btn-neon:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .btn-neon, .btn-neon:hover { transition: none; transform: none; } }
+
+
+/* ── Site theme (light / dark) ─────────────────────────────────────
+   The toggle on the home page sets <html data-theme>; the choice applies to every page.
+   Dark mode redefines the colour variables Tailwind utilities read, so bg-slate-50,
+   text-slate-900, hover: and /opacity variants all switch without per-page edits.
+   Rules are unlayered so they win over Tailwind utilities. Use `dark:` for one-off tweaks,
+   and `keep-light` on anything that represents printed paper (document previews). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+.theme-toggle { background: #ffffff; color: #0a0a0a; border-color: rgb(0 0 0 / 0.1); box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.35); }
+.theme-toggle:hover { background: #0a0a0a; color: #a3ff47; }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #111111;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --card: #111111;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --muted: #141414;
+  --muted-foreground: #a3a3a3;
+  --border: #262626;
+  --input: #262626;
+  --primary: #a3ff47;
+  --primary-foreground: #0a0a0a;
+  --secondary: #141414;
+  --secondary-foreground: #f5f5f5;
+  --accent: #141414;
+  --accent-foreground: #f5f5f5;
+  --ring: #93e33f;
+
+  /* Neutrals: surfaces get darker, text gets lighter. */
+  --color-slate-50: #141414;
+  --color-slate-100: #1b1b1b;
+  --color-slate-200: #2a2a2a;
+  --color-slate-300: #3d3d3d;
+  --color-slate-400: #8f8f8f;
+  --color-slate-500: #a3a3a3;
+  --color-slate-600: #bdbdbd;
+  --color-slate-700: #d4d4d4;
+  --color-slate-800: #e5e5e5;
+  --color-slate-900: #f5f5f5;
+  --color-gray-50: #141414;
+  --color-gray-100: #1b1b1b;
+  --color-gray-200: #2a2a2a;
+
+  /* Brand: tints become dark green, text shades become neon. (900/950 stay dark for gradients.) */
+  --color-brand-50: #111a09;
+  --color-brand-100: #172410;
+  --color-brand-200: #233a12;
+  --color-brand-300: #35561a;
+  --color-brand-400: #7bd12e;
+  --color-brand-500: #93e33f;
+  --color-brand-600: #a3ff47;
+  --color-brand-700: #b8ff70;
+  --color-brand-800: #c9ff94;
+
+  /* Status colours: pale tints become dim tints, dark text becomes light text. */
+  --color-amber-50: color-mix(in srgb, #f59e0b 12%, #0a0a0a);
+  --color-amber-100: color-mix(in srgb, #f59e0b 20%, #0a0a0a);
+  --color-amber-200: color-mix(in srgb, #f59e0b 32%, #0a0a0a);
+  --color-amber-600: #fcd34d; --color-amber-700: #fcd34d; --color-amber-800: #fde68a; --color-amber-900: #fef3c7;
+  --color-rose-50: color-mix(in srgb, #f43f5e 12%, #0a0a0a);
+  --color-rose-100: color-mix(in srgb, #f43f5e 20%, #0a0a0a);
+  --color-rose-200: color-mix(in srgb, #f43f5e 32%, #0a0a0a);
+  --color-rose-600: #fda4af; --color-rose-700: #fda4af; --color-rose-800: #fecdd3;
+  --color-red-50: color-mix(in srgb, #ef4444 12%, #0a0a0a);
+  --color-red-100: color-mix(in srgb, #ef4444 20%, #0a0a0a);
+  --color-red-700: #fca5a5;
+  --color-emerald-50: color-mix(in srgb, #10b981 12%, #0a0a0a);
+  --color-emerald-100: color-mix(in srgb, #10b981 20%, #0a0a0a);
+  --color-emerald-200: color-mix(in srgb, #10b981 32%, #0a0a0a);
+  --color-emerald-600: #6ee7b7; --color-emerald-700: #6ee7b7; --color-emerald-800: #a7f3d0;
+  --color-sky-50: color-mix(in srgb, #0ea5e9 12%, #0a0a0a);
+  --color-sky-100: color-mix(in srgb, #0ea5e9 20%, #0a0a0a);
+  --color-sky-200: color-mix(in srgb, #0ea5e9 32%, #0a0a0a);
+  --color-sky-700: #7dd3fc;
+  --color-blue-50: color-mix(in srgb, #3b82f6 12%, #0a0a0a);
+  --color-blue-100: color-mix(in srgb, #3b82f6 20%, #0a0a0a);
+  --color-blue-200: color-mix(in srgb, #3b82f6 32%, #0a0a0a);
+  --color-blue-600: #93c5fd; --color-blue-700: #93c5fd;
+  --color-indigo-50: color-mix(in srgb, #6366f1 12%, #0a0a0a);
+  --color-indigo-100: color-mix(in srgb, #6366f1 20%, #0a0a0a);
+  --color-indigo-200: color-mix(in srgb, #6366f1 32%, #0a0a0a);
+  --color-indigo-600: #a5b4fc; --color-indigo-700: #a5b4fc; --color-indigo-900: #e0e7ff;
+  --color-purple-50: color-mix(in srgb, #a855f7 12%, #0a0a0a);
+  --color-purple-100: color-mix(in srgb, #a855f7 20%, #0a0a0a);
+  --color-purple-200: color-mix(in srgb, #a855f7 32%, #0a0a0a);
+  --color-purple-600: #d8b4fe; --color-purple-700: #d8b4fe;
+  --color-violet-100: color-mix(in srgb, #8b5cf6 20%, #0a0a0a);
+  --color-violet-700: #c4b5fd;
+  --color-teal-50: color-mix(in srgb, #14b8a6 12%, #0a0a0a);
+  --color-teal-600: #5eead4;
+  --color-yellow-50: color-mix(in srgb, #eab308 12%, #0a0a0a);
+}
+
+/* White surfaces (bg-white can't use a variable: text-white shares --color-white). */
+html[data-theme="dark"] :is(.bg-white, .hover\:bg-white:hover) { background-color: var(--surface); }
+html[data-theme="dark"] .bg-white\/80 { background-color: rgb(17 17 17 / 0.8); }
+html[data-theme="dark"] .bg-white\/85 { background-color: rgb(17 17 17 / 0.85); }
+html[data-theme="dark"] .bg-white\/90 { background-color: rgb(17 17 17 / 0.9); }
+html[data-theme="dark"] .bg-white\/95 { background-color: rgb(17 17 17 / 0.95); }
+html[data-theme="dark"] .from-white { --tw-gradient-from: var(--surface); }
+html[data-theme="dark"] .via-white { --tw-gradient-via: var(--surface); }
+html[data-theme="dark"] .to-white { --tw-gradient-to: var(--surface); }
+html[data-theme="dark"] .border-black\/10 { border-color: rgb(255 255 255 / 0.12); }
+html[data-theme="dark"] .border-white\/40 { border-color: rgb(255 255 255 / 0.1); }
+
+/* Classes that must keep their light-mode colour: they sit on dark surfaces or carry white text. */
+html[data-theme="dark"] .text-slate-300 { color: #d4d4d4; }
+html[data-theme="dark"] .bg-slate-800 { background-color: #262626; }
+html[data-theme="dark"] :is(.bg-slate-900, .hover\:bg-slate-900:hover) { background-color: #1f1f1f; }
+html[data-theme="dark"] .hover\:bg-slate-800:hover { background-color: #2e2e2e; }
+html[data-theme="dark"] .bg-slate-900\/40 { background-color: rgb(0 0 0 / 0.6); }
+html[data-theme="dark"] .text-brand-50 { color: #f3fce8; }
+html[data-theme="dark"] .text-brand-100 { color: #e4f9cc; }
+html[data-theme="dark"] .text-brand-100\/80 { color: rgb(228 249 204 / 0.8); }
+html[data-theme="dark"] .text-brand-200 { color: #caf29d; }
+html[data-theme="dark"] .text-brand-200\/80 { color: rgb(202 242 157 / 0.8); }
+html[data-theme="dark"] .bg-rose-600 { background-color: #e11d48; }
+html[data-theme="dark"] .hover\:bg-rose-700:hover { background-color: #be123c; }
+html[data-theme="dark"] .bg-emerald-600 { background-color: #059669; }
+html[data-theme="dark"] :is(.bg-emerald-700, .hover\:bg-emerald-700:hover) { background-color: #047857; }
+html[data-theme="dark"] .bg-sky-600 { background-color: #0284c7; }
+html[data-theme="dark"] .hover\:bg-red-600:hover { background-color: #dc2626; }
+html[data-theme="dark"] .border-ink { border-color: #a3ff47; }
+html[data-theme="dark"] .ring-ink { --tw-ring-color: #a3ff47; }
+
+/* Glow buttons keep their neon glow; a faint white edge keeps them visible on black. */
+html[data-theme="dark"] .btn-glow {
+  background:
+    radial-gradient(var(--stroke-w) 50% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0) 100%) border-box,
+    rgb(255 255 255 / 0.16) border-box;
+}
+
+/* Hand-written components in this file */
+html[data-theme="dark"] .skeleton { background-color: #1b1b1b; }
+html[data-theme="dark"] .skeleton::after { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent); }
+html[data-theme="dark"] .legal-prose strong,
+html[data-theme="dark"] .legal-prose th { color: #f5f5f5; }
+html[data-theme="dark"] .legal-prose th { background: #141414; }
+html[data-theme="dark"] :is(.legal-prose th, .legal-prose td) { border-color: #262626; }
+
+/* The logo keeps its original colours; on dark surfaces it sits on a small white tile. */
+html[data-theme="dark"] .brand-mark:not(footer .brand-mark) { background: #ffffff; border-radius: 0.5rem; padding: 3px 5px; box-sizing: content-box; }
+
+/* Printed-paper previews stay white in dark mode. */
+html[data-theme="dark"] .keep-light {
+  --surface: #ffffff;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .theme-toggle { background: #141414; color: #a3ff47; border-color: rgb(255 255 255 / 0.12); box-shadow: 0 10px 30px -10px rgb(163 255 71 / 0.35); }
+html[data-theme="dark"] .theme-toggle:hover { background: #a3ff47; color: #0a0a0a; }

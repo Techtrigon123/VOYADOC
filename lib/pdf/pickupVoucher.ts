@@ -58,7 +58,7 @@ function timeline(c: Ctx, d: PickupVoucherData, numbered: boolean) {
 
 export async function renderPickupVoucher(d: PickupVoucherData, agent: Agent, plan: PlanId): Promise<Uint8Array> {
   const layout = d.layout ?? "journey";
-  const accent = layout === "boarding" ? "#0f172a" : layout === "document" ? "#7c2d12" : "#f97316";
+  const accent = layout === "boarding" ? "#0f172a" : layout === "document" ? "#7c2d12" : "#3b7d0c";
   const c = await createDoc({ agent, plan, accent, title: `Pickup voucher ${d.voucherNumber}` });
   c.footer = `Transport voucher ${d.voucherNumber} - Show this voucher to the driver.`;
   const guest = [d.guestTitle, d.guestName].filter(Boolean).join(" ");

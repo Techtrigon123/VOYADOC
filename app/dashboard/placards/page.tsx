@@ -108,7 +108,7 @@ export default function PlacardsPage() {
             <ul className="divide-y divide-slate-100">
               {shown.map((d) => (
                 <li key={d.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                  <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 sm:flex">
+                  <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 sm:flex">
                     <Signpost className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">

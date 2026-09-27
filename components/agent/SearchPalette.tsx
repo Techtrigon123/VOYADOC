@@ -119,9 +119,9 @@ export function SearchPalette({ open, onOpenChange }: { open: boolean; onOpenCha
                   type="button"
                   onMouseEnter={() => setActive(i)}
                   onClick={() => choose(h)}
-                  className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left", i === active ? "bg-orange-50" : "hover:bg-slate-50")}
+                  className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left", i === active ? "bg-brand-50" : "hover:bg-slate-50")}
                 >
-                  <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border", i === active ? "border-orange-200 bg-white text-orange-600" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                  <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border", i === active ? "border-brand-200 bg-white text-brand-600" : "border-slate-200 bg-slate-50 text-slate-500")}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0 flex-1">

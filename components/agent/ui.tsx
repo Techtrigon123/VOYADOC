@@ -43,7 +43,7 @@ export function PageHeader({
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {back ? (
-          <Link href={back.href} className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-orange-600">
+          <Link href={back.href} className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600">
             ← {back.label}
           </Link>
         ) : null}
@@ -78,7 +78,7 @@ export function SectionCard({
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {Icon ? (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
               <Icon className="h-[18px] w-[18px]" />
             </span>
           ) : null}
@@ -117,7 +117,7 @@ export function Field({
     <div id={id} className={cn("space-y-1.5 scroll-mt-32", className)}>
       <label htmlFor={htmlFor} className="text-sm font-medium text-slate-700">
         {label}
-        {required ? <span className="text-orange-500"> *</span> : null}
+        {required ? <span className="text-brand-500"> *</span> : null}
       </label>
       {children}
       {error ? <p className="text-xs font-medium text-rose-600">{error}</p> : hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
@@ -128,8 +128,8 @@ export function Field({
 /** Native inputs styled for the panel; tinted once they hold a value (as in the reference form). */
 export const inputClass = (filled?: boolean, invalid?: boolean) =>
   cn(
-    "h-10 w-full rounded-xl border px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60",
-    filled ? "border-orange-200 bg-orange-50/40" : "border-slate-200 bg-slate-50",
+    "h-10 w-full rounded-xl border px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60",
+    filled ? "border-brand-200 bg-brand-50/40" : "border-slate-200 bg-slate-50",
     invalid && "border-rose-300 bg-rose-50/40 focus:border-rose-400 focus:ring-rose-100"
   );
 
@@ -202,7 +202,7 @@ export function Segmented<T extends string>({
           className={cn(
             "rounded-xl text-left font-medium transition",
             size === "sm" ? "px-3 py-1.5 text-xs" : "px-3.5 py-2 text-sm",
-            value === o.value ? "bg-white text-orange-600 shadow-sm ring-1 ring-orange-200" : "text-slate-600 hover:text-slate-900"
+            value === o.value ? "bg-white text-brand-600 shadow-sm ring-1 ring-brand-200" : "text-slate-600 hover:text-slate-900"
           )}
         >
           <span className="block">{o.label}</span>
@@ -269,11 +269,11 @@ export function FileDrop({
       className={cn(
         "flex flex-col items-center justify-center rounded-2xl border-2 border-dashed text-center transition",
         compact ? "gap-1 px-4 py-4" : "gap-2 px-6 py-8",
-        over ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-slate-50/60",
+        over ? "border-brand-400 bg-brand-50" : "border-slate-200 bg-slate-50/60",
         disabled && "opacity-60"
       )}
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-orange-500 shadow-sm ring-1 ring-slate-200">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-500 shadow-sm ring-1 ring-slate-200">
         <UploadCloud className="h-5 w-5" />
       </span>
       <p className="text-sm font-semibold text-slate-800">{title}</p>
@@ -282,7 +282,7 @@ export function FileDrop({
         type="button"
         disabled={disabled}
         onClick={() => ref.current?.click()}
-        className="mt-1 rounded-full border border-orange-200 bg-white px-4 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+        className="mt-1 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 disabled:opacity-50"
       >
         {buttonLabel}
       </button>
@@ -387,7 +387,7 @@ export function Modal({
 export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description: string; action?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
-      <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+      <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-500">
         <Icon className="h-6 w-6" />
       </span>
       <p className="text-base font-semibold text-slate-900">{title}</p>
@@ -421,9 +421,9 @@ export function AccessBadge({ access }: { access: DocumentAccess }) {
 export const primaryBtn =
   "btn-glow inline-flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm disabled:opacity-50";
 export const secondaryBtn =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50/50 disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-200 hover:bg-brand-50/50 disabled:opacity-50";
 export const iconBtn =
-  "inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-orange-50 hover:text-orange-600 disabled:opacity-40";
+  "inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-brand-50 hover:text-brand-600 disabled:opacity-40";
 
 /** View / share / edit / delete actions for a saved document row. */
 export function RowActions({
@@ -444,7 +444,7 @@ export function RowActions({
   if (locked) {
     return (
       <div className="flex items-center justify-end gap-1">
-        <Link href="/dashboard/pricing" title="Locked on Silver plan" className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-orange-50 hover:text-orange-600">
+        <Link href="/dashboard/pricing" title="Locked on Silver plan" className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-brand-50 hover:text-brand-600">
           <Lock className="h-3.5 w-3.5" /> Locked
         </Link>
         {onDelete ? (
@@ -499,7 +499,7 @@ export function useFeatureGate(kind: DocumentKind, label: string) {
 export function Spinner({ label }: { label?: string }) {
   return (
     <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-      <Loader2 className="h-5 w-5 animate-spin text-orange-500" /> {label ?? "Loading…"}
+      <Loader2 className="h-5 w-5 animate-spin text-brand-500" /> {label ?? "Loading…"}
     </div>
   );
 }

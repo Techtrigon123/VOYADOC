@@ -6,7 +6,7 @@ import { PAID_PLAN_PRICE_INR, formatInr } from "@/lib/agent/plans";
 export const metadata: Metadata = {
   title: "Refund Policy",
   description:
-    "When and how TravelDoc Pro refunds Gold and Platinum plan payments, and how to request a refund for a duplicate or unverified UPI payment.",
+    "When and how Voyenta refunds Gold and Platinum plan payments, and how to request a refund for a duplicate or unverified UPI payment.",
   alternates: { canonical: "/refunds" },
 };
 
@@ -69,7 +69,7 @@ export default function RefundPolicyPage() {
   return (
     <LegalPage
       title="Refund Policy"
-      intro={<p>How refunds work for TravelDoc Pro plans, and how to ask for one.</p>}
+      intro={<p>How refunds work for Voyenta plans, and how to ask for one.</p>}
       sections={sections}
     />
   );

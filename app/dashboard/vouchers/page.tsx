@@ -132,7 +132,7 @@ export default function VouchersPage() {
               return (
                 <li key={key} className="rounded-2xl border border-slate-200 bg-white">
                   <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                    <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 sm:flex">
+                    <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 sm:flex">
                       <Hotel className="h-5 w-5" />
                     </span>
                     <div className="min-w-0 flex-1">
