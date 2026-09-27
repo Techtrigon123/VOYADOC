@@ -130,47 +130,64 @@ button, a, input, select, textarea {
 @keyframes printer-feed { 0% { transform: translateY(-100%) } 100% { transform: translateY(0) } }
 .printer-sheet { animation: printer-feed 2.6s ease-in-out both }
 
-/* ─── Flame buttons (same look as components/ui/flame-button.tsx) ──────────
-   Applied with the `btn-flame` class; components/ui/flame-pointer.tsx feeds
-   the cursor position. Unlayered so it wins over bg-/text- utilities, while
-   size, spacing and radius utilities still apply. */
-@property --glow { syntax: "<number>"; inherits: false; initial-value: 0; }
-@property --edge { syntax: "<number>"; inherits: false; initial-value: 0; }
+/* ─── Glow buttons (Uiverse "desktop" button) ─────────────────────────────
+   Black fill, 1px stroke that glows from the bottom edge, soft glow beneath.
+   Hover widens the stroke and glow (1.2s ease). Applied with the btn-glow class.
+   Unlayered so it wins over bg-/text- utilities; size, spacing and radius
+   utilities on each button still apply. Set --glow-color to 255 255 255 for a white glow on dark pages. */
+@property --stroke-w { syntax: "<percentage>"; inherits: true; initial-value: 10.7%; }
+@property --glow-w { syntax: "<percentage>"; inherits: true; initial-value: 15%; }
 
-.btn-flame {
-  --mx: 50%;
-  --side: 1;
+.btn-glow {
+  --glow-color: 249 115 22; /* brand orange (rgb) — set 255 255 255 for white */
+  --stroke-w: 10.7%;
+  --glow-w: 15%;
   position: relative;
-  color: #5a250a;
-  border-color: transparent;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  background-color: #d6d6d6;
-  background-image:
-    radial-gradient(60px circle at var(--mx) 50%,
-      rgb(255 255 245 / calc(var(--glow) * 1)) 3.5%,
-      rgb(255 106 45 / calc(var(--glow) * 1)) 26.5%,
-      rgb(255 218 159 / calc(var(--glow) * 1)) 37.5%,
-      rgb(255 106 45 / calc(var(--glow) * 0.5)) 49%,
-      rgb(255 45 85 / 0) 92.5%),
-    radial-gradient(102px 52px at var(--mx) 50%,
-      rgb(255 255 247 / calc(var(--glow) * 0.9)) 29%,
-      rgb(255 250 205 / calc(var(--glow) * 0.8)) 48.5%,
-      rgb(244 210 191 / calc(var(--glow) * 0.6)) 60.7%,
-      rgb(214 211 210 / 0) 100%),
-    linear-gradient(100deg, #cfcfcf 0%, #d6d6d6 40%, #e4e2e0 70%, #f0eeec 100%);
-  box-shadow:
-    calc(var(--side) * 5px) 0 16px 2px rgb(255 106 45 / calc(var(--edge) * 0.85)),
-    calc(var(--side) * 2px) 0 6px 0 rgb(255 214 130 / calc(var(--edge) * 0.95)),
-    0 1px 2px rgb(15 23 42 / 0.08);
-  transition: --glow 150ms ease-out, --edge 220ms ease-out, box-shadow 220ms ease-out, opacity 150ms;
+  isolation: isolate;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+  -webkit-font-smoothing: antialiased;
+  border: 1px solid transparent;
+  /* Stroke: the 1px border shows this gradient. Base tint matches the original. */
+  background:
+    radial-gradient(var(--stroke-w) 50% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0) 100%) border-box,
+    rgb(15 23 42 / 0.12) border-box;
+  box-shadow: none;
+  transition: --stroke-w 1200ms ease-in-out, --glow-w 1200ms ease-in-out, transform 150ms ease, opacity 150ms;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.btn-flame:hover { color: #5a250a; }
-.btn-flame:focus-visible { outline: 2px solid #ff6a2d; outline-offset: 2px; }
-.btn-flame:disabled, .btn-flame[aria-disabled="true"] { --glow: 0; --edge: 0; }
-/* The pulsing attention ring would hide the flame halo while hovered. */
-.btn-flame.prompt-glow:hover { animation: none; }
+/* Fill (inside the stroke) */
+.btn-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #000;
+  pointer-events: none;
+}
+/* Soft glow under the bottom edge */
+.btn-glow::after {
+  content: "";
+  position: absolute;
+  /* Pushed below the button so the glow reads on light backgrounds too. */
+  inset: 30% 4% -10px 4%;
+  z-index: -2;
+  border-radius: inherit;
+  background: radial-gradient(var(--glow-w) 70% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0.35) 45%, rgb(var(--glow-color) / 0) 100%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+.btn-glow:hover { color: #fff; --stroke-w: 60.1%; --glow-w: 60.6%; }
+.btn-glow:active { transform: scale(0.95); }
+.btn-glow:focus-visible { outline: 2px solid rgb(var(--glow-color)); outline-offset: 2px; }
+.btn-glow:disabled, .btn-glow[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; --stroke-w: 10.7%; --glow-w: 15%; }
+.btn-glow svg { position: relative; }
+/* The pulsing attention ring would hide the glow while hovered. */
+.btn-glow.prompt-glow:hover { animation: none; }
 
 /* ─── Marquee (components/ui/marquee-01-utils/marquee.tsx) ─────────────── */
 @theme inline {

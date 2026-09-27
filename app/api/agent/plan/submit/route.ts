@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import PlanPayment from "@/models/PlanPayment";
+import { createPlanPayment, findPendingPlanPayment, updatePlanPayment } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
 import { isPaidPlan, PAID_PLAN_PRICE_INR } from "@/lib/agent/plans";
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (!isPaidPlan(planId)) return fail("Choose Gold or Platinum.");
     if (!txn) return fail("Please enter the transaction ID from your payment app.");
 
-    const existing = await PlanPayment.findOne({ agentId: user._id, status: "pending", planId });
+    const existing = await findPendingPlanPayment(user.id, planId);
     const hasNewProof = typeof proof === "string" && proof.length > 0;
     if (!existing && !hasNewProof) return fail("Please upload a screenshot of your payment.");
     if (hasNewProof) {
@@ -29,28 +29,23 @@ export async function POST(req: NextRequest) {
     }
 
     const proofType = hasNewProof ? (proof as string).slice(5, (proof as string).indexOf(";")) : undefined;
-    let payment;
-    if (existing) {
-      existing.paymentTransactionId = txn;
-      if (hasNewProof) {
-        existing.proof = proof as string;
-        existing.proofType = proofType!;
-      }
-      payment = await existing.save();
-    } else {
-      payment = await PlanPayment.create({
-        agentId: user._id,
-        planId,
-        amountInr: PAID_PLAN_PRICE_INR[planId],
-        paymentTransactionId: txn,
-        proof: proof as string,
-        proofType,
-      });
-    }
+    const payment = existing
+      ? await updatePlanPayment(existing.id, {
+          paymentTransactionId: txn,
+          ...(hasNewProof ? { proof: proof as string, proofType: proofType! } : {}),
+        })
+      : await createPlanPayment({
+          agentId: user.id,
+          planId,
+          amountInr: PAID_PLAN_PRICE_INR[planId],
+          paymentTransactionId: txn,
+          proof: proof as string,
+          proofType: proofType ?? "image/png",
+        });
 
     return ok(
       {
-        id: payment._id.toString(),
+        id: payment.id,
         planId: payment.planId,
         amountInr: payment.amountInr,
         paymentTransactionId: payment.paymentTransactionId,

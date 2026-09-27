@@ -361,7 +361,7 @@ export function InvoiceForm({
           </button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <button type="button" disabled={!!busy} aria-label="More save options" className="inline-flex h-10 items-center btn-flame rounded-r-full border-l border-white/60 bg-[var(--primary)] px-2.5 text-white hover:bg-orange-600 disabled:opacity-50">
+              <button type="button" disabled={!!busy} aria-label="More save options" className="inline-flex h-10 items-center btn-glow rounded-r-lg bg-[var(--primary)] px-2.5 text-white hover:bg-orange-600 disabled:opacity-50">
                 <ChevronDown className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>

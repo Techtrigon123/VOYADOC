@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireAgent, serializeAgent, refreshAgentState, ok, fail } from "@/lib/agent/server";
 import { isPartnerType, normalizeMobile } from "@/lib/agent/profile";
+import { updateUser } from "@/lib/db/repo";
 
 /** Quick setup (Role → Profile). */
 export async function POST(req: NextRequest) {
@@ -24,18 +25,17 @@ export async function POST(req: NextRequest) {
     if (!str("state")) return fail("Please select your state");
     if (str("city").length < 2) return fail("Please enter your city");
 
-    user.name = str("name");
-    user.companyName = str("companyName");
-    user.brandName = str("brandName") || undefined;
-    user.partnerType = partnerType;
-    user.partnerTypeOther = partnerType === "other" ? partnerTypeOther : undefined;
-    user.mobile = mobile;
-    user.state = str("state");
-    user.city = str("city");
-    await user.save();
-    await refreshAgentState(user);
-
-    return ok(serializeAgent(user));
+    const updated = await updateUser(user.id, {
+      name: str("name"),
+      companyName: str("companyName"),
+      brandName: str("brandName") || undefined,
+      partnerType,
+      partnerTypeOther: partnerType === "other" ? partnerTypeOther : undefined,
+      mobile,
+      state: str("state"),
+      city: str("city"),
+    });
+    return ok(serializeAgent(await refreshAgentState(updated)));
   } catch (error) {
     console.error("[POST /api/agent/setup]", error);
     return fail("Could not save your details. Please try again.", 500);

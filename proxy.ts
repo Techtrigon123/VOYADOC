@@ -1,13 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth/jwt";
+import { checkRateLimit, clientIp, findRule, retryMessage } from "@/lib/rate-limit";
 
 const PROTECTED_PATHS = ["/dashboard", "/setup"];
 const AUTH_PATHS = ["/login", "/signup"];
+const COOKIE = "checkin_token";
 
-export function proxy(request: NextRequest) {
+/** Rate-limit every API request; see lib/rate-limit.ts for the rules. */
+async function limitApi(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+  const rule = findRule(pathname, request.method);
+  if (!rule) return NextResponse.next();
+
+  const ip = clientIp(request.headers);
+  let identity = `ip:${ip}`;
+  if (rule.scope === "user") {
+    const token = request.cookies.get(COOKIE)?.value;
+    const session = token ? verifyToken(token) : null;
+    if (session?.userId) identity = `user:${session.userId}`;
+  }
+
+  const result = await checkRateLimit(rule, identity);
+  const headers = {
+    "RateLimit-Limit": String(result.limit),
+    "RateLimit-Remaining": String(result.remaining),
+    "RateLimit-Reset": String(result.resetIn),
+  };
+
+  if (!result.allowed) {
+    const message = retryMessage(result.resetIn);
+    // Auth pages read `error` as a string; the agent panel reads `error.message`.
+    const error = pathname.startsWith("/api/auth/") ? message : { message, code: "RATE_LIMITED" };
+    return NextResponse.json(
+      { success: false, error },
+      { status: 429, headers: { ...headers, "Retry-After": String(result.resetIn) } }
+    );
+  }
+
+  const response = NextResponse.next();
+  for (const [k, v] of Object.entries(headers)) response.headers.set(k, v);
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = request.cookies.get("checkin_token")?.value;
+  if (pathname.startsWith("/api/")) return limitApi(request);
+
+  const token = request.cookies.get(COOKIE)?.value;
   const session = token ? verifyToken(token) : null;
 
   // Redirect to login if accessing protected path without session
@@ -29,6 +69,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|public|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public).*)",
   ],
 };

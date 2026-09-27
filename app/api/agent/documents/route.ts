@@ -1,19 +1,22 @@
 import { NextRequest } from "next/server";
-import AgentDocument, { DOCUMENT_KINDS, type DocumentKind } from "@/models/AgentDocument";
 import {
   requireAgent,
   refreshAgentState,
   summarizeDocument,
-  escapeRegex,
   serializeAgent,
   ok,
   fail,
 } from "@/lib/agent/server";
 import { describeDocument, validateDocument } from "@/lib/agent/documents";
 import { isFeatureEnabled } from "@/lib/agent/features";
+import { createDocument, documentExists, listDocuments, updateDocument, type DocFilters } from "@/lib/db/repo";
+import type { DocumentKind } from "@/lib/agent/types";
 
-const isKind = (k: unknown): k is DocumentKind =>
-  typeof k === "string" && (DOCUMENT_KINDS as readonly string[]).includes(k);
+const DOCUMENT_KINDS: DocumentKind[] = [
+  "hotel_voucher", "air_ticket", "pickup_voucher", "welcome_placard", "invoice", "proforma", "receipt",
+];
+const isKind = (k: unknown): k is DocumentKind => typeof k === "string" && (DOCUMENT_KINDS as string[]).includes(k);
+const FIELDS = ["all", "title", "number", "ref", "preparedBy"] as const;
 
 /**
  * List saved documents.
@@ -26,33 +29,19 @@ export async function GET(req: NextRequest) {
     if (response) return response;
 
     const sp = req.nextUrl.searchParams;
-    const kinds = (sp.get("kind") ?? "").split(",").filter(isKind);
-    const filter: Record<string, any> = { agentId: user._id }; // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (kinds.length) filter.kind = { $in: kinds };
-
-    const q = (sp.get("q") ?? "").trim();
-    if (q) {
-      const re = new RegExp(escapeRegex(q), "i");
-      const field = sp.get("field") ?? "all";
-      if (field === "title") filter.title = re;
-      else if (field === "number") filter.number = re;
-      else if (field === "ref") filter["data.bookingRef"] = re;
-      else if (field === "preparedBy") filter["data.preparedBy"] = re;
-      else filter.$or = [{ title: re }, { number: re }, { subtitle: re }, { searchText: re }];
-    }
-
-    const status = sp.get("status");
-    if (status) filter.status = status;
-
+    const field = sp.get("field");
     const from = sp.get("from");
     const to = sp.get("to");
-    if (from || to) {
-      filter.createdAt = {};
-      if (from) filter.createdAt.$gte = new Date(`${from}T00:00:00`);
-      if (to) filter.createdAt.$lte = new Date(`${to}T23:59:59.999`);
-    }
+    const filters: DocFilters = {
+      kinds: (sp.get("kind") ?? "").split(",").filter(isKind),
+      q: sp.get("q") ?? undefined,
+      field: (FIELDS as readonly string[]).includes(field ?? "") ? (field as DocFilters["field"]) : "all",
+      status: sp.get("status") ?? undefined,
+      from: from ? new Date(`${from}T00:00:00`) : undefined,
+      to: to ? new Date(`${to}T23:59:59.999`) : undefined,
+    };
 
-    const docs = await AgentDocument.find(filter).sort({ createdAt: -1 }).limit(500).select("-data");
+    const docs = await listDocuments(user.id, filters);
     return ok(docs.map((d) => summarizeDocument(d, user)));
   } catch (error) {
     console.error("[GET /api/agent/documents]", error);
@@ -83,12 +72,12 @@ export async function POST(req: NextRequest) {
     const desc = describeDocument(kind, data, agent.state);
 
     if ((kind === "invoice" || kind === "proforma" || kind === "receipt") && desc.number) {
-      const dup = await AgentDocument.exists({ agentId: user._id, kind, number: desc.number });
-      if (dup) return fail("This document number is already used. Choose another.", 409, "DUPLICATE_NUMBER");
+      if (await documentExists(user.id, { kind, number: desc.number }))
+        return fail("This document number is already used. Choose another.", 409, "DUPLICATE_NUMBER");
     }
 
-    const doc = await AgentDocument.create({
-      agentId: user._id,
+    let doc = await createDocument({
+      agentId: user.id,
       kind,
       ...desc,
       groupKey: typeof body.groupKey === "string" ? body.groupKey : desc.groupKey,
@@ -96,15 +85,13 @@ export async function POST(req: NextRequest) {
       data,
       pdfGeneratedAt: body.generatePdf ? new Date() : undefined,
     });
-    if (!doc.groupKey) {
-      doc.groupKey = doc._id.toString();
-      await doc.save();
-    }
+    // Every document belongs to a group so later versions can be stacked under it.
+    if (!doc.groupKey) doc = await updateDocument(user.id, doc.id, { groupKey: doc.id });
 
     const wasActive = user.status === "ACTIVE";
-    await refreshAgentState(user);
+    const fresh = await refreshAgentState(user);
     return ok(
-      { document: summarizeDocument(doc, user), data: doc.data, becameActive: !wasActive && user.status === "ACTIVE" },
+      { document: summarizeDocument(doc, fresh), data: doc.data, becameActive: !wasActive && fresh.status === "ACTIVE" },
       { status: 201 }
     );
   } catch (error) {

@@ -168,7 +168,7 @@ export function ExtractUploader<T>({ type, onFields }: { type: "voucher" | "tick
             </button>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={fill} disabled={phase === "filling"} className="inline-flex h-9 items-center gap-2 btn-flame rounded-full bg-[var(--primary)] px-4 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60">
+            <button type="button" onClick={fill} disabled={phase === "filling"} className="inline-flex h-9 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60">
               {phase === "filling" ? <Loader2 className="h-4 w-4 animate-spin" /> : phase === "done" ? <CheckCircle2 className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
               {phase === "filling" ? "Filling form…" : phase === "done" ? "Fill again" : "Fill form from this file"}
             </button>

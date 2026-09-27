@@ -1,12 +1,12 @@
-import type { ICustomer } from "@/models/Customer";
+import type { CustomerRecord } from "@/lib/db/repo";
 
 export const CUSTOMER_FIELDS = [
   "name", "company", "email", "phone", "gstTreatment", "gstin", "placeOfSupply", "pan", "address",
 ] as const;
 
-export function serializeCustomer(c: ICustomer) {
+export function serializeCustomer(c: CustomerRecord) {
   return {
-    id: c._id.toString(),
+    id: c.id,
     name: c.name,
     company: c.company ?? "",
     email: c.email ?? "",

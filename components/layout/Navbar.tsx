@@ -12,7 +12,7 @@ const navLinks = [
   { href: "/#documents", label: "Documents" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/faq", label: "FAQ" },
+  { href: "/#faq", label: "FAQ" },
   { href: "/about", label: "About" },
 ];
 
@@ -49,7 +49,7 @@ export default function Navbar() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link href="/contact">
-            <span className="inline-flex items-center btn-flame rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)]/90 transition-colors">
+            <span className="inline-flex items-center btn-glow rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary)]/90 transition-colors">
               Talk to Us
             </span>
           </Link>
@@ -80,7 +80,7 @@ export default function Navbar() {
               </Link>
             ))}
             <Link href="/contact" className="block mt-2">
-              <Button className="btn-flame w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90">
+              <Button className="btn-glow w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90">
                 Talk to Us
               </Button>
             </Link>

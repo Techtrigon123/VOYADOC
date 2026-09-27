@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import QRCode from "qrcode";
-import PlanPayment from "@/models/PlanPayment";
+import { findPendingPlanPayment } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
 import { effectivePlan, isPaidPlan, PAID_PLAN_PRICE_INR } from "@/lib/agent/plans";
 
@@ -13,14 +13,14 @@ export async function GET(req: NextRequest) {
     const { user, response } = await requireAgent();
     if (response) return response;
 
-    const pending = await PlanPayment.findOne({ agentId: user._id, status: "pending" }).sort({ createdAt: -1 });
+    const pending = await findPendingPlanPayment(user.id);
     const result: Record<string, unknown> = {
       plan: effectivePlan(user),
       subscriptionPlan: user.subscriptionPlan,
       subscriptionExpiresAt: user.subscriptionExpiresAt?.toISOString() ?? null,
       pending: pending
         ? {
-            id: pending._id.toString(),
+            id: pending.id,
             planId: pending.planId,
             amountInr: pending.amountInr,
             paymentTransactionId: pending.paymentTransactionId,

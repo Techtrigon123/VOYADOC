@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/models/User";
+import { findUserByEmail, updateUser } from "@/lib/db/repo";
 
 const forgotSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
+
+const GENERIC = "If an account exists, a reset link has been sent.";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,34 +21,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
-
-    const user = await User.findOne({ email: parsed.data.email });
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "No account found with that email." },
-        { status: 404 }
-      );
-    }
+    const user = await findUserByEmail(parsed.data.email);
+    // Same response whether or not the email exists, so accounts can't be probed.
+    if (!user) return NextResponse.json({ success: true, message: GENERIC });
 
     const resetToken = crypto.randomUUID();
-    const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-
-    await User.findByIdAndUpdate(user._id, {
+    await updateUser(user.id, {
       resetToken,
-      resetTokenExpiry,
+      resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 60), // 1 hour
     });
 
     // TODO: send reset email via your email provider
     // For now, return the token in development only
     const isDev = process.env.NODE_ENV !== "production";
-    const message = isDev
-      ? `Reset link: /reset-password/${resetToken}`
-      : "If an account exists, a reset link has been sent.";
-
     return NextResponse.json({
       success: true,
-      message,
+      message: isDev ? `Reset link: /reset-password/${resetToken}` : GENERIC,
       ...(isDev ? { resetToken } : {}),
     });
   } catch (error) {

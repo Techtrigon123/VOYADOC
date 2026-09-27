@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db/mongoose";
 import { getSession } from "@/lib/auth/jwt";
-import User, { type IUser } from "@/models/User";
-import AgentDocument, { type IAgentDocument } from "@/models/AgentDocument";
+import { documentExists, findUserById, updateUser, type DocRecord, type UserRecord } from "@/lib/db/repo";
 import type { Agent, DocumentSummary } from "./types";
 import { computeAutoVerified, missingActivationFields } from "./profile";
 import { documentAccess, effectivePlan } from "./plans";
@@ -18,23 +16,28 @@ export function fail(message: string, status = 400, code?: string) {
   return NextResponse.json({ success: false, error: { message, code } }, { status });
 }
 
-type Guarded = { user: IUser; response?: never } | { user?: never; response: NextResponse };
+type Guarded = { user: UserRecord; response?: never } | { user?: never; response: NextResponse };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const isUuid = (v: string) => UUID_RE.test(v);
 
 /** Resolve the signed-in agent or produce the 401/404 response to return. */
 export async function requireAgent(): Promise<Guarded> {
   const session = await getSession();
   if (!session) return { response: fail("Your session expired. Please sign in again.", 401, "UNAUTHORIZED") };
-  await connectDB();
-  const user = await User.findById(session.userId);
+  // Sessions issued before the Supabase move carry MongoDB ids — treat them as signed out.
+  if (!isUuid(session.userId)) return { response: fail("Your session expired. Please sign in again.", 401, "UNAUTHORIZED") };
+  const user = await findUserById(session.userId);
   if (!user) return { response: fail("Account not found.", 404, "ACCOUNT_NOT_FOUND") };
   if (user.status === "SUSPENDED")
     return { response: fail("Your account is suspended. Please contact support.", 403, "SUSPENDED") };
   return { user };
 }
 
-export function serializeAgent(u: IUser): Agent {
+export function serializeAgent(u: UserRecord): Agent {
+  const s = u.documentNumberSettings;
   return {
-    id: u._id.toString(),
+    id: u.id,
     name: u.name,
     email: u.email,
     mobile: u.mobile,
@@ -66,14 +69,12 @@ export function serializeAgent(u: IUser): Agent {
     airTicketingEnabled: u.airTicketingEnabled !== false,
     travelServiceVoucherEnabled: u.travelServiceVoucherEnabled !== false,
     welcomePlacardEnabled: u.welcomePlacardEnabled !== false,
-    documentNumberSettings: u.documentNumberSettings
-      ? {
-          invoicePrefix: u.documentNumberSettings.invoicePrefix ?? "INV-",
-          proformaPrefix: u.documentNumberSettings.proformaPrefix ?? "PI-",
-          receiptPrefix: u.documentNumberSettings.receiptPrefix ?? "RCPT-",
-          digits: u.documentNumberSettings.digits ?? 4,
-        }
-      : undefined,
+    documentNumberSettings: {
+      invoicePrefix: s?.invoicePrefix ?? "INV-",
+      proformaPrefix: s?.proformaPrefix ?? "PI-",
+      receiptPrefix: s?.receiptPrefix ?? "RCPT-",
+      digits: s?.digits ?? 4,
+    },
     createdAt: u.createdAt?.toISOString(),
   };
 }
@@ -81,29 +82,23 @@ export function serializeAgent(u: IUser): Agent {
 /**
  * Recompute Verified + Active after a profile or document change.
  * Active = the four activation fields are filled AND at least one document exists.
+ * Returns the (possibly updated) user.
  */
-export async function refreshAgentState(user: IUser): Promise<IUser> {
+export async function refreshAgentState(user: UserRecord): Promise<UserRecord> {
   if (user.status === "SUSPENDED") return user;
   const plain = serializeAgent(user);
   const verified = computeAutoVerified(plain);
-  let status = user.status ?? "INACTIVE";
-  if (missingActivationFields(plain).length === 0) {
-    const hasDoc = await AgentDocument.exists({ agentId: user._id });
-    status = hasDoc ? "ACTIVE" : "INACTIVE";
-  } else {
-    status = "INACTIVE";
-  }
+  const status =
+    missingActivationFields(plain).length === 0 && (await documentExists(user.id)) ? "ACTIVE" : "INACTIVE";
   if (verified !== user.isVerified || status !== user.status) {
-    user.isVerified = verified;
-    user.status = status;
-    await user.save();
+    return updateUser(user.id, { isVerified: verified, status });
   }
   return user;
 }
 
-export function summarizeDocument(d: IAgentDocument, user: IUser): DocumentSummary {
+export function summarizeDocument(d: DocRecord, user: UserRecord): DocumentSummary {
   return {
-    id: d._id.toString(),
+    id: d.id,
     kind: d.kind,
     title: d.title,
     subtitle: d.subtitle,
@@ -113,17 +108,13 @@ export function summarizeDocument(d: IAgentDocument, user: IUser): DocumentSumma
     status: d.status,
     hasStoredPdf: !!d.pdfGeneratedAt,
     currency: d.currency,
-    total: d.total,
-    paidAmount: d.paidAmount,
-    parentId: d.parentId?.toString(),
+    total: d.total == null ? undefined : Number(d.total),
+    paidAmount: d.paidAmount == null ? undefined : Number(d.paidAmount),
+    parentId: d.parentId,
     createdAt: d.createdAt.toISOString(),
     updatedAt: d.updatedAt.toISOString(),
     access: documentAccess(effectivePlan(user), d.createdAt),
   };
-}
-
-export function escapeRegex(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** Accept only image data URLs under a size cap (base64 length ≈ 1.37× bytes). */

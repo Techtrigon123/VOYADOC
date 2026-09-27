@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import { findUserByResetToken, updateUser } from "@/lib/db/repo";
 
 const resetSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
@@ -22,13 +21,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
-
-    const user = await User.findOne({
-      resetToken: parsed.data.token,
-      resetTokenExpiry: { $gt: new Date() },
-    }).select("+password");
-
+    const user = await findUserByResetToken(parsed.data.token);
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Invalid or expired reset token." },
@@ -36,9 +29,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(parsed.data.password, 10);
-    await User.findByIdAndUpdate(user._id, {
-      password: hashedPassword,
+    await updateUser(user.id, {
+      passwordHash: await bcrypt.hash(parsed.data.password, 12),
       resetToken: undefined,
       resetTokenExpiry: undefined,
     });

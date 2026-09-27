@@ -1,4 +1,4 @@
-import AgentDocument from "@/models/AgentDocument";
+import { listDocuments } from "@/lib/db/repo";
 import { requireAgent, summarizeDocument, ok, fail } from "@/lib/agent/server";
 import { effectivePlan, SILVER_RETENTION_DAYS } from "@/lib/agent/plans";
 import { KIND_LABELS } from "@/lib/agent/documents";
@@ -16,7 +16,7 @@ export async function GET() {
     if (response) return response;
 
     const plan = effectivePlan(user);
-    const docs = await AgentDocument.find({ agentId: user._id }).sort({ createdAt: -1 }).limit(1000).select("-data");
+    const docs = await listDocuments(user.id, { limit: 1000 });
     const rows = docs.map((d) => {
       const s = summarizeDocument(d, user);
       return {

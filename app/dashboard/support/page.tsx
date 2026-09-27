@@ -79,7 +79,7 @@ export default function SupportPage() {
             aria-label="Message"
             className="h-11 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
           />
-          <button type="submit" disabled={sending || !text.trim()} className="inline-flex h-11 w-11 items-center justify-center btn-flame rounded-full bg-[var(--primary)] text-white hover:bg-orange-600 disabled:opacity-50" aria-label="Send">
+          <button type="submit" disabled={sending || !text.trim()} className="inline-flex h-11 w-11 items-center justify-center btn-glow rounded-lg bg-[var(--primary)] text-white hover:bg-orange-600 disabled:opacity-50" aria-label="Send">
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>
         </form>

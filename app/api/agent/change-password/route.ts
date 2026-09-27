@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
-import User from "@/models/User";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
+import { findUserWithPassword, updateUser } from "@/lib/db/repo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,13 +13,12 @@ export async function POST(req: NextRequest) {
     const next = String(body?.newPassword ?? "");
     if (next.length < 8) return fail("New password must be at least 8 characters.");
 
-    const withPassword = await User.findById(user._id).select("+password");
+    const withPassword = await findUserWithPassword({ id: user.id });
     if (!withPassword) return fail("Account not found.", 404);
-    if (!(await bcrypt.compare(current, withPassword.password)))
+    if (!(await bcrypt.compare(current, withPassword.passwordHash)))
       return fail("Your current password is incorrect.", 400, "WRONG_PASSWORD");
 
-    withPassword.password = await bcrypt.hash(next, 12);
-    await withPassword.save();
+    await updateUser(user.id, { passwordHash: await bcrypt.hash(next, 12) });
     return ok(true, { message: "Your password has been updated." });
   } catch (error) {
     console.error("[POST /api/agent/change-password]", error);

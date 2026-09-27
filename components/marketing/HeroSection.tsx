@@ -29,7 +29,7 @@ export default function HeroSection() {
               <Link href="/signup">
                 <Button
                   size="xl"
-                  className="btn-flame bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-900/30 w-full sm:w-auto"
+                  className="btn-glow bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-900/30 w-full sm:w-auto"
                 >
                   Create Your First Document
                   <ArrowRight className="h-4 w-4" />

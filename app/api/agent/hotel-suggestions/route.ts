@@ -1,6 +1,15 @@
 import { NextRequest } from "next/server";
-import AgentDocument from "@/models/AgentDocument";
-import { requireAgent, escapeRegex, ok, fail } from "@/lib/agent/server";
+import { requireAgent, ok, fail } from "@/lib/agent/server";
+import { listDocuments } from "@/lib/db/repo";
+
+interface VoucherHotel {
+  hotelName?: string;
+  hotelAddress?: string;
+  city?: string;
+  hotelEmail?: string;
+  hotelPhone?: string;
+  rooms?: { roomName?: string }[];
+}
 
 /** Hotels the agent has used before — typed suggestions for the voucher form. */
 export async function GET(req: NextRequest) {
@@ -10,39 +19,30 @@ export async function GET(req: NextRequest) {
     const q = (req.nextUrl.searchParams.get("q") ?? "").trim();
     if (q.length < 2) return ok([]);
 
-    const rows = await AgentDocument.aggregate<{
-      _id: string;
-      hotelAddress?: string;
-      city?: string;
-      hotelEmail?: string;
-      hotelPhone?: string;
-      rooms: string[];
-    }>([
-      { $match: { agentId: user._id, kind: "hotel_voucher", "data.hotelName": new RegExp(escapeRegex(q), "i") } },
-      { $sort: { updatedAt: -1 } },
-      {
-        $group: {
-          _id: "$data.hotelName",
-          hotelAddress: { $first: "$data.hotelAddress" },
-          city: { $first: "$data.city" },
-          hotelEmail: { $first: "$data.hotelEmail" },
-          hotelPhone: { $first: "$data.hotelPhone" },
-          rooms: { $addToSet: { $arrayElemAt: ["$data.rooms.roomName", 0] } },
-        },
-      },
-      { $limit: 8 },
-    ]);
+    const docs = await listDocuments(user.id, {
+      kinds: ["hotel_voucher"],
+      q,
+      field: "hotel",
+      withData: true,
+      order: "updated_desc",
+      limit: 200,
+    });
 
-    return ok(
-      rows.map((r) => ({
-        name: r._id,
-        address: r.hotelAddress ?? "",
-        city: r.city ?? "",
-        email: r.hotelEmail ?? "",
-        phone: r.hotelPhone ?? "",
-        rooms: (r.rooms ?? []).filter(Boolean),
-      }))
-    );
+    // Newest voucher wins for contact details; room names are collected across all of them.
+    const byName = new Map<string, { name: string; address: string; city: string; email: string; phone: string; rooms: Set<string> }>();
+    for (const d of docs) {
+      const h = d.data as VoucherHotel;
+      const name = h.hotelName?.trim();
+      if (!name) continue;
+      const entry =
+        byName.get(name) ??
+        { name, address: h.hotelAddress ?? "", city: h.city ?? "", email: h.hotelEmail ?? "", phone: h.hotelPhone ?? "", rooms: new Set<string>() };
+      const room = h.rooms?.[0]?.roomName?.trim();
+      if (room) entry.rooms.add(room);
+      byName.set(name, entry);
+    }
+
+    return ok([...byName.values()].slice(0, 8).map((e) => ({ ...e, rooms: [...e.rooms] })));
   } catch (error) {
     console.error("[GET /api/agent/hotel-suggestions]", error);
     return fail("Could not load hotel list. You can still type the name manually.", 500);

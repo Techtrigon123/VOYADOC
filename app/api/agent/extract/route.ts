@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import type { IUser } from "@/models/User";
+import { updateUser, type UserRecord } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
 import { effectivePlan, EXTRACT_LIMITS } from "@/lib/agent/plans";
 import { extractAvailable, extractFromFile, ExtractError } from "@/lib/agent/extract";
@@ -10,7 +10,7 @@ type Kind = "voucher" | "ticket";
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
-function usage(user: IUser, kind: Kind) {
+function usage(user: UserRecord, kind: Kind) {
   const plan = effectivePlan(user);
   const u = user.extractUsage ?? { day: "", voucher: 0, airTicket: 0, yearTotal: 0 };
   const sameDay = u.day === todayKey();
@@ -25,8 +25,8 @@ function usage(user: IUser, kind: Kind) {
   return { plan, used, limit, remaining: Math.max(0, limit - used), period: "day" };
 }
 
-async function recordUse(user: IUser, kind: Kind) {
-  const u = user.extractUsage ?? { day: "", voucher: 0, airTicket: 0, yearTotal: 0 };
+async function recordUse(user: UserRecord, kind: Kind): Promise<UserRecord> {
+  const u = { ...(user.extractUsage ?? { day: "", voucher: 0, airTicket: 0, yearTotal: 0 }) };
   if (u.day !== todayKey()) {
     u.day = todayKey();
     u.voucher = 0;
@@ -35,13 +35,11 @@ async function recordUse(user: IUser, kind: Kind) {
   if (kind === "voucher") u.voucher += 1;
   else u.airTicket += 1;
   if (!u.yearStart || Date.now() - new Date(u.yearStart).getTime() > 365 * 86400000) {
-    u.yearStart = new Date();
+    u.yearStart = new Date().toISOString();
     u.yearTotal = 0;
   }
   u.yearTotal = (u.yearTotal ?? 0) + 1;
-  user.extractUsage = u;
-  user.markModified("extractUsage");
-  await user.save();
+  return updateUser(user.id, { extractUsage: u });
 }
 
 /** ?type=voucher|ticket → { available, used, limit, remaining, period, plan } */
@@ -80,8 +78,8 @@ export async function POST(req: NextRequest) {
 
     const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
     const fields = await extractFromFile(kind, { base64, mediaType: file.type as (typeof MEDIA)[number] });
-    await recordUse(user, kind);
-    return ok({ fields, usage: usage(user, kind) });
+    const updated = await recordUse(user, kind);
+    return ok({ fields, usage: usage(updated, kind) });
   } catch (error) {
     if (error instanceof ExtractError) {
       const status = error.code === "EXTRACT_TEMPORARY" ? 429 : error.code === "EXTRACT_UNAVAILABLE" ? 503 : 422;

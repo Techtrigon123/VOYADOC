@@ -264,7 +264,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
       </div>
       <div className="shrink-0 space-y-2 border-t border-slate-100 bg-slate-50/80 px-5 py-4">
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Link href="/dashboard/pricing" onClick={onDismiss} className="inline-flex h-11 flex-1 items-center justify-center gap-2 btn-flame rounded-full bg-slate-900 font-semibold text-white hover:bg-slate-800">
+          <Link href="/dashboard/pricing" onClick={onDismiss} className="inline-flex h-11 flex-1 items-center justify-center gap-2 btn-glow rounded-lg bg-slate-900 font-semibold text-white hover:bg-slate-800">
             Unlock my files <ArrowRight className="h-4 w-4" />
           </Link>
           {onDismiss ? (

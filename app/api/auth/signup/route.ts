@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { connectDB } from "@/lib/db/mongoose";
-import User from "@/models/User";
+import { createUser, findUserByEmail } from "@/lib/db/repo";
 import { signToken, setAuthCookie } from "@/lib/auth/jwt";
 
 const signupSchema = z.object({
@@ -26,53 +25,37 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password, organization } = parsed.data;
 
-    await connectDB();
-
     // Check if email already exists
-    const existing = await User.findOne({ email }).select("_id");
-    if (existing) {
+    if (await findUserByEmail(email)) {
       return NextResponse.json(
         { success: false, error: "An account with this email already exists." },
         { status: 409 }
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Create user
-    const user = await User.create({
-      name,
+    const user = await createUser({
+      name: name.trim(),
       email,
-      password: hashedPassword,
-      organization,
-      companyName: organization,
-      role: "owner",
+      passwordHash: await bcrypt.hash(password, 12),
+      organization: organization?.trim() || undefined,
+      companyName: organization?.trim() || undefined,
     });
 
-    // Sign JWT
     const token = signToken({
-      userId: user._id.toString(),
+      userId: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
     });
 
-    const cookieOptions = setAuthCookie(token);
     const response = NextResponse.json(
       {
         success: true,
-        user: {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
       },
       { status: 201 }
     );
-
-    response.cookies.set(cookieOptions);
+    response.cookies.set(setAuthCookie(token));
     return response;
   } catch (error) {
     console.error("[POST /api/auth/signup]", error);

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import AgentDocument from "@/models/AgentDocument";
+import { listDocuments } from "@/lib/db/repo";
 import { requireAgent, fail } from "@/lib/agent/server";
 import { invoiceTotals, GST_TREATMENTS, type InvoiceData } from "@/lib/agent/documents";
 import { toCsv, toXls, toXlsx, type Cell } from "@/lib/agent/spreadsheet";
@@ -23,12 +23,10 @@ export async function POST(req: NextRequest) {
     const format = String(body?.format ?? "csv");
     const pii = body?.includePii === true;
 
-    const filter: Record<string, unknown> = { agentId: user._id, kind: mod };
     const from = body?.from ? new Date(`${body.from}T00:00:00`) : null;
     const to = body?.to ? new Date(`${body.to}T23:59:59.999`) : null;
-    if (from || to) filter.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lte: to } : {}) };
 
-    const docs = await AgentDocument.find(filter).sort({ createdAt: 1 });
+    const docs = await listDocuments(user.id, { kinds: [mod], from: from ?? undefined, to: to ?? undefined, withData: true, order: "created_asc", limit: 5000 });
     const round = (n: number) => Number(n.toFixed(decimals));
     const hide = (v: string) => (pii ? v : "");
 
@@ -44,7 +42,7 @@ export async function POST(req: NextRequest) {
       const data = d.data as unknown as InvoiceData;
       const t = invoiceTotals(data, user.state);
       const b = data.billTo ?? ({} as InvoiceData["billTo"]);
-      const paid = d.paidAmount ?? 0;
+      const paid = Number(d.paidAmount ?? 0);
       if (template === "summary") {
         rows.push([data.date, d.number ?? "", b.name, data.currency, round(t.total), round(paid), round(Math.max(0, t.total - paid))]);
       } else if (template === "accounting") {

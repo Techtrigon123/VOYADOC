@@ -222,7 +222,7 @@ export function QuickSetupForm({ initial, onSuccess }: { initial: Agent; onSucce
           <button
             type="submit"
             disabled={saving || (step === 0 ? !roleOk : !profileOk)}
-            className={cn("inline-flex h-11 items-center justify-center gap-1.5 btn-flame rounded-full bg-[var(--primary)] text-sm font-semibold text-white shadow-sm hover:bg-orange-600 disabled:opacity-50", step > 0 ? "flex-[1.4]" : "w-full")}
+            className={cn("inline-flex h-11 items-center justify-center gap-1.5 btn-glow rounded-lg bg-[var(--primary)] text-sm font-semibold text-white shadow-sm hover:bg-orange-600 disabled:opacity-50", step > 0 ? "flex-[1.4]" : "w-full")}
           >
             {saving ? "Saving…" : step === 0 ? "Continue" : "Continue to dashboard"}
             {!saving ? <ArrowRight className="h-4 w-4" /> : null}

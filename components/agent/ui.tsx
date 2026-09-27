@@ -332,7 +332,7 @@ export function ConfirmDialog({
           type="button"
           disabled={busy}
           onClick={onConfirm}
-          className={cn("inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white disabled:opacity-60", destructive ? "bg-rose-600 hover:bg-rose-700" : "btn-flame rounded-full")}
+          className={cn("inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white disabled:opacity-60", destructive ? "bg-rose-600 hover:bg-rose-700" : "btn-glow rounded-lg")}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {busy ? busyLabel ?? confirmLabel : confirmLabel}
@@ -419,7 +419,7 @@ export function AccessBadge({ access }: { access: DocumentAccess }) {
 }
 
 export const primaryBtn =
-  "btn-flame inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-sm disabled:opacity-50";
+  "btn-glow inline-flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm disabled:opacity-50";
 export const secondaryBtn =
   "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50/50 disabled:opacity-50";
 export const iconBtn =

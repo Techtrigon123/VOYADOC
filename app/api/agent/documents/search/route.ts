@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import AgentDocument from "@/models/AgentDocument";
-import { requireAgent, escapeRegex, ok, fail } from "@/lib/agent/server";
+import { requireAgent, ok, fail } from "@/lib/agent/server";
+import { searchDocuments } from "@/lib/db/repo";
 
 /** Header search palette: vouchers, tickets, invoices… by number, guest or hotel. */
 export async function GET(req: NextRequest) {
@@ -11,18 +11,10 @@ export async function GET(req: NextRequest) {
     const q = (req.nextUrl.searchParams.get("q") ?? "").trim();
     if (q.length < 2) return ok({ items: [] });
 
-    const re = new RegExp(escapeRegex(q), "i");
-    const docs = await AgentDocument.find({
-      agentId: user._id,
-      $or: [{ title: re }, { number: re }, { subtitle: re }, { searchText: re }],
-    })
-      .sort({ updatedAt: -1 })
-      .limit(20)
-      .select("kind title subtitle number groupKey pdfGeneratedAt");
-
+    const docs = await searchDocuments(user.id, q, 20);
     return ok({
       items: docs.map((d) => ({
-        id: d._id.toString(),
+        id: d.id,
         kind: d.kind,
         title: d.title,
         subtitle: d.subtitle,

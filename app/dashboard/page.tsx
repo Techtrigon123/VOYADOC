@@ -211,7 +211,7 @@ export default function DashboardPage() {
                     {profileLink.label} <ChevronRight className="h-4 w-4" />
                   </Link>
                   <NewDocumentMenu tiles={tiles}>
-                    <button type="button" className="inline-flex h-10 items-center justify-center gap-1.5 btn-flame rounded-full bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm shadow-orange-500/30 hover:bg-orange-600">
+                    <button type="button" className="inline-flex h-10 items-center justify-center gap-1.5 btn-glow rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm shadow-orange-500/30 hover:bg-orange-600">
                       <Plus className="h-4 w-4" /> New document
                     </button>
                   </NewDocumentMenu>
@@ -474,7 +474,7 @@ function QuickStartPopup() {
           ) : null}
         </div>
       </div>
-      <Link href="/dashboard/vouchers/new" onClick={close} className="mt-3 flex h-10 w-full items-center justify-center btn-flame rounded-full bg-[var(--primary)] text-[13px] font-semibold text-white hover:bg-orange-600">
+      <Link href="/dashboard/vouchers/new" onClick={close} className="mt-3 flex h-10 w-full items-center justify-center btn-glow rounded-lg bg-[var(--primary)] text-[13px] font-semibold text-white hover:bg-orange-600">
         Create hotel voucher
       </Link>
     </div>

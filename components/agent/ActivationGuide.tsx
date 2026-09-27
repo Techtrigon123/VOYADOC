@@ -79,7 +79,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label="Open steps to activate your account"
-                className="prompt-glow pointer-events-auto inline-flex h-11 items-center gap-2 btn-flame rounded-full bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600"
+                className="prompt-glow pointer-events-auto inline-flex h-11 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600"
               >
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">Activate account</span>
@@ -253,7 +253,7 @@ function ActivationDialog({
               type="button"
               disabled={!actionable && !progress.nextStep}
               onClick={() => (actionable ? go(step) : progress.nextStep ? go(progress.nextStep) : onOpenChange(false))}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 btn-flame rounded-full bg-[var(--primary)] font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 btn-glow rounded-lg bg-[var(--primary)] font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
             >
               {actionable ? (
                 <>

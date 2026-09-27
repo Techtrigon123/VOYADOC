@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
-import AgentDocument from "@/models/AgentDocument";
-import { requireAgent, escapeRegex, ok, fail } from "@/lib/agent/server";
-import type { IUser } from "@/models/User";
+import { requireAgent, ok, fail } from "@/lib/agent/server";
+import { listDocuments, updateUser, type UserRecord } from "@/lib/db/repo";
 
 type Kind = "invoice" | "proforma" | "receipt";
 const KINDS: Kind[] = ["invoice", "proforma", "receipt"];
 
-function settingsOf(user: IUser) {
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function settingsOf(user: UserRecord) {
   const s = user.documentNumberSettings;
   return {
     invoicePrefix: s?.invoicePrefix ?? "INV-",
@@ -20,12 +21,12 @@ const prefixFor = (s: ReturnType<typeof settingsOf>, k: Kind) =>
   k === "invoice" ? s.invoicePrefix : k === "proforma" ? s.proformaPrefix : s.receiptPrefix;
 
 /** Next number = one above the largest saved number sharing the prefix (custom IDs included). */
-async function suggestions(user: IUser) {
+async function suggestions(user: UserRecord) {
   const settings = settingsOf(user);
   const out: Record<Kind, { next: string; saved: string[] }> = {} as never;
   for (const kind of KINDS) {
     const prefix = prefixFor(settings, kind);
-    const saved = (await AgentDocument.find({ agentId: user._id, kind }).sort({ createdAt: -1 }).limit(200).select("number"))
+    const saved = (await listDocuments(user.id, { kinds: [kind], limit: 200 }))
       .map((d) => d.number ?? "")
       .filter(Boolean);
     const re = new RegExp(`^${escapeRegex(prefix)}(\\d+)$`);
@@ -56,14 +57,15 @@ export async function PUT(req: NextRequest) {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     const clean = (v: unknown, d: string) => String(v ?? d).replace(/\s/g, "").slice(0, 12) || d;
     const digits = Math.min(8, Math.max(1, parseInt(String(body?.digits ?? 4), 10) || 4));
-    user.documentNumberSettings = {
-      invoicePrefix: clean(body?.invoicePrefix, "INV-"),
-      proformaPrefix: clean(body?.proformaPrefix, "PI-"),
-      receiptPrefix: clean(body?.receiptPrefix, "RCPT-"),
-      digits,
-    };
-    await user.save();
-    return ok(await suggestions(user), {
+    const updated = await updateUser(user.id, {
+      documentNumberSettings: {
+        invoicePrefix: clean(body?.invoicePrefix, "INV-"),
+        proformaPrefix: clean(body?.proformaPrefix, "PI-"),
+        receiptPrefix: clean(body?.receiptPrefix, "RCPT-"),
+        digits,
+      },
+    });
+    return ok(await suggestions(updated), {
       message: 'Number format saved to your account. Use "Use next suggested number" or type any custom reference you prefer.',
     });
   } catch (error) {
