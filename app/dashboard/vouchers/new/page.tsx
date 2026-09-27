@@ -160,7 +160,9 @@ function HotelNameInput({ value, onChange, onPick }: { value: string; onChange: 
 
 function CurrencyInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [text, setText] = useState(value);
-  useEffect(() => setText(value), [value]);
+  useEffect(() => {
+    setText(value);
+  }, [value]);
   const commit = (v: string) => {
     const t = v.trim().toUpperCase();
     const byName = Object.entries(CURRENCY_NAMES).find(([, n]) => n.toLowerCase().startsWith(v.trim().toLowerCase()))?.[0];

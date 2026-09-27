@@ -23,7 +23,9 @@ export default function SupportPage() {
   useEffect(() => {
     void api<Msg[]>("/api/agent/support").then((r) => setMsgs(r.success && r.data ? r.data : []));
   }, []);
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth" }), [msgs]);
+  useEffect(() => {
+    end.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs]);
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();

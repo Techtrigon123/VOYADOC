@@ -11,8 +11,12 @@ export function db(): SupabaseClient {
     throw new Error("lib/db/supabase must only be used on the server.");
   }
   if (client) return client;
-  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Accept the URL even if it was copied with the REST path (…/rest/v1/) or a trailing slash.
+  const url = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)
+    ?.trim()
+    .replace(/\/rest\/v1\/?$/, "")
+    .replace(/\/+$/, "");
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) {
     throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local (Supabase → Project Settings → API).");
   }

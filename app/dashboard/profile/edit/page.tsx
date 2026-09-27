@@ -91,7 +91,9 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => setForm(initial), [initial]);
+  useEffect(() => {
+    setForm(initial);
+  }, [initial]);
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
     if (hash) window.setTimeout(() => focusAnchor(hash), 300);

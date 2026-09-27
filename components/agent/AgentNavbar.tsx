@@ -159,7 +159,9 @@ export default function AgentNavbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => setMobileOpen(false), [pathname, searchParams]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname, searchParams]);
 
   if (!agent) return null;
   const items = visibleNavItems(agent);
