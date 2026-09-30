@@ -17,6 +17,7 @@ const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   organization: z.string().optional(),
+  website: z.string().optional(), // hidden bot trap — people never see or fill it
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -58,6 +59,7 @@ export default function SignupForm() {
           email: data.email,
           password: data.password,
           organization: data.organization || undefined,
+          website: data.website || undefined,
         }),
       });
 
@@ -131,6 +133,9 @@ export default function SignupForm() {
                 {...register("organization")}
               />
             </div>
+
+            {/* Bot trap: hidden from people and screen readers; automated sign-up scripts fill it in. */}
+            <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" {...register("website")} />
 
             {/* Password */}
             <div className="space-y-1.5">

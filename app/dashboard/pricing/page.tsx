@@ -3,19 +3,35 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, ChevronDown, Crown, FileUp, Gem, Loader2, Pencil, ShieldCheck, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Crown, FileUp, Gem, Loader2, Lock, Pencil, ShieldCheck, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAgent } from "@/components/agent/AgentProvider";
 import { Field, Modal, PageShell, TextInput, primaryBtn, secondaryBtn } from "@/components/agent/ui";
 import { api, fileToDataUrl } from "@/lib/agent/client";
-import { formatInr, PLAN_COMPARISON, PLANS, PRICING_FAQ, isPaidPlan, type PaidPlanId } from "@/lib/agent/plans";
+import {
+  ALL_SERVICES,
+  formatInr,
+  GRACE_DAYS,
+  isBillingCycle,
+  isPaidPlan,
+  PLAN_COMPARISON,
+  PLAN_PRICES_INR,
+  PLANS,
+  PRICING_FAQ,
+  SERVICE_LABELS,
+  subscriptionState,
+  type BillingCycle,
+  type PaidPlanId,
+  type SubscriptionState,
+} from "@/lib/agent/plans";
 import type { PlanId } from "@/lib/agent/types";
 import { PaymentDetailsSkeleton } from "@/components/agent/skeletons";
 
 interface PendingPayment {
   id: string;
   planId: PaidPlanId;
+  billingCycle?: BillingCycle;
   amountInr: number;
   paymentTransactionId: string;
   proof: string;
@@ -26,11 +42,22 @@ interface PendingPayment {
 interface PlanInfo {
   plan: PlanId;
   subscriptionExpiresAt: string | null;
+  subscription?: SubscriptionState;
+  /** False until migration 0005 is run — then only yearly can be bought. */
+  monthlyAvailable?: boolean;
   pending: PendingPayment | null;
-  paymentConfig?: { planId: PaidPlanId; planName: string; amountInr: number; upiId: string | null; payee: string; qr: string | null };
+  paymentConfig?: { planId: PaidPlanId; planName: string; cycle: BillingCycle; amountInr: number; upiId: string | null; payee: string; qr: string | null };
 }
 
 const PLAN_ICONS = { silver: ShieldCheck, gold: Sparkles, platinum: Gem };
+
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+/** Yearly saving against paying monthly for 12 months, as a whole percentage. */
+const yearlySaving = (plan: PaidPlanId) => {
+  const { monthly, yearly } = PLAN_PRICES_INR[plan];
+  return Math.round((1 - yearly / (monthly * 12)) * 100);
+};
 
 function Cell({ value }: { value: boolean | string }) {
   if (typeof value === "string") return <span className="text-xs font-medium text-slate-700">{value}</span>;
@@ -47,6 +74,10 @@ export default function PricingPage() {
   const params = useSearchParams();
   const [info, setInfo] = useState<PlanInfo | null>(null);
   const [checkout, setCheckout] = useState<PaidPlanId | null>(null);
+  const [pickedCycle, setCycle] = useState<BillingCycle>(() => {
+    const c = params.get("cycle");
+    return isBillingCycle(c) ? c : "yearly";
+  });
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
   useEffect(() => {
@@ -58,8 +89,12 @@ export default function PricingPage() {
     if (isPaidPlan(p)) setCheckout(p);
   }, [params]);
 
+  const monthlyAvailable = info?.monthlyAvailable !== false;
+  const cycle: BillingCycle = monthlyAvailable ? pickedCycle : "yearly";
+
   if (!agent) return null;
-  const current = agent.subscriptionPlan;
+  const sub = info?.subscription ?? agent.subscription ?? subscriptionState(agent);
+  const current = sub.plan;
 
   return (
     <PageShell wide>
@@ -72,15 +107,55 @@ export default function PricingPage() {
         </p>
         {info?.pending ? (
           <p className="relative mx-auto mt-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-sm font-medium text-amber-800">
-            <Loader2 className="h-4 w-4 animate-spin" /> Your {info.pending.planId} payment is under review.
+            <Loader2 className="h-4 w-4 animate-spin" /> Your {info.pending.planId} {info.pending.billingCycle ?? "yearly"} payment is under review.
+          </p>
+        ) : sub.status === "grace" ? (
+          <p role="status" className="relative mx-auto mt-4 flex max-w-2xl items-start gap-2 rounded-2xl bg-amber-100 px-4 py-2.5 text-left text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Your <strong className="capitalize">{sub.paidPlan}</strong> plan ended on {fmtDate(sub.expiresAt!)}. You&apos;re in the {GRACE_DAYS[sub.cycle ?? "yearly"]}-day grace period
+              until {fmtDate(sub.graceEndsAt!)} ({sub.daysLeft} day{sub.daysLeft === 1 ? "" : "s"} left) — renew monthly or yearly below and your new term continues from your old end date.
+            </span>
+          </p>
+        ) : sub.status === "lapsed" ? (
+          <p role="status" className="relative mx-auto mt-4 flex max-w-2xl items-start gap-2 rounded-2xl bg-slate-100 px-4 py-2.5 text-left text-sm text-slate-700">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Your <strong className="capitalize">{sub.paidPlan}</strong> plan ended on {fmtDate(sub.expiresAt!)} and you&apos;re on Silver now. Your saved documents are kept — renew to unlock them.
+            </span>
           </p>
         ) : null}
       </section>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-3">
+      <div className="mt-8 flex flex-col items-center gap-2">
+        <div role="radiogroup" aria-label="Billing cycle" className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+          {(["monthly", "yearly"] as const).map((c) => (
+            <button
+              key={c}
+              type="button"
+              role="radio"
+              aria-checked={cycle === c}
+              disabled={c === "monthly" && !monthlyAvailable}
+              onClick={() => setCycle(c)}
+              className={cn(
+                "h-9 rounded-full px-5 text-sm font-semibold capitalize transition disabled:cursor-not-allowed disabled:opacity-40",
+                cycle === c ? "bg-[var(--primary)] text-white shadow" : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              {c}
+              {c === "yearly" ? <span className={cn("ml-1.5 text-[11px] font-bold normal-case", cycle === c ? "text-brand-neon" : "text-brand-600")}>Save up to {Math.max(yearlySaving("gold"), yearlySaving("platinum"))}%</span> : null}
+            </button>
+          ))}
+        </div>
+        {!monthlyAvailable ? <p className="text-xs text-slate-500">Monthly billing is coming soon.</p> : null}
+      </div>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-3">
         {PLANS.map((p) => {
           const Icon = PLAN_ICONS[p.id];
           const isCurrent = p.id === current;
+          const isRenewal = p.id === sub.paidPlan;
+          const amount = p.prices ? p.prices[cycle] : null;
           return (
             <div
               key={p.id}
@@ -103,14 +178,20 @@ export default function PricingPage() {
               <h2 className="mt-4 text-xl font-bold text-slate-900">{p.name}</h2>
               <p className="mt-1 text-sm text-slate-500">{p.headline}</p>
               <div className="mt-4">
-                {p.yearlyPrice === null ? (
+                {amount === null ? (
                   <p className="text-3xl font-bold text-slate-900">Free</p>
                 ) : (
                   <p className="text-3xl font-bold text-slate-900">
-                    {formatInr(p.yearlyPrice)} <span className="text-sm font-medium text-slate-500">per year · GST inclusive</span>
+                    {formatInr(amount)} <span className="text-sm font-medium text-slate-500">per {cycle === "monthly" ? "month" : "year"} · GST inclusive</span>
                   </p>
                 )}
-                <p className="mt-1 text-xs text-slate-500">{p.yearlyPrice === null ? "No subscription · no credit card" : p.subscriptionNote ?? "Billed yearly"}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {amount === null
+                    ? "No subscription · no credit card"
+                    : cycle === "yearly"
+                      ? `Save ${yearlySaving(p.id as PaidPlanId)}% vs monthly · ${GRACE_DAYS.yearly}-day grace period`
+                      : `Billed monthly · ${GRACE_DAYS.monthly}-day grace period`}
+                </p>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2" aria-label="Plan highlights">
                 {p.highlights.map((h) => (
@@ -120,7 +201,19 @@ export default function PricingPage() {
                   </div>
                 ))}
               </div>
-              <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">What&apos;s included</p>
+              <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">Services · {p.services.length} of {ALL_SERVICES.length}</p>
+              <ul className="mt-2 space-y-1.5">
+                {ALL_SERVICES.map((k) => {
+                  const open = p.services.includes(k);
+                  return (
+                    <li key={k} className={cn("flex items-center gap-2 text-sm", open ? "text-slate-800" : "text-slate-400")}>
+                      {open ? <Check className="h-4 w-4 shrink-0 text-brand-500" strokeWidth={3} /> : <Lock className="h-3.5 w-3.5 shrink-0" />}
+                      {SERVICE_LABELS[k]}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">Also included</p>
               <ul className="mt-2 flex-1 space-y-2">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
@@ -132,14 +225,14 @@ export default function PricingPage() {
                 <button type="button" disabled className={cn(secondaryBtn, "mt-6 w-full")}>{isCurrent ? "Your current plan" : "Included"}</button>
               ) : (
                 <button type="button" onClick={() => setCheckout(p.id as PaidPlanId)} className={cn(p.featured ? primaryBtn : secondaryBtn, "mt-6 w-full")}>
-                  {isCurrent ? "Renew" : info?.pending?.planId === p.id ? "View payment" : p.cta}
+                  {info?.pending?.planId === p.id ? "View payment" : isRenewal ? `Renew ${cycle}` : p.cta}
                 </button>
               )}
             </div>
           );
         })}
       </div>
-      <p className="mt-3 text-center text-xs text-slate-500">Paid plans billed yearly · All prices in INR · GST inclusive</p>
+      <p className="mt-3 text-center text-xs text-slate-500">All prices in INR · GST inclusive · No auto-renew — you pay again only when you choose to</p>
 
       <section className="mt-12">
         <h2 className="text-center text-2xl font-bold text-slate-900">Compare plans</h2>
@@ -195,6 +288,8 @@ export default function PricingPage() {
       {checkout ? (
         <CheckoutDialog
           planId={checkout}
+          cycle={cycle}
+          monthlyAvailable={monthlyAvailable}
           pending={info?.pending?.planId === checkout ? info.pending : null}
           onClose={() => {
             setCheckout(null);
@@ -209,15 +304,20 @@ export default function PricingPage() {
 
 function CheckoutDialog({
   planId,
+  cycle: initialCycle,
+  monthlyAvailable,
   pending,
   onClose,
   onSubmitted,
 }: {
   planId: PaidPlanId;
+  cycle: BillingCycle;
+  monthlyAvailable: boolean;
   pending: PendingPayment | null;
   onClose: () => void;
   onSubmitted: (p: PendingPayment) => void;
 }) {
+  const [cycle, setCycle] = useState<BillingCycle>(pending?.billingCycle ?? (monthlyAvailable ? initialCycle : "yearly"));
   const [config, setConfig] = useState<PlanInfo["paymentConfig"] | null>(null);
   const [loadError, setLoadError] = useState("");
   const [mode, setMode] = useState<"checkout" | "submitted" | "edit">(pending ? "submitted" : "checkout");
@@ -228,11 +328,16 @@ function CheckoutDialog({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    void api<PlanInfo>(`/api/agent/plan?plan=${planId}`).then((r) => {
+    let cancelled = false;
+    void api<PlanInfo>(`/api/agent/plan?plan=${planId}&cycle=${cycle}`).then((r) => {
+      if (cancelled) return;
       if (r.success && r.data?.paymentConfig) setConfig(r.data.paymentConfig);
       else setLoadError(r.error?.message || "Could not load payment details");
     });
-  }, [planId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [planId, cycle]);
 
   const name = config?.planName ?? (planId === "gold" ? "Gold" : "Platinum");
   const editing = mode === "edit";
@@ -251,7 +356,7 @@ function CheckoutDialog({
     setBusy(true);
     const r = await api<PendingPayment>("/api/agent/plan/submit", {
       method: "POST",
-      json: { planId, paymentTransactionId: txn.trim(), proof: proof?.dataUrl },
+      json: { planId, billingCycle: cycle, paymentTransactionId: txn.trim(), proof: proof?.dataUrl },
     });
     setBusy(false);
     if (!r.success || !r.data) return setError(r.error?.message || "Upload failed. Please try again.");
@@ -281,7 +386,7 @@ function CheckoutDialog({
       {mode === "submitted" && saved ? (
         <div className="mt-5 space-y-4">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800"><Crown className="h-4 w-4" /> {name} · {formatInr(saved.amountInr)}</p>
+            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800"><Crown className="h-4 w-4" /> {name} · {saved.billingCycle === "monthly" ? "Monthly" : "Yearly"} · {formatInr(saved.amountInr)}</p>
             <p className="mt-1 text-xs text-emerald-700">Submitted {new Date(saved.createdAt).toLocaleString("en-IN")}</p>
           </div>
           <div>
@@ -307,11 +412,11 @@ function CheckoutDialog({
           {!editing ? (
             loadError ? (
               <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{loadError}</p>
-            ) : !config ? (
+            ) : !config || config.cycle !== cycle ? (
               <PaymentDetailsSkeleton />
             ) : (
               <div className="rounded-2xl border border-brand-200 bg-brand-50/50 p-4">
-                <p className="text-xs text-slate-500">Amount due (1 year · GST inclusive)</p>
+                <p className="text-xs text-slate-500">Amount due ({config.cycle === "monthly" ? "1 month" : "1 year"} · GST inclusive)</p>
                 <p className="text-2xl font-bold text-slate-900">{formatInr(config.amountInr)}</p>
                 {config.qr ? (
                   <div className="mt-3 flex flex-col items-center gap-2 rounded-xl bg-white p-3 ring-1 ring-brand-100 sm:flex-row sm:items-start">
@@ -328,6 +433,33 @@ function CheckoutDialog({
                 )}
               </div>
             )
+          ) : null}
+
+          {monthlyAvailable ? (
+            <div>
+              <p className="mb-1.5 text-sm font-medium text-slate-700">Billing</p>
+              <div role="radiogroup" aria-label="Billing cycle" className="grid grid-cols-2 gap-2">
+                {(["monthly", "yearly"] as const).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    role="radio"
+                    aria-checked={cycle === c}
+                    onClick={() => setCycle(c)}
+                    className={cn(
+                      "rounded-xl border px-3 py-2 text-left text-sm transition",
+                      cycle === c ? "border-brand-400 bg-brand-50 ring-2 ring-brand-100" : "border-slate-200 hover:border-brand-200"
+                    )}
+                  >
+                    <span className="block font-semibold capitalize text-slate-900">{c}</span>
+                    <span className="block text-xs text-slate-500">
+                      {formatInr(PLAN_PRICES_INR[planId][c])} · {GRACE_DAYS[c]}-day grace
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {editing ? <p className="mt-1 text-xs text-slate-500">Changing the billing also changes the amount — make sure it matches what you paid.</p> : null}
+            </div>
           ) : null}
 
           <Field label="Transaction ID" htmlFor="txn" hint="Copy this from your payment app after you pay (UTR or transaction reference).">

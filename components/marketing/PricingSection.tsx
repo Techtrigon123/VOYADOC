@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { Check, Zap } from "lucide-react";
+import { Check, Lock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnimatedCard from "@/components/ui/AnimatedCard";
-import { PLANS, formatInr } from "@/lib/agent/plans";
+import { ALL_SERVICES, GRACE_DAYS, PLANS, SERVICE_LABELS, formatInr } from "@/lib/agent/plans";
 
 export default function PricingSection() {
   return (
@@ -12,7 +12,7 @@ export default function PricingSection() {
         {/* Heading */}
         <div className="text-center mb-12">
           <p className="text-sm font-semibold text-[var(--primary)] uppercase tracking-wider mb-3">Pricing</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">Simple, yearly pricing</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">Simple pricing, monthly or yearly</h2>
           <p className="max-w-xl mx-auto text-[var(--muted-foreground)]">
             Start free on Silver. Upgrade to Gold or Platinum from your dashboard whenever you&apos;re ready.
           </p>
@@ -49,14 +49,14 @@ export default function PricingSection() {
                   <div className="mb-6">
                     <div className="flex items-end gap-1">
                       <span className="text-4xl font-bold text-[var(--foreground)]">
-                        {plan.yearlyPrice == null ? "Free" : formatInr(plan.yearlyPrice)}
+                        {plan.prices == null ? "Free" : formatInr(plan.prices.yearly)}
                       </span>
-                      {plan.yearlyPrice != null && (
+                      {plan.prices != null && (
                         <span className="text-sm mb-1 text-[var(--muted-foreground)]">/year</span>
                       )}
                     </div>
                     <p className="text-xs mt-1 text-[var(--muted-foreground)]">
-                      {plan.yearlyPrice == null ? "Free forever · no card needed" : "Incl. GST · billed once a year · no auto-renew"}
+                      {plan.prices == null ? "Free forever · no card needed" : `or ${formatInr(plan.prices.monthly)}/month · incl. GST · no auto-renew`}
                     </p>
                   </div>
 
@@ -64,16 +64,28 @@ export default function PricingSection() {
                     href="/signup"
                     className={cn(
                       "mb-6 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors",
-                      plan.yearlyPrice == null || featured
+                      plan.prices == null || featured
                         ? "btn-glow"
                         : "border border-slate-300 bg-white text-slate-800 hover:border-brand-400 hover:text-brand-700",
                     )}
                   >
-                    {plan.yearlyPrice == null ? "Start free" : `Start free, upgrade to ${plan.name}`}
+                    {plan.prices == null ? "Start free" : `Start free, upgrade to ${plan.name}`}
                   </Link>
 
-                  <ul className="space-y-2.5 flex-1">
-                    {[...plan.highlights.map((h) => `${h.value} ${h.label.toLowerCase()}`), ...plan.features].map((feature) => (
+                  <ul className="mb-5 space-y-1.5" aria-label={`Services on ${plan.name}`}>
+                    {ALL_SERVICES.map((k) => {
+                      const open = plan.services.includes(k);
+                      return (
+                        <li key={k} className={cn("flex items-center gap-2.5 text-sm", open ? "text-[var(--foreground)]" : "text-slate-400")}>
+                          {open ? <Check className="h-4 w-4 shrink-0 text-brand-500" /> : <Lock className="h-3.5 w-3.5 shrink-0" />}
+                          {SERVICE_LABELS[k]}
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <ul className="space-y-2.5 flex-1 border-t border-[var(--border)] pt-4">
+                    {[...plan.highlights.filter((h) => h.label !== "Services").map((h) => `${h.value} ${h.label.toLowerCase()}`), ...plan.features].map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
                         <Check className="h-4 w-4 shrink-0 mt-0.5 text-brand-500" />
                         <span className="text-sm text-[var(--muted-foreground)]">{feature}</span>
@@ -87,7 +99,7 @@ export default function PricingSection() {
         </div>
 
         <p className="text-center text-sm text-[var(--muted-foreground)] mt-8">
-          Paid plans are paid by UPI and activated once we verify your payment. See our{" "}
+          Paid plans are paid by UPI and activated once we verify your payment. When a plan ends you get a {GRACE_DAYS.monthly}-day (monthly) or {GRACE_DAYS.yearly}-day (yearly) grace period to renew. See our{" "}
           <Link href="/refunds" className="underline underline-offset-2 hover:text-[var(--foreground)]">
             Refund Policy
           </Link>

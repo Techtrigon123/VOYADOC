@@ -355,7 +355,7 @@ export function InvoiceForm({
 
       <p className="text-right text-xs text-slate-500">Save &amp; Download stores the document and downloads the PDF. On mobile, WhatsApp can attach the PDF directly.</p>
       {/* Compact, right-aligned so it never sits under the centred floating prompts. */}
-      <div className="sticky bottom-4 z-10 ml-auto flex w-fit rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur">
+      <div className="chat-aware sticky bottom-4 z-10 ml-auto flex w-fit rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur">
         <div className="flex">
           <button type="button" onClick={() => run("download")} disabled={!!busy} className={cn(primaryBtn, "rounded-r-none")}>
             {busy === "download" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Save &amp; Download

@@ -1,9 +1,10 @@
+import "server-only";
 import { NextResponse } from "next/server";
 import { getSession, passwordVersion } from "@/lib/auth/jwt";
 import { documentExists, findUserWithPassword, updateUser, type DocRecord, type UserRecord } from "@/lib/db/repo";
 import type { Agent, DocumentSummary } from "./types";
 import { computeAutoVerified, missingActivationFields } from "./profile";
-import { documentAccess, effectivePlan } from "./plans";
+import { documentAccess, effectivePlan, subscriptionState } from "./plans";
 
 export function ok<T>(data: T, init?: { status?: number; message?: string }) {
   return NextResponse.json(
@@ -70,6 +71,8 @@ export function serializeAgent(u: UserRecord): Agent {
     agentLevel: u.agentLevel,
     subscriptionPlan: effectivePlan(u),
     subscriptionExpiresAt: u.subscriptionExpiresAt?.toISOString(),
+    subscriptionCycle: u.subscriptionCycle,
+    subscription: subscriptionState(u),
     airTicketingEnabled: u.airTicketingEnabled !== false,
     travelServiceVoucherEnabled: u.travelServiceVoucherEnabled !== false,
     welcomePlacardEnabled: u.welcomePlacardEnabled !== false,
@@ -117,7 +120,7 @@ export function summarizeDocument(d: DocRecord, user: UserRecord): DocumentSumma
     parentId: d.parentId,
     createdAt: d.createdAt.toISOString(),
     updatedAt: d.updatedAt.toISOString(),
-    access: documentAccess(effectivePlan(user), d.createdAt),
+    access: documentAccess(effectivePlan(user), d.createdAt, d.kind),
   };
 }
 

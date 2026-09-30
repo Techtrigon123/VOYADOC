@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireAgent, serializeAgent, summarizeDocument, isUuid, fail } from "@/lib/agent/server";
 import { effectivePlan } from "@/lib/agent/plans";
+import { lockedDocument } from "@/lib/agent/entitlements";
 import { renderDocumentPdf, pdfFileName } from "@/lib/pdf/render";
 import { getDocument, updateDocument } from "@/lib/db/repo";
 
@@ -16,8 +17,11 @@ export async function GET(req: NextRequest, { params }: Ctx) {
     const doc = await getDocument(user.id, id);
     if (!doc) return fail("Document not found.", 404);
 
-    if (summarizeDocument(doc, user).access.locked)
-      return fail("This PDF is locked on your plan. Upgrade to Gold or Platinum to open it again.", 403, "HISTORY_LOCKED");
+    const access = summarizeDocument(doc, user).access;
+    if (access.locked) {
+      const lock = lockedDocument(access, doc.kind);
+      return fail(lock.message, lock.status, lock.code);
+    }
 
     const bytes = await renderDocumentPdf(doc.kind, doc.data, serializeAgent(user), effectivePlan(user), {
       paidAmount: Number(doc.paidAmount ?? 0),

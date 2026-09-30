@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, KeyRound, LogOut, Menu, Search, Settings, UserRound, X } from "lucide-react";
+import { ChevronDown, KeyRound, Lock, LogOut, Menu, Search, Settings, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -17,7 +17,7 @@ import type { Agent, PlanId } from "@/lib/agent/types";
 import { displayName, initials } from "@/lib/agent/profile";
 import { useAgent } from "./AgentProvider";
 import { SearchPalette } from "./SearchPalette";
-import { isItemActive, visibleNavItems, type NavItem } from "./nav-config";
+import { isItemActive, lockedNavPlan, visibleNavItems, type NavItem } from "./nav-config";
 import BrandMark from "@/components/brand/BrandMark";
 
 const PLAN_STYLES: Record<PlanId, string> = {
@@ -60,7 +60,7 @@ export function AgentAvatar({ agent, size = 36 }: { agent: Agent; size?: number 
   );
 }
 
-function NavPill({ item, active, currentType }: { item: NavItem; active: boolean; currentType: string | null }) {
+function NavPill({ item, active, currentType, lockedPlan }: { item: NavItem; active: boolean; currentType: string | null; lockedPlan: string | null }) {
   const Icon = item.icon;
   const pill = (
     <span
@@ -72,12 +72,28 @@ function NavPill({ item, active, currentType }: { item: NavItem; active: boolean
       <Icon className={cn("h-[18px] w-[18px]", active ? "text-brand-500" : "text-slate-500 group-hover:text-slate-800")} strokeWidth={1.9} />
       <span className="flex items-center gap-0.5 leading-none">
         {item.label}
-        {item.subItems ? <ChevronDown className="h-3 w-3 opacity-60 transition group-data-[state=open]:rotate-180" /> : null}
+        {lockedPlan ? (
+          <Lock className="ml-0.5 h-3 w-3 text-slate-400" aria-label="Locked" />
+        ) : item.subItems ? (
+          <ChevronDown className="h-3 w-3 opacity-60 transition group-data-[state=open]:rotate-180" />
+        ) : null}
       </span>
       {active ? <span className="absolute -bottom-[9px] left-1/2 h-[3px] w-8 -translate-x-1/2 rounded-full bg-[var(--primary)]" /> : null}
     </span>
   );
 
+  // A service outside the plan links to Pricing instead of opening its menu.
+  if (lockedPlan) {
+    return (
+      <Link
+        href="/dashboard/pricing"
+        title={`${item.label} is on the ${lockedPlan === "gold" ? "Gold and Platinum plans" : "Platinum plan"} — upgrade to unlock`}
+        className="rounded-2xl opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+      >
+        {pill}
+      </Link>
+    );
+  }
   if (!item.subItems) {
     return (
       <Link href={item.href} aria-current={active ? "page" : undefined} className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">
@@ -177,7 +193,7 @@ export default function AgentNavbar() {
             {items.map((item, i) => (
               <React.Fragment key={item.key}>
                 {i === 1 || item.key === "pricing" ? <span className="mx-1.5 h-8 w-px bg-slate-200" aria-hidden /> : null}
-                <NavPill item={item} active={isItemActive(item, pathname)} currentType={currentType} />
+                <NavPill item={item} active={isItemActive(item, pathname)} currentType={currentType} lockedPlan={lockedNavPlan(item, agent)} />
               </React.Fragment>
             ))}
           </nav>
@@ -223,7 +239,7 @@ export default function AgentNavbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <PlanBadge plan={agent.subscriptionPlan} className="hidden sm:inline-flex" />
+            <PlanBadge plan={agent.subscription?.plan ?? agent.subscriptionPlan} className="hidden sm:inline-flex" />
 
             <button
               type="button"
@@ -243,6 +259,16 @@ export default function AgentNavbar() {
               {items.map((item) => {
                 const Icon = item.icon;
                 const active = isItemActive(item, pathname);
+                const lockedPlan = lockedNavPlan(item, agent);
+                if (lockedPlan)
+                  return (
+                    <Link key={item.key} href="/dashboard/pricing" className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-slate-500">
+                      <Icon className="h-5 w-5" /> {item.label}
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-slate-500">
+                        <Lock className="h-3 w-3" /> {lockedPlan}
+                      </span>
+                    </Link>
+                  );
                 return (
                   <div key={item.key} className={cn("rounded-2xl", active && "bg-brand-50/70")}>
                     <Link
@@ -270,7 +296,7 @@ export default function AgentNavbar() {
                 <p className="truncate text-sm font-semibold">{displayName(agent)}</p>
                 <p className="truncate text-xs text-slate-500">{agent.email}</p>
               </div>
-              <PlanBadge plan={agent.subscriptionPlan} />
+              <PlanBadge plan={agent.subscription?.plan ?? agent.subscriptionPlan} />
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Link href="/dashboard/profile" className="rounded-xl border border-slate-200 px-3 py-2 text-center text-sm font-medium">Profile</Link>

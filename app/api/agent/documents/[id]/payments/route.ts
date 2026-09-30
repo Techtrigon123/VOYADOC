@@ -8,6 +8,7 @@ import {
   type InvoiceKind,
 } from "@/lib/agent/documents";
 import { createDocument, documentExists, getDocument, listDocuments, updateDocument } from "@/lib/db/repo";
+import { creationBlock, lockedDocument } from "@/lib/agent/entitlements";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -52,6 +53,14 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const { id } = await params;
     const { user, doc, response } = await loadParent(id);
     if (response) return response;
+
+    const access = summarizeDocument(doc, user).access;
+    if (access.locked) {
+      const lock = lockedDocument(access, doc.kind);
+      return fail(lock.message, lock.status, lock.code);
+    }
+    const block = await creationBlock(user, "receipt");
+    if (block) return fail(block.message, block.status, block.code);
 
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     const date = String(body?.date ?? "");

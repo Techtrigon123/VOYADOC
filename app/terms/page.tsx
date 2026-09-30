@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { type LegalSection } from "@/components/legal/LegalPage";
 import { SITE } from "@/lib/site";
-import { PAID_PLAN_PRICE_INR, SILVER_RETENTION_DAYS, formatInr } from "@/lib/agent/plans";
+import { FREE_MONTHLY_DOCUMENTS, GRACE_DAYS, PLAN_PRICES_INR, SILVER_RETENTION_DAYS, formatInr } from "@/lib/agent/plans";
 
 export const metadata: Metadata = {
   title: "Terms and Conditions",
@@ -72,19 +72,30 @@ const sections: LegalSection[] = [
       <>
         <ul>
           <li>
-            <strong>Silver</strong> is free. Documents stay open for {SILVER_RETENTION_DAYS} days from creation and are then
-            locked (not deleted). PDFs carry a watermark, and upload auto-fill is limited per day.
+            <strong>Silver</strong> is free and includes hotel vouchers, invoices, proforma invoices and payment receipts, with up
+            to {FREE_MONTHLY_DOCUMENTS} new documents per calendar month (India time). Documents stay open for{" "}
+            {SILVER_RETENTION_DAYS} days from creation and are then locked (not deleted). PDFs carry a watermark, and upload
+            auto-fill is limited per day.
           </li>
           <li>
-            <strong>Gold</strong> costs {formatInr(PAID_PLAN_PRICE_INR.gold)} and <strong>Platinum</strong> costs{" "}
-            {formatInr(PAID_PLAN_PRICE_INR.platinum)} per year, inclusive of GST. Features and limits are shown on the
+            <strong>Gold</strong> adds air tickets and costs {formatInr(PLAN_PRICES_INR.gold.monthly)} per month or{" "}
+            {formatInr(PLAN_PRICES_INR.gold.yearly)} per year. <strong>Platinum</strong> includes every service, including pickup
+            vouchers and welcome placards, and costs {formatInr(PLAN_PRICES_INR.platinum.monthly)} per month or{" "}
+            {formatInr(PLAN_PRICES_INR.platinum.yearly)} per year. Prices include GST. Features and limits are shown on the
             pricing page.
           </li>
           <li>
             Paid plans are paid in advance by UPI or bank transfer. After you submit your transaction ID and payment proof,
-            we verify the payment and activate your plan. Benefits run for one year from activation.
+            we verify the payment and activate your plan. Benefits run for one month (monthly billing) or one year (yearly
+            billing) from activation. If you renew before your plan ends, or during its grace period, the new term starts
+            from your old end date.
           </li>
-          <li>Paid plans do not renew automatically. When a plan ends, your account returns to Silver until you renew.</li>
+          <li>
+            Paid plans do not renew automatically. When a plan ends it keeps working for a grace period of{" "}
+            {GRACE_DAYS.monthly} days (monthly) or {GRACE_DAYS.yearly} days (yearly), during which you can renew monthly or
+            yearly. After the grace period your account returns to Silver until you renew: services outside Silver are locked,
+            and your saved documents are kept.
+          </li>
           <li>
             We may change prices for future periods with at least 30 days&apos; notice. A price change never affects a
             period you have already paid for.

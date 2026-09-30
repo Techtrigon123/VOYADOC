@@ -432,3 +432,51 @@ html[data-theme="dark"] .keep-light {
 
 html[data-theme="dark"] .theme-toggle { background: #141414; color: #a3ff47; border-color: rgb(255 255 255 / 0.12); box-shadow: 0 10px 30px -10px rgb(163 255 71 / 0.35); }
 html[data-theme="dark"] .theme-toggle:hover { background: #a3ff47; color: #0a0a0a; }
+
+/* Live chat bubble (components/ChatWidget.tsx) sits bottom-right: lift anything else anchored there. */
+html.has-chat-widget .chat-aware {
+  bottom: 5.5rem;
+}
+
+/* Document cards (components/marketing/DocumentsSection.tsx): gentle 3D tilt toward the cursor. */
+.doc-card {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out, box-shadow 0.3s ease;
+}
+.doc-card:hover {
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(163 255 71 / 0.08);
+}
+@media (prefers-reduced-motion: reduce) {
+  .doc-card {
+    transform: none !important;
+  }
+}
+
+/* How-it-works spider diagram (components/marketing/HowItWorksSection.tsx) */
+.spider-line {
+  stroke-dasharray: 6 10;
+  stroke-linecap: round;
+  animation: spider-flow 1.4s linear infinite;
+  filter: drop-shadow(0 0 4px rgb(163 255 71 / 0.6));
+}
+@keyframes spider-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+.spider-orbit {
+  animation: spider-spin 24s linear infinite;
+}
+@keyframes spider-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spider-line,
+  .spider-orbit {
+    animation: none;
+  }
+}
+

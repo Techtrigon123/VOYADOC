@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import CookieConsent from "@/components/consent/CookieConsent";
+import ChatWidget from "@/components/ChatWidget";
 import ThemedToaster from "@/components/ThemedToaster";
 import { THEME_SCRIPT } from "@/lib/theme-script";
 import { SITE } from "@/lib/site";
@@ -83,6 +84,7 @@ export default function RootLayout({
         {children}
         <CookieConsent />
         <ThemedToaster />
+        <ChatWidget />
       </body>
     </html>
   );

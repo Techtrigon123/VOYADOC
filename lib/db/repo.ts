@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "./supabase";
 import type { DocumentKind, PartnerType, AgentStatus, PlanId } from "@/lib/agent/types";
 
@@ -36,6 +37,22 @@ function toRow(patch: Record<string, unknown>): Record<string, unknown> {
 function check<T>(res: { data: T; error: { message: string } | null }): T {
   if (res.error) throw new Error(`Supabase: ${res.error.message}`);
   return res.data;
+}
+
+/**
+ * Whether a column added by a later migration exists yet. Checked once, then re-checked
+ * every minute while missing — so the app keeps working before the migration is run and
+ * picks the column up afterwards without a restart.
+ */
+const columnCache = new Map<string, { present: boolean; checkedAt: number }>();
+export async function hasColumn(table: string, column: string): Promise<boolean> {
+  const key = `${table}.${column}`;
+  const cached = columnCache.get(key);
+  if (cached && (cached.present || Date.now() - cached.checkedAt < 60_000)) return cached.present;
+  const { error } = await db().from(table).select(column).limit(0);
+  const present = !error;
+  columnCache.set(key, { present, checkedAt: Date.now() });
+  return present;
 }
 
 /** Safe value for PostgREST `or=(…ilike…)` filters: drop filter syntax, escape LIKE wildcards. */
@@ -98,6 +115,7 @@ export interface UserRecord {
   agentLevel?: string;
   subscriptionPlan: PlanId;
   subscriptionExpiresAt?: Date;
+  subscriptionCycle?: "monthly" | "yearly";
   airTicketingEnabled: boolean;
   travelServiceVoucherEnabled: boolean;
   welcomePlacardEnabled: boolean;
@@ -114,22 +132,27 @@ export type UserPatch = Partial<Omit<UserRecord, "id" | "createdAt" | "updatedAt
 };
 
 // Never select secrets unless a caller asks for them explicitly.
-const USER_COLUMNS =
+const USER_BASE_COLUMNS =
   "id,name,email,organization,role,mobile,landline_number,brand_name,company_name,partner_type,partner_type_other,address,city,state,country,pincode,gst_number,iata_number,brand_logo,company_stamp,bank_account_holder,bank_name,bank_account_number,bank_ifsc_code,bank_branch_address,payment_upi,status,is_verified,agent_level,subscription_plan,subscription_expires_at,air_ticketing_enabled,travel_service_voucher_enabled,welcome_placard_enabled,document_number_settings,extract_usage,created_at,updated_at";
 
+/** User columns, including subscription_cycle once migration 0005 has been run. */
+async function userColumns(): Promise<string> {
+  return (await hasColumn("users", "subscription_cycle")) ? `${USER_BASE_COLUMNS},subscription_cycle` : USER_BASE_COLUMNS;
+}
+
 export async function findUserById(id: string): Promise<UserRecord | null> {
-  const row = check(await db().from("users").select(USER_COLUMNS).eq("id", id).maybeSingle());
+  const row = check(await db().from("users").select(await userColumns()).eq("id", id).maybeSingle());
   return fromRow<UserRecord>(row as Record<string, unknown> | null);
 }
 
 export async function findUserByEmail(email: string): Promise<UserRecord | null> {
-  const row = check(await db().from("users").select(USER_COLUMNS).eq("email", email.trim().toLowerCase()).maybeSingle());
+  const row = check(await db().from("users").select(await userColumns()).eq("email", email.trim().toLowerCase()).maybeSingle());
   return fromRow<UserRecord>(row as Record<string, unknown> | null);
 }
 
 /** For login / password change only. */
 export async function findUserWithPassword(by: { id?: string; email?: string }): Promise<(UserRecord & { passwordHash: string }) | null> {
-  let q = db().from("users").select(`${USER_COLUMNS},password_hash`);
+  let q = db().from("users").select(`${await userColumns()},password_hash`);
   q = by.id ? q.eq("id", by.id) : q.eq("email", (by.email ?? "").trim().toLowerCase());
   const row = check(await q.maybeSingle());
   return fromRow<UserRecord & { passwordHash: string }>(row as Record<string, unknown> | null);
@@ -137,7 +160,7 @@ export async function findUserWithPassword(by: { id?: string; email?: string }):
 
 export async function findUserByResetToken(token: string): Promise<UserRecord | null> {
   const row = check(
-    await db().from("users").select(USER_COLUMNS).eq("reset_token", token).gt("reset_token_expiry", new Date().toISOString()).maybeSingle()
+    await db().from("users").select(await userColumns()).eq("reset_token", token).gt("reset_token_expiry", new Date().toISOString()).maybeSingle()
   );
   return fromRow<UserRecord>(row as Record<string, unknown> | null);
 }
@@ -147,15 +170,15 @@ export async function createUser(input: { name: string; email: string; passwordH
     await db()
       .from("users")
       .insert(toRow({ ...input, email: input.email.trim().toLowerCase(), role: "owner" }))
-      .select(USER_COLUMNS)
+      .select(await userColumns())
       .single()
   );
-  return fromRow<UserRecord>(row as Record<string, unknown>)!;
+  return fromRow<UserRecord>(row as unknown as Record<string, unknown>)!;
 }
 
 export async function updateUser(id: string, patch: UserPatch): Promise<UserRecord> {
-  const row = check(await db().from("users").update(toRow(patch)).eq("id", id).select(USER_COLUMNS).single());
-  return fromRow<UserRecord>(row as Record<string, unknown>)!;
+  const row = check(await db().from("users").update(toRow(patch)).eq("id", id).select(await userColumns()).single());
+  return fromRow<UserRecord>(row as unknown as Record<string, unknown>)!;
 }
 
 /* ─── agent documents ───────────────────────────────────────────────────── */
@@ -252,11 +275,12 @@ export async function documentExists(agentId: string, where: { kind?: DocumentKi
   return (res.count ?? 0) > 0;
 }
 
-export async function latestVersionInGroup(agentId: string, groupKey: string): Promise<number> {
+/** Highest version in a group, or `ifNone` when the group has no documents. */
+export async function latestVersionInGroup(agentId: string, groupKey: string, ifNone = 1): Promise<number> {
   const row = check(
     await db().from("agent_documents").select("version").eq("agent_id", agentId).eq("group_key", groupKey).order("version", { ascending: false }).limit(1).maybeSingle()
   );
-  return (row as { version?: number } | null)?.version ?? 1;
+  return row ? ((row as { version?: number | null }).version ?? 1) : ifNone;
 }
 
 export async function searchDocuments(agentId: string, q: string, limit = 20) {
@@ -339,6 +363,7 @@ export interface PlanPaymentRecord {
   id: string;
   agentId: string;
   planId: "gold" | "platinum";
+  billingCycle?: "monthly" | "yearly";
   amountInr: number;
   paymentTransactionId: string;
   proof: string;
@@ -360,9 +385,21 @@ export async function createPlanPayment(input: Omit<PlanPaymentRecord, "id" | "s
   return fromRow<PlanPaymentRecord>(row as Record<string, unknown>)!;
 }
 
-export async function updatePlanPayment(id: string, patch: Partial<Pick<PlanPaymentRecord, "paymentTransactionId" | "proof" | "proofType">>): Promise<PlanPaymentRecord> {
+export async function updatePlanPayment(id: string, patch: Partial<Pick<PlanPaymentRecord, "paymentTransactionId" | "proof" | "proofType" | "billingCycle" | "amountInr">>): Promise<PlanPaymentRecord> {
   const row = check(await db().from("plan_payments").update(toRow(patch)).eq("id", id).select("*").single());
   return fromRow<PlanPaymentRecord>(row as Record<string, unknown>)!;
+}
+
+/** New documents (first versions only — edits and new versions don't count) created since a date. */
+export async function countNewDocumentsSince(agentId: string, since: Date): Promise<number> {
+  const { count, error } = await db()
+    .from("agent_documents")
+    .select("id", { count: "exact", head: true })
+    .eq("agent_id", agentId)
+    .gte("created_at", since.toISOString())
+    .or("version.is.null,version.eq.1");
+  if (error) throw new Error(`Supabase: ${error.message}`);
+  return count ?? 0;
 }
 
 /* ─── support messages ───────────────────────────────────────────────────── */

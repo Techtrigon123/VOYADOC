@@ -1,80 +1,67 @@
-import React from "react";
-import AnimatedCard from "@/components/ui/AnimatedCard";
-import {
-  FileText,
-  Receipt,
-  FileCheck,
-  CreditCard,
-  Quote,
-  FolderOpen,
-  Download,
-  Settings2,
-} from "lucide-react";
+"use client";
 
-const services = [
+import React from "react";
+import { BedDouble, Car, FileText, Landmark, Plane, ReceiptText, Signpost, UploadCloud } from "lucide-react";
+import AnimatedCard from "@/components/ui/AnimatedCard";
+import ImageInfoCard, { type ImageInfo } from "@/components/marketing/ImageInfoCard";
+
+/** The core services Voyenta provides — the 7 document types plus upload auto-fill. Informational only. */
+const services: ImageInfo[] = [
   {
-    icon: FileText,
     title: "Hotel Vouchers",
-    description:
-      "Create professional hotel vouchers with guest, hotel, booking, room, stay and agency details.",
-    color: "bg-indigo-50 text-indigo-600",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+    description: "Check-in confirmations with guest, hotel, stay and booking details.",
+    includes: ["Guest & stay", "Rooms & meal plan", "Booking reference"],
+    icon: BedDouble,
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
   },
   {
-    icon: Receipt,
-    title: "Proforma Invoices",
-    description:
-      "Prepare clear preliminary invoices and quotations for customers before final billing.",
-    color: "bg-emerald-50 text-emerald-600",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80",
+    title: "Air Tickets",
+    description: "Offline e-tickets with flights, passengers and fare.",
+    includes: ["PNR & ticket no.", "Baggage", "Fare breakup"],
+    icon: Plane,
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80",
   },
   {
-    icon: FileCheck,
+    title: "Pickup Vouchers",
+    description: "Transfer details your driver and guest can both follow.",
+    includes: ["Driver & vehicle", "Pickup time", "Drop location"],
+    icon: Car,
+    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80",
+  },
+  {
+    title: "Welcome Placards",
+    description: "Airport and hotel welcome boards with your guest's name.",
+    includes: ["Guest name", "Your branding", "Print ready"],
+    icon: Signpost,
+    image: "https://images.unsplash.com/photo-1517400508447-f8dd518b86db?w=800&q=80",
+  },
+  {
     title: "GST / Tax Invoices",
-    description:
-      "Generate professional invoices with customer, business, pricing, tax and transaction details.",
-    color: "bg-blue-50 text-blue-600",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80",
+    description: "Tax invoices with GST worked out for you.",
+    includes: ["CGST · SGST · IGST", "Place of supply", "Payments tracked"],
+    icon: Landmark,
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
   },
   {
-    icon: CreditCard,
+    title: "Proforma Invoices",
+    description: "Priced quotations your customer approves before paying.",
+    includes: ["Line items", "Taxes shown", "Before payment"],
+    icon: FileText,
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80",
+  },
+  {
     title: "Payment Receipts",
-    description:
-      "Create clear payment receipts for advances, full payments and other customer transactions.",
-    color: "bg-purple-50 text-purple-600",
-    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80",
+    description: "Proof of each payment, linked to its invoice.",
+    includes: ["Amount & mode", "Transaction ref", "Balance due"],
+    icon: ReceiptText,
+    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80",
   },
   {
-    icon: Quote,
-    title: "Travel Quotations",
-    description:
-      "Prepare professional quotations for travel packages, accommodations, transfers and other services.",
-    color: "bg-amber-50 text-amber-600",
-    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80",
-  },
-  {
-    icon: FolderOpen,
-    title: "Document Management",
-    description:
-      "Keep your travel documents organized in one centralized workspace instead of scattered files.",
-    color: "bg-rose-50 text-rose-600",
-    image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80",
-  },
-  {
-    icon: Download,
-    title: "PDF Generation",
-    description:
-      "Turn your completed document information into clean, professional PDFs ready for download, printing or sharing.",
-    color: "bg-teal-50 text-teal-600",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-  },
-  {
-    icon: Settings2,
-    title: "Custom Documents",
-    description:
-      "Create additional business documents required by your travel workflow using reusable document structures.",
-    color: "bg-brand-50 text-brand-600",
-    image: "https://images.unsplash.com/photo-1523240794352-6a386f20230a?w=600&q=80",
+    title: "Upload Auto-fill",
+    description: "Upload a hotel voucher or airline e-ticket and the form fills itself.",
+    includes: ["PDF or photo", "Hotel vouchers", "Air tickets"],
+    icon: UploadCloud,
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
   },
 ];
 
@@ -84,50 +71,20 @@ export default function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="text-center mb-16">
-          <p className="text-sm font-semibold text-[var(--primary)] uppercase tracking-wider mb-3">
-            Services
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">
-            Everything You Need for Travel Documentation
-          </h2>
+          <p className="text-sm font-semibold text-[var(--primary)] uppercase tracking-wider mb-3">Services</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">Everything You Need for Travel Documentation</h2>
           <p className="max-w-xl mx-auto text-[var(--muted-foreground)]">
-            From hotel vouchers to invoices and quotations — create the documents your travel business needs from one place.
+            Hotel vouchers, air tickets, transfers, welcome boards and GST billing — every document your travel business sends, from one place.
           </p>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => {
-            const Icon = service.icon;
-            return (
-              <AnimatedCard key={service.title} delay={index * 80}>
-                <div
-                  className="group rounded-xl border border-[var(--border)] overflow-hidden hover:border-indigo-200 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl bg-white h-full"
-                >
-                  <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div
-                      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${service.color} mb-4`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[var(--foreground)] mb-2">
-                      {service.title}
-                    </h3>
-                    <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-            );
-          })}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 [perspective:1200px]">
+          {services.map((service, index) => (
+            <AnimatedCard key={service.title} delay={index * 80}>
+              <ImageInfoCard item={service} className="min-h-[300px]" />
+            </AnimatedCard>
+          ))}
         </div>
       </div>
     </section>

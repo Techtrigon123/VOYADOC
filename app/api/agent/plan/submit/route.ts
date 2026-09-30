@@ -1,11 +1,15 @@
 import { NextRequest } from "next/server";
-import { createPlanPayment, findPendingPlanPayment, updatePlanPayment } from "@/lib/db/repo";
+import { createPlanPayment, findPendingPlanPayment, hasColumn, updatePlanPayment } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
-import { isPaidPlan, PAID_PLAN_PRICE_INR } from "@/lib/agent/plans";
+import { isBillingCycle, isPaidPlan, normalizeCycle, PLAN_PRICES_INR } from "@/lib/agent/plans";
 
 const MAX_PROOF_BYTES = 3 * 1024 * 1024;
 
-/** Submit (or edit) payment proof for a paid plan. Our team verifies it and activates the plan. */
+/**
+ * Submit (or edit) payment proof for a paid plan. Body: { planId, billingCycle?, paymentTransactionId, proof? }.
+ * The amount always comes from PLAN_PRICES_INR, never from the client. Our team verifies the
+ * payment and activates the plan with approve_plan_payment() (see migration 0005).
+ */
 export async function POST(req: NextRequest) {
   try {
     const { user, response } = await requireAgent();
@@ -15,9 +19,17 @@ export async function POST(req: NextRequest) {
     const planId = String(body?.planId ?? "");
     const txn = String(body?.paymentTransactionId ?? "").trim();
     const proof = body?.proof;
+    const requestedCycle = body?.billingCycle ?? "yearly";
 
     if (!isPaidPlan(planId)) return fail("Choose Gold or Platinum.");
+    if (!isBillingCycle(requestedCycle)) return fail("Choose monthly or yearly billing.");
+    // Monthly billing needs migration 0005 (plan_payments.billing_cycle); until then only yearly is sold.
+    const cyclesStored = await hasColumn("plan_payments", "billing_cycle");
+    if (requestedCycle === "monthly" && !cyclesStored)
+      return fail("Monthly billing isn't available yet. Choose yearly, or try again later.", 400, "MONTHLY_UNAVAILABLE");
+    const billingCycle = normalizeCycle(requestedCycle);
     if (!txn) return fail("Please enter the transaction ID from your payment app.");
+    if (txn.length > 100) return fail("That transaction ID is too long.");
 
     const existing = await findPendingPlanPayment(user.id, planId);
     const hasNewProof = typeof proof === "string" && proof.length > 0;
@@ -28,16 +40,21 @@ export async function POST(req: NextRequest) {
         return fail("Upload a PNG, JPG, WebP image or PDF under 3 MB.");
     }
 
+    const amountInr = PLAN_PRICES_INR[planId][billingCycle];
+    const cycleFields = cyclesStored ? { billingCycle } : {};
     const proofType = hasNewProof ? (proof as string).slice(5, (proof as string).indexOf(";")) : undefined;
     const payment = existing
       ? await updatePlanPayment(existing.id, {
           paymentTransactionId: txn,
+          amountInr,
+          ...cycleFields,
           ...(hasNewProof ? { proof: proof as string, proofType: proofType! } : {}),
         })
       : await createPlanPayment({
           agentId: user.id,
           planId,
-          amountInr: PAID_PLAN_PRICE_INR[planId],
+          ...cycleFields,
+          amountInr,
           paymentTransactionId: txn,
           proof: proof as string,
           proofType: proofType ?? "image/png",
@@ -47,6 +64,7 @@ export async function POST(req: NextRequest) {
       {
         id: payment.id,
         planId: payment.planId,
+        billingCycle: normalizeCycle(payment.billingCycle),
         amountInr: payment.amountInr,
         paymentTransactionId: payment.paymentTransactionId,
         proof: payment.proof,

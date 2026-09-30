@@ -10,7 +10,7 @@ import { useAgent } from "@/components/agent/AgentProvider";
 import { KIND_ICONS, type AccessSummary } from "@/components/agent/DocumentAccessWarning";
 import { PageHeader, PageShell, primaryBtn, secondaryBtn } from "@/components/agent/ui";
 import { api, downloadPdf, formatDay } from "@/lib/agent/client";
-import { accessLabel, formatInr, PAID_PLAN_PRICE_INR } from "@/lib/agent/plans";
+import { accessLabel, formatInr, PLAN_PRICES_INR } from "@/lib/agent/plans";
 import { StatsListSkeleton } from "@/components/agent/skeletons";
 
 export default function DocumentAccessPage() {
@@ -157,14 +157,14 @@ export default function DocumentAccessPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5">
                 <Sparkles className="h-6 w-6 text-brand-500" />
-                <p className="mt-2 text-lg font-bold text-slate-900">Gold · {formatInr(PAID_PLAN_PRICE_INR.gold)}/yr</p>
-                <p className="text-sm text-slate-600">Keep every file forever. Unlimited file access — no {summary.retentionDays}-day limit. Reopen locked vouchers, invoices &amp; tickets.</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Gold · from {formatInr(PLAN_PRICES_INR.gold.monthly)}/mo</p>
+                <p className="text-sm text-slate-600">Keep every file forever — no {summary.retentionDays}-day limit — and add air tickets. Reopen locked vouchers and invoices. {formatInr(PLAN_PRICES_INR.gold.yearly)} if you pay yearly.</p>
                 <Link href="/dashboard/pricing?plan=gold" className={`${primaryBtn} mt-4`}>Choose Gold</Link>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
                 <Crown className="h-6 w-6 text-slate-700" />
-                <p className="mt-2 text-lg font-bold text-slate-900">Platinum · {formatInr(PAID_PLAN_PRICE_INR.platinum)}/yr</p>
-                <p className="text-sm text-slate-600">Everything in Gold, plus unlimited PDF uploads. Best for high-volume agencies.</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Platinum · from {formatInr(PLAN_PRICES_INR.platinum.monthly)}/mo</p>
+                <p className="text-sm text-slate-600">All 7 services, including pickup vouchers and welcome placards, plus unlimited PDF uploads. {formatInr(PLAN_PRICES_INR.platinum.yearly)} if you pay yearly.</p>
                 <Link href="/dashboard/pricing?plan=platinum" className={`${secondaryBtn} mt-4`}>Choose Platinum</Link>
               </div>
               <p className="text-sm text-slate-500 md:col-span-2">

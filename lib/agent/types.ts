@@ -42,6 +42,9 @@ export interface Agent {
   agentLevel?: string;
   subscriptionPlan: PlanId;
   subscriptionExpiresAt?: string;
+  subscriptionCycle?: "monthly" | "yearly";
+  /** Computed plan status: active, in its grace period, lapsed… */
+  subscription?: import("./plans").SubscriptionState;
   airTicketingEnabled: boolean;
   travelServiceVoucherEnabled: boolean;
   welcomePlacardEnabled: boolean;
@@ -76,6 +79,10 @@ export interface DocumentSummary {
 
 export interface DocumentAccess {
   locked: boolean;
+  /** Why it's locked: the service isn't on the current plan, or Silver's history window has passed. */
+  reason?: "plan" | "history";
+  /** For reason "plan": the cheapest plan that opens this document type. */
+  requiredPlan?: PlanId;
   /** null when access never closes (Gold / Platinum). */
   remainingDays: number | null;
   accessUntil: string | null;

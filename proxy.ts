@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth/jwt";
-import { checkRateLimit, clientIp, findRule, retryMessage } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp, findRules, retryMessage, type RateResult } from "@/lib/rate-limit";
 
 const PROTECTED_PATHS = ["/dashboard", "/setup"];
 const AUTH_PATHS = ["/login", "/signup"];
@@ -45,23 +45,38 @@ async function limitApi(request: NextRequest): Promise<NextResponse> {
 
   if (WRITE_METHODS.has(request.method)) {
     if (crossSite(request)) return apiError(pathname, 403, "Cross-site request blocked.", "CROSS_SITE");
-    const length = Number(request.headers.get("content-length") ?? 0);
-    if (length > maxBodyBytes(pathname))
+    // A streamed (chunked) body has no Content-Length, so the size cap below couldn't see it.
+    // Browsers always send a length for fetch/form bodies, so only scripts are affected.
+    const declared = request.headers.get("content-length");
+    if (declared === null && request.headers.get("transfer-encoding"))
+      return apiError(pathname, 411, "Request body must declare its size.", "LENGTH_REQUIRED");
+    const length = Number(declared ?? 0);
+    if (!Number.isFinite(length) || length > maxBodyBytes(pathname))
       return apiError(pathname, 413, "That request is too large. Try a smaller file.", "TOO_LARGE");
   }
 
-  const rule = findRule(pathname, request.method);
-  if (!rule) return NextResponse.next();
+  const rules = findRules(pathname, request.method);
+  if (rules.length === 0) return NextResponse.next();
 
-  const ip = clientIp(request.headers);
-  let identity = `ip:${ip}`;
-  if (rule.scope === "user") {
+  const ipIdentity = `ip:${clientIp(request.headers)}`;
+  let userIdentity: string | null = null;
+  if (rules.some((r) => r.scope === "user")) {
     const token = request.cookies.get(COOKIE)?.value;
     const session = token ? verifyToken(token) : null;
-    if (session?.userId) identity = `user:${session.userId}`;
+    if (session?.userId) userIdentity = `user:${session.userId}`;
   }
 
-  const result = await checkRateLimit(rule, identity);
+  // Check the burst limit first, then each daily ceiling; the first one exceeded wins.
+  let result: RateResult | null = null;
+  for (const rule of rules) {
+    const r = await checkRateLimit(rule, rule.scope === "user" ? userIdentity ?? ipIdentity : ipIdentity);
+    if (!result) result = r; // headers describe the burst limit
+    if (!r.allowed) {
+      result = r;
+      break;
+    }
+  }
+  if (!result) return NextResponse.next();
   const headers = {
     "RateLimit-Limit": String(result.limit),
     "RateLimit-Remaining": String(result.remaining),

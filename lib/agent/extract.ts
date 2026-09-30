@@ -1,6 +1,8 @@
+import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
+import { MAX_OUTPUT_TOKENS } from "@/lib/ai-budget";
 
 /**
  * Upload auto-fill: read a hotel voucher or airline e-ticket (PDF or photo)
@@ -81,8 +83,17 @@ const TicketSchema = z.object({
 export type ExtractedVoucher = z.infer<typeof VoucherSchema>;
 export type ExtractedTicket = z.infer<typeof TicketSchema>;
 
+export type TokenUsage = { input_tokens: number; output_tokens: number };
+
 export class ExtractError extends Error {
-  constructor(public code: "EXTRACT_FAILED" | "EXTRACT_TEMPORARY" | "EXTRACT_UNAVAILABLE", message: string) {
+  constructor(
+    public code: "EXTRACT_FAILED" | "EXTRACT_TEMPORARY" | "EXTRACT_UNAVAILABLE",
+    message: string,
+    /** Token usage when the API answered (and billed) but the answer wasn't usable. */
+    public usage?: TokenUsage,
+    /** True when the API certainly didn't bill the call, so the user's allowance can be refunded. */
+    public notBilled = false
+  ) {
     super(message);
   }
 }
@@ -99,9 +110,10 @@ type Media = "application/pdf" | "image/png" | "image/jpeg" | "image/webp" | "im
 export async function extractFromFile(
   kind: "voucher" | "ticket",
   file: { base64: string; mediaType: Media }
-): Promise<ExtractedVoucher | ExtractedTicket> {
-  if (!extractAvailable()) throw new ExtractError("EXTRACT_UNAVAILABLE", "Upload auto-fill is not available right now.");
-  const client = new Anthropic();
+): Promise<{ fields: ExtractedVoucher | ExtractedTicket; usage: TokenUsage }> {
+  if (!extractAvailable()) throw new ExtractError("EXTRACT_UNAVAILABLE", "Upload auto-fill is not available right now.", undefined, true);
+  // One retry at most (each retry re-sends and re-bills the whole file) and a hard 60 s ceiling.
+  const client = new Anthropic({ maxRetries: 1, timeout: 60_000 });
   const source: Anthropic.Beta.BetaContentBlockParam =
     file.mediaType === "application/pdf"
       ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: file.base64 } }
@@ -110,7 +122,7 @@ export async function extractFromFile(
   try {
     const response = await client.beta.messages.parse({
       model: MODEL,
-      max_tokens: 16000,
+      max_tokens: MAX_OUTPUT_TOKENS,
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       thinking: { type: "adaptive" },
@@ -120,17 +132,22 @@ export async function extractFromFile(
       },
       messages: [{ role: "user", content: [source, { type: "text", text: PROMPTS[kind] }] }],
     });
-    if (response.stop_reason === "refusal" || !response.parsed_output) {
-      throw new ExtractError("EXTRACT_FAILED", "Could not read this file.");
+    const usage = { input_tokens: response.usage.input_tokens, output_tokens: response.usage.output_tokens };
+    if (response.stop_reason === "refusal" || response.stop_reason === "max_tokens" || !response.parsed_output) {
+      throw new ExtractError("EXTRACT_FAILED", "Could not read this file.", usage);
     }
-    return response.parsed_output as ExtractedVoucher | ExtractedTicket;
+    return { fields: response.parsed_output as ExtractedVoucher | ExtractedTicket, usage };
   } catch (error) {
     if (error instanceof ExtractError) throw error;
+    // Rejected before any tokens were processed: not billed, so the allowance is refunded.
     if (error instanceof Anthropic.RateLimitError || error instanceof Anthropic.InternalServerError) {
-      throw new ExtractError("EXTRACT_TEMPORARY", "The reader is busy. Please try again in a minute.");
+      throw new ExtractError("EXTRACT_TEMPORARY", "The reader is busy. Please try again in a minute.", undefined, true);
     }
     if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
-      throw new ExtractError("EXTRACT_UNAVAILABLE", "Upload auto-fill is not available right now.");
+      throw new ExtractError("EXTRACT_UNAVAILABLE", "Upload auto-fill is not available right now.", undefined, true);
+    }
+    if (error instanceof Anthropic.BadRequestError) {
+      throw new ExtractError("EXTRACT_FAILED", "Could not read this file.", undefined, true);
     }
     if (error instanceof Anthropic.APIError) {
       throw new ExtractError("EXTRACT_FAILED", "Could not read this file.");

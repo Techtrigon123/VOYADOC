@@ -9,6 +9,8 @@ const signupSchema = z.object({
   email: z.string().trim().email().max(200),
   password: z.string().min(8, "Password must be at least 8 characters."),
   organization: z.string().trim().max(200).optional(),
+  /** Hidden bot-trap field; real people leave it empty. */
+  website: z.string().max(200).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -23,7 +25,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, organization } = parsed.data;
+    const { name, email, password, organization, website } = parsed.data;
+    // Automated sign-up (bot filled the hidden field): refuse without saying why.
+    if (website) {
+      return NextResponse.json({ success: false, error: "Could not create your account. Please try again." }, { status: 400 });
+    }
     if (passwordTooLong(password)) {
       return NextResponse.json(
         { success: false, error: "Password is too long (maximum 72 characters)." },

@@ -1,3 +1,4 @@
+import "server-only";
 import { db } from "@/lib/db/supabase";
 
 /**
@@ -20,9 +21,39 @@ export interface RateRule {
   store: "db" | "memory";
   /** Count per signed-in user when possible, otherwise per client IP. */
   scope: "ip" | "user";
+  /**
+   * Daily caps: checked in addition to the first matching rule, so a request can be
+   * held to both a burst limit (per minute) and a daily ceiling.
+   */
+  extra?: boolean;
 }
 
 const FIFTEEN_MIN = 15 * 60;
+const DAY = 24 * 60 * 60;
+
+/** A daily ceiling, stored in Supabase so it holds across restarts and server instances. */
+const daily = (id: string, test: RateRule["test"], limit: number, scope: RateRule["scope"]): RateRule =>
+  ({ id: `day:${id}`, test, limit, windowSeconds: DAY, store: "db", scope, extra: true });
+
+/**
+ * Daily ceilings. They stop scripted abuse that stays under the per-minute limits:
+ * account farms, database-bloat attacks and runaway PDF/AI usage (hosting and API bills).
+ * Generous for real agencies; raise them here if a customer legitimately needs more.
+ */
+const DAILY_RULES: RateRule[] = [
+  daily("signup:ip", (p, m) => p === "/api/auth/signup" && m === "POST", 10, "ip"),
+  daily("contact:ip", (p, m) => p === "/api/contact" && m === "POST", 20, "ip"),
+  daily("extract:ip", (p, m) => p === "/api/agent/extract" && m === "POST", 60, "ip"),
+  daily("documents:create", (p, m) => p === "/api/agent/documents" && m === "POST", 300, "user"),
+  daily("documents:update", (p, m) => /^\/api\/agent\/documents\/[^/]+$/.test(p) && m === "PATCH", 1500, "user"),
+  daily("payments:create", (p, m) => /^\/api\/agent\/documents\/[^/]+\/payments$/.test(p) && m === "POST", 300, "user"),
+  daily("customers:create", (p, m) => p === "/api/agent/customers" && m === "POST", 200, "user"),
+  daily("support:send", (p, m) => p === "/api/agent/support" && m === "POST", 50, "user"),
+  daily("plan:submit", (p, m) => p === "/api/agent/plan/submit" && m === "POST", 10, "user"),
+  daily("profile:update", (p, m) => (p === "/api/agent/profile" || p === "/api/agent/setup") && m !== "GET", 100, "user"),
+  daily("pdf", (p) => /^\/api\/agent\/documents\/[^/]+\/pdf$/.test(p), 1500, "user"),
+  daily("export", (p) => p === "/api/agent/invoices/export", 100, "user"),
+];
 const AUTH_ROUTES = ["login", "signup", "forgot-password", "reset-password"];
 
 export const RATE_RULES: RateRule[] = [
@@ -52,11 +83,15 @@ export const RATE_RULES: RateRule[] = [
   { id: "tools", test: (p) => p.startsWith("/api/tools/"), limit: 20, windowSeconds: 60, store: "memory", scope: "ip" },
   // Everything else under /api.
   { id: "api", test: (p) => p.startsWith("/api/"), limit: 120, windowSeconds: 60, store: "memory", scope: "user" },
+  ...DAILY_RULES,
 ];
 
-export function findRule(path: string, method: string): RateRule | null {
-  if (method === "OPTIONS") return null;
-  return RATE_RULES.find((r) => r.test(path, method)) ?? null;
+/** The first matching burst rule, plus every matching daily ceiling. */
+export function findRules(path: string, method: string): RateRule[] {
+  if (method === "OPTIONS") return [];
+  const primary = RATE_RULES.find((r) => !r.extra && r.test(path, method));
+  const extras = RATE_RULES.filter((r) => r.extra && r.test(path, method));
+  return primary ? [primary, ...extras] : extras;
 }
 
 export interface RateResult {
@@ -121,11 +156,18 @@ export async function checkRateLimit(rule: RateRule, identity: string): Promise<
   return hitMemory(key, rule.limit, rule.windowSeconds);
 }
 
-/** Client IP from the proxy headers set by the hosting platform. */
+/**
+ * Client IP for rate limiting. Prefers headers that the hosting platform sets itself
+ * (clients can't forge them there), then the right-most X-Forwarded-For entry — the one
+ * added by our own proxy. The left-most entry is whatever the client sent, so trusting it
+ * would let an attacker pick a fresh "IP" for every request and dodge per-IP limits.
+ */
 export function clientIp(headers: Headers): string {
+  const platform = headers.get("cf-connecting-ip") ?? headers.get("x-vercel-forwarded-for") ?? headers.get("x-real-ip");
+  if (platform) return platform.split(",")[0].trim();
   const fwd = headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return headers.get("x-real-ip")?.trim() || "unknown";
+  if (fwd) return fwd.split(",").map((s) => s.trim()).filter(Boolean).pop() ?? "unknown";
+  return "unknown";
 }
 
 export function retryMessage(seconds: number): string {

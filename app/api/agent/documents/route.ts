@@ -9,7 +9,8 @@ import {
 } from "@/lib/agent/server";
 import { describeDocument, validateDocument } from "@/lib/agent/documents";
 import { isFeatureEnabled } from "@/lib/agent/features";
-import { createDocument, documentExists, listDocuments, updateDocument, type DocFilters } from "@/lib/db/repo";
+import { creationBlock } from "@/lib/agent/entitlements";
+import { createDocument, documentExists, latestVersionInGroup, listDocuments, updateDocument, type DocFilters } from "@/lib/db/repo";
 import type { DocumentKind } from "@/lib/agent/types";
 
 const DOCUMENT_KINDS: DocumentKind[] = [
@@ -63,6 +64,13 @@ export async function POST(req: NextRequest) {
     const agent = serializeAgent(user);
     if (!isFeatureEnabled(agent, kind))
       return fail("This document type is not enabled for your account.", 403, "FEATURE_DISABLED");
+    // A version above 1 only counts as a new version of a document that already exists —
+    // otherwise it is a new document and uses the free allowance.
+    const groupKey = typeof body.groupKey === "string" ? body.groupKey : undefined;
+    const existing = groupKey && typeof body.version === "number" && body.version > 1 ? await latestVersionInGroup(user.id, groupKey, 0) : 0;
+    const version = existing > 0 ? existing + 1 : 1;
+    const block = await creationBlock(user, kind, { newVersion: version > 1 });
+    if (block) return fail(block.message, block.status, block.code);
 
     const data = body.data as Record<string, unknown>;
     const companyName = kind === "welcome_placard" ? agent.brandName || agent.companyName : agent.companyName;
@@ -80,8 +88,8 @@ export async function POST(req: NextRequest) {
       agentId: user.id,
       kind,
       ...desc,
-      groupKey: typeof body.groupKey === "string" ? body.groupKey : desc.groupKey,
-      version: typeof body.version === "number" ? body.version : 1,
+      groupKey: groupKey ?? desc.groupKey,
+      version,
       data,
       pdfGeneratedAt: body.generatePdf ? new Date() : undefined,
     });

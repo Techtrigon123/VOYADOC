@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Agent, DocumentKind } from "@/lib/agent/types";
 import { isFeatureEnabled } from "@/lib/agent/features";
+import { effectivePlan, lowestPlanFor, planIncludes } from "@/lib/agent/plans";
 
 export interface NavSubItem {
   label: string;
@@ -103,6 +104,12 @@ export const NAV_ITEMS: NavItem[] = [
 
 export function visibleNavItems(agent: Agent): NavItem[] {
   return NAV_ITEMS.filter((i) => !i.kind || isFeatureEnabled(agent, i.kind));
+}
+
+/** The plan needed for a nav item, or null when it's open on the current plan. */
+export function lockedNavPlan(item: NavItem, agent: Agent): "gold" | "platinum" | null {
+  if (!item.kind || planIncludes(effectivePlan(agent), item.kind)) return null;
+  return lowestPlanFor(item.kind) === "gold" ? "gold" : "platinum";
 }
 
 export function isItemActive(item: NavItem, pathname: string): boolean {

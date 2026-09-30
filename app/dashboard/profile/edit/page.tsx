@@ -277,7 +277,7 @@ export default function EditProfilePage() {
 
         {error ? <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
 
-        <div className="sticky bottom-4 z-10 ml-auto flex w-fit gap-2 rounded-2xl border border-slate-200 bg-white/90 p-2 shadow-lg backdrop-blur">
+        <div className="chat-aware sticky bottom-4 z-10 ml-auto flex w-fit gap-2 rounded-2xl border border-slate-200 bg-white/90 p-2 shadow-lg backdrop-blur">
           <Link href="/dashboard/profile" className={secondaryBtn}>
             <ArrowLeft className="h-4 w-4" /> Cancel
           </Link>

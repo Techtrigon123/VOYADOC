@@ -11,9 +11,11 @@ import {
   needsActivationPrompt,
   type ActivationStep,
 } from "@/lib/agent/profile";
-import { delayFor, snooze } from "./prompt-timing";
+import { delayFor, isTyping, snooze, TYPING_PAUSE_MS } from "./prompt-timing";
 
 const KEY = "agent_activation_prompt";
+/** After it is closed, the complete-your-profile reminder comes back every 5 minutes — on every page, including document forms. */
+const REMIND_EVERY_MS = 5 * 60 * 1000;
 /** Pages where the guide stays out of the way (the agent is already fixing things there). */
 const QUIET_PATHS = ["/setup", "/dashboard/profile/edit"];
 
@@ -49,7 +51,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
 
   const onOpenChange = useCallback((v: boolean) => {
     setOpen(v);
-    if (!v) snooze(KEY);
+    if (!v) snooze(KEY, REMIND_EVERY_MS);
   }, []);
 
   useEffect(() => {
@@ -58,7 +60,15 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       return;
     }
     if (open) return;
-    const t = window.setTimeout(() => setOpen(true), delayFor(KEY));
+    let t = 0;
+    // When the reminder is due, wait while the agent is typing (so it doesn't steal focus mid-word)
+    // or while another popup is open (so two dialogs never stack).
+    const otherDialogOpen = () => !!document.querySelector('[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]');
+    const tryOpen = () => {
+      if (isTyping() || otherDialogOpen()) t = window.setTimeout(tryOpen, TYPING_PAUSE_MS);
+      else setOpen(true);
+    };
+    t = window.setTimeout(tryOpen, delayFor(KEY));
     return () => window.clearTimeout(t);
   }, [show, open]);
 

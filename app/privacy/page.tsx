@@ -126,6 +126,11 @@ const sections: LegalSection[] = [
               <td>Only the file you choose to upload. We do not keep a copy of the uploaded file.</td>
             </tr>
             <tr>
+              <td>Chatwoot</td>
+              <td>Live chat — the “Chat with us” window</td>
+              <td>Messages you send in the chat and your IP address; if you are signed in, your name, email, company and plan</td>
+            </tr>
+            <tr>
               <td>Google Fonts</td>
               <td>Fonts in the welcome placard editor</td>
               <td>Your IP address, when the placard editor loads fonts</td>
@@ -205,6 +210,12 @@ const sections: LegalSection[] = [
               <td>Essential cookie</td>
               <td>Remembers your cookie choices</td>
               <td>12 months</td>
+            </tr>
+            <tr>
+              <td>cw_conversation, cw_user_*</td>
+              <td>Essential cookie (Chatwoot)</td>
+              <td>Keeps your live-chat conversation open between pages; cleared when you log out</td>
+              <td>Set by Chatwoot</td>
             </tr>
             <tr>
               <td>Session storage</td>

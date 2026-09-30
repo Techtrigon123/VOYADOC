@@ -9,6 +9,7 @@ import {
   fail,
 } from "@/lib/agent/server";
 import { describeDocument, validateDocument } from "@/lib/agent/documents";
+import { lockedDocument } from "@/lib/agent/entitlements";
 import {
   createDocument,
   deleteDocument,
@@ -19,9 +20,6 @@ import {
 } from "@/lib/db/repo";
 
 type Ctx = { params: Promise<{ id: string }> };
-
-const LOCKED_MESSAGE =
-  "Locked — Silver keeps documents open for 30 days from creation. Upgrade to Gold or Platinum to open this again.";
 
 async function load(id: string) {
   const { user, response } = await requireAgent();
@@ -38,7 +36,10 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const { user, doc, response } = await load(id);
     if (response) return response;
     const summary = summarizeDocument(doc, user);
-    if (summary.access.locked) return fail(LOCKED_MESSAGE, 403, "HISTORY_LOCKED");
+    if (summary.access.locked) {
+      const lock = lockedDocument(summary.access, doc.kind);
+      return fail(lock.message, lock.status, lock.code);
+    }
     return ok({ document: summary, data: doc.data });
   } catch (error) {
     console.error("[GET /api/agent/documents/:id]", error);
@@ -55,7 +56,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const { id } = await params;
     const { user, doc, response } = await load(id);
     if (response) return response;
-    if (summarizeDocument(doc, user).access.locked) return fail(LOCKED_MESSAGE, 403, "HISTORY_LOCKED");
+    const access = summarizeDocument(doc, user).access;
+    if (access.locked) {
+      const lock = lockedDocument(access, doc.kind);
+      return fail(lock.message, lock.status, lock.code);
+    }
 
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body) return fail("Invalid request body.");

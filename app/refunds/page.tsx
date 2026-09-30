@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage, { type LegalSection } from "@/components/legal/LegalPage";
-import { PAID_PLAN_PRICE_INR, formatInr } from "@/lib/agent/plans";
+import { GRACE_DAYS, PLAN_PRICES_INR, formatInr } from "@/lib/agent/plans";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
@@ -22,9 +22,12 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          Gold ({formatInr(PAID_PLAN_PRICE_INR.gold)}/year) and Platinum ({formatInr(PAID_PLAN_PRICE_INR.platinum)}/year) are
-          yearly plans paid in advance. Your plan is activated once we verify your payment, and its benefits run for one year
-          from that date. Plans do not renew automatically, so you are never charged again without choosing to.
+          Gold ({formatInr(PLAN_PRICES_INR.gold.monthly)}/month or {formatInr(PLAN_PRICES_INR.gold.yearly)}/year) and Platinum
+          ({formatInr(PLAN_PRICES_INR.platinum.monthly)}/month or {formatInr(PLAN_PRICES_INR.platinum.yearly)}/year) are paid in
+          advance. Your plan is activated once we verify your payment, and its benefits run for one month or one year from that
+          date, depending on the billing you chose. Plans do not renew automatically, so you are never charged again without
+          choosing to. After a plan ends it keeps working for a grace period ({GRACE_DAYS.monthly} days for monthly,{" "}
+          {GRACE_DAYS.yearly} days for yearly) so you can renew without interruption.
         </p>
         <ul>
           <li>
@@ -37,7 +40,7 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Other requests</strong> are reviewed case by case. Because documents you create and download can&apos;t be
-            returned, partial-year refunds are not guaranteed.
+            returned, refunds for part of a month or year are not guaranteed.
           </li>
         </ul>
       </>

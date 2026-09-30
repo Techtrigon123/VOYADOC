@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { accessLabel } from "@/lib/agent/plans";
+import { accessLabel, effectivePlan, lowestPlanFor, planIncludes, planName } from "@/lib/agent/plans";
 import type { DocumentAccess, DocumentKind } from "@/lib/agent/types";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import { useAgent } from "./AgentProvider";
@@ -399,6 +399,15 @@ export function EmptyState({ icon: Icon, title, description, action }: { icon: L
 
 export function AccessBadge({ access }: { access: DocumentAccess }) {
   if (access.remainingDays == null && !access.locked) return null;
+  if (access.locked && access.reason === "plan")
+    return (
+      <span
+        title={`This document type is on the ${planName(access.requiredPlan ?? "gold")} plan. Upgrade to open it.`}
+        className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+      >
+        <Lock className="h-3 w-3" /> {accessLabel(access)}
+      </span>
+    );
   const urgent = !access.locked && (access.remainingDays ?? 99) <= 3;
   return (
     <span
@@ -486,13 +495,21 @@ export function RowActions({
 export function useFeatureGate(kind: DocumentKind, label: string) {
   const { agent } = useAgent();
   const router = useRouter();
-  const enabled = agent ? isFeatureEnabled(agent, kind) : true;
+  const switchedOn = agent ? isFeatureEnabled(agent, kind) : true;
+  const onPlan = agent ? planIncludes(effectivePlan(agent), kind) : true;
+  const enabled = switchedOn && onPlan;
   useEffect(() => {
-    if (!enabled) {
+    if (!switchedOn) {
       toast.message(`${label} is not enabled for your account.`, { description: "Ask your admin to turn it on, or upgrade your plan if needed." });
       router.replace("/dashboard");
+    } else if (!onPlan) {
+      const need = lowestPlanFor(kind);
+      toast.message(`${label} are on the ${need === "gold" ? "Gold and Platinum plans" : "Platinum plan"}.`, {
+        description: "Upgrade to unlock this service.",
+      });
+      router.replace("/dashboard/pricing");
     }
-  }, [enabled, label, router]);
+  }, [switchedOn, onPlan, kind, label, router]);
   return enabled;
 }
 

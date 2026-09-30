@@ -3,12 +3,16 @@ import { updateUser, type UserRecord } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
 import { effectivePlan, EXTRACT_LIMITS } from "@/lib/agent/plans";
 import { extractAvailable, extractFromFile, ExtractError } from "@/lib/agent/extract";
+import { AI_LIMITS, limitMessage, reserveAiCall, reserveMicros, settleAiCall } from "@/lib/ai-budget";
+import { contentMatchesType, pdfPageCount } from "@/lib/agent/upload-check";
+import { serviceBlock } from "@/lib/agent/entitlements";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MEDIA = ["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 type Kind = "voucher" | "ticket";
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
+
 
 function usage(user: UserRecord, kind: Kind) {
   const plan = effectivePlan(user);
@@ -59,10 +63,24 @@ export async function POST(req: NextRequest) {
     const form = await req.formData().catch(() => null);
     const file = form?.get("file");
     const kind: Kind = form?.get("type") === "ticket" ? "ticket" : "voucher";
+    const planBlock = serviceBlock(user, kind === "ticket" ? "air_ticket" : "hotel_voucher");
+    if (planBlock) return fail(planBlock.message, planBlock.status, planBlock.code);
     if (!(file instanceof File)) return fail("Choose a file first.", 400, "MISSING_FILE");
     if (!(MEDIA as readonly string[]).includes(file.type) || file.size > MAX_FILE_BYTES)
       return fail("Upload a PDF or image (PNG, JPG, WebP) under 10 MB.", 400, "INVALID_FILE");
-    if (!extractAvailable())
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (!contentMatchesType(bytes, file.type))
+      return fail("This file doesn't look like a real PDF or image. Upload the original file.", 400, "INVALID_FILE");
+    let pdfPages: number | undefined;
+    if (file.type === "application/pdf") {
+      const pages = await pdfPageCount(bytes);
+      if (pages === null) return fail("This PDF can't be opened. Upload a different copy or a photo of it.", 400, "INVALID_FILE");
+      if (pages > AI_LIMITS.maxPdfPages())
+        return fail(`Upload the voucher or ticket pages only — PDFs can have at most ${AI_LIMITS.maxPdfPages()} pages.`, 400, "TOO_MANY_PAGES");
+      pdfPages = pages;
+    }
+
+    if (!extractAvailable() || !AI_LIMITS.enabled())
       return fail("Upload auto-fill is not available right now. You can still fill the form manually.", 503, "EXTRACT_UNAVAILABLE");
 
     const u = usage(user, kind);
@@ -76,10 +94,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
-    const fields = await extractFromFile(kind, { base64, mediaType: file.type as (typeof MEDIA)[number] });
-    const updated = await recordUse(user, kind);
-    return ok({ fields, usage: usage(updated, kind) });
+    // Reserve the worst-case cost. The database enforces every limit atomically: the plan's
+    // daily allowance, the per-account fair-use cap, the free-plan pool and the spend budgets.
+    const { result, reservation } = await reserveAiCall({
+      userId: user.id,
+      kind,
+      free: u.plan === "silver",
+      planDailyLimit: u.period === "day" ? u.limit : null,
+      micros: reserveMicros({ pdfPages }),
+    });
+    if (result !== "ok" || !reservation) {
+      const m = limitMessage(result === "ok" ? "unavailable" : result);
+      return fail(m.message, m.status, m.code);
+    }
+
+    try {
+      const base64 = Buffer.from(bytes).toString("base64");
+      const extracted = await extractFromFile(kind, { base64, mediaType: file.type as (typeof MEDIA)[number] });
+      await settleAiCall(reservation, { usage: extracted.usage });
+      const updated = await recordUse(user, kind);
+      return ok({ fields: extracted.fields, usage: usage(updated, kind) });
+    } catch (error) {
+      if (error instanceof ExtractError) await settleAiCall(reservation, { usage: error.usage, refund: error.notBilled });
+      else await settleAiCall(reservation, {}); // unknown failure: keep the reserved cost counted
+      throw error;
+    }
   } catch (error) {
     if (error instanceof ExtractError) {
       const status = error.code === "EXTRACT_TEMPORARY" ? 429 : error.code === "EXTRACT_UNAVAILABLE" ? 503 : 422;

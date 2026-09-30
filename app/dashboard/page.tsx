@@ -19,6 +19,7 @@ import {
   Trophy,
   X,
   type LucideIcon,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -43,7 +44,7 @@ import {
   statusTooltip,
   verifyTooltip,
 } from "@/lib/agent/profile";
-import { planLabel } from "@/lib/agent/plans";
+import { effectivePlan, lowestPlanFor, planIncludes, planLabel, planName, subscriptionState } from "@/lib/agent/plans";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import type { Agent, DocumentKind } from "@/lib/agent/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,6 +54,8 @@ interface Summary {
   totalDocuments: number;
   customers: number;
   planPaymentPending: boolean;
+  /** Silver only: new documents this month against the free allowance. */
+  freeUsage: { used: number; limit: number; resetsAt: string } | null;
   ranking: { activityScore: number; rank: number | null; topTier: "top_10" | "top_20" | "top_30" | null };
 }
 
@@ -97,14 +100,24 @@ function setupProgress(agent: Agent, totalDocs: number) {
   return { percent, detail, profileComplete: missing.length === 0, hasDocs };
 }
 
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
 function planStatus(agent: Agent, pending: boolean) {
-  const label = planLabel(agent.subscriptionPlan);
-  const until = agent.subscriptionExpiresAt
-    ? new Date(agent.subscriptionExpiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-    : null;
-  if (pending) return { detail: `We are reviewing your payment. You can keep using your account meanwhile.`, badge: "In review" };
-  if (agent.subscriptionPlan !== "silver") return { detail: until ? `Your ${label} is active until ${until}.` : `Your ${label} is active.`, badge: "Active" };
-  return { detail: "Core document tools are included.", badge: "Active" };
+  const sub = agent.subscription ?? subscriptionState(agent);
+  const paid = sub.paidPlan ? planLabel(sub.paidPlan) : null;
+  const cycle = sub.cycle === "monthly" ? "monthly" : "yearly";
+  if (pending) return { detail: `We are reviewing your payment. You can keep using your account meanwhile.`, badge: "In review", tone: "warn" as const };
+  if (sub.status === "grace")
+    return {
+      detail: `Your ${cycle} ${paid} ended on ${shortDate(sub.expiresAt!)}. It keeps working until ${shortDate(sub.graceEndsAt!)} — renew monthly or yearly to keep your services.`,
+      badge: `Grace · ${sub.daysLeft} day${sub.daysLeft === 1 ? "" : "s"} left`,
+      tone: "warn" as const,
+    };
+  if (sub.status === "lapsed")
+    return { detail: `Your ${paid} ended on ${shortDate(sub.expiresAt!)}. You're on Silver now — renew to unlock your services again.`, badge: "Ended", tone: "warn" as const };
+  if (sub.status === "active")
+    return { detail: sub.expiresAt ? `Your ${cycle} ${paid} is active until ${shortDate(sub.expiresAt)}.` : `Your ${paid} is active.`, badge: "Active", tone: "ok" as const };
+  return { detail: "Hotel vouchers, invoices, proforma invoices and receipts are included.", badge: "Active", tone: "ok" as const };
 }
 
 function NewDocumentMenu({ tiles, children }: { tiles: Tile[]; children: React.ReactNode }) {
@@ -158,7 +171,9 @@ export default function DashboardPage() {
     if (hash) window.setTimeout(() => focusAnchor(hash), 250);
   }, []);
 
-  const tiles = useMemo(() => (agent ? TILES.filter((t) => isFeatureEnabled(agent, t.key)) : []), [agent]);
+  const allTiles = useMemo(() => (agent ? TILES.filter((t) => isFeatureEnabled(agent, t.key)) : []), [agent]);
+  const currentPlan = agent ? effectivePlan(agent) : "silver";
+  const tiles = useMemo(() => allTiles.filter((t) => planIncludes(currentPlan, t.key)), [allTiles, currentPlan]);
   if (!agent) return null;
 
   const counts = new Map(summary?.documentCounts.map((c) => [c.key, c.count]) ?? []);
@@ -167,6 +182,8 @@ export default function DashboardPage() {
   const active = isActive(agent.status);
   const suspended = isSuspended(agent.status);
   const plan = planStatus(agent, !!summary?.planPaymentPending);
+  const usage = summary?.freeUsage ?? null;
+  const usageFull = !!usage && usage.used >= usage.limit;
   const rank = rankCopy(summary?.ranking);
   const verifiedLabel = agent.isVerified ? "Verified" : agent.partnerType === "other" ? "In review" : "Not verified";
   const profileLink = !active && !setup.profileComplete ? { href: "/dashboard/profile/edit", label: "Continue in profile" } : { href: "/dashboard/profile", label: "View full profile" };
@@ -268,7 +285,7 @@ export default function DashboardPage() {
               </div>
               {!loading && !error ? (
                 <p className="text-xs font-medium text-slate-500">
-                  <span className="font-bold text-slate-900">{total.toLocaleString("en-IN")}</span> total · {tiles.length} categories
+                  <span className="font-bold text-slate-900">{total.toLocaleString("en-IN")}</span> total · {tiles.length} of {allTiles.length} services on your plan
                 </p>
               ) : null}
             </div>
@@ -288,11 +305,27 @@ export default function DashboardPage() {
               </div>
             ) : error ? (
               <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
-            ) : tiles.length === 0 ? (
+            ) : allTiles.length === 0 ? (
               <p className="text-sm text-slate-500">No document tools are enabled for your account yet. Contact support if you need access.</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {tiles.map((t, i) => (
+                {allTiles.map((t, i) =>
+                  !planIncludes(currentPlan, t.key) ? (
+                    <article key={t.key} className="anim-rise flex flex-col rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-3.5" style={{ animationDelay: `${i * 35}ms` }}>
+                      <div className="flex items-center justify-between">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                          <t.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">
+                          <Lock className="h-3 w-3" /> {planName(lowestPlanFor(t.key))}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-[13px] font-medium text-slate-500">{t.label}</p>
+                      <Link href="/dashboard/pricing" aria-label={`Unlock ${t.label.toLowerCase()}`} className="mt-1 text-xs font-semibold text-slate-600 hover:text-brand-700">
+                        Upgrade to unlock
+                      </Link>
+                    </article>
+                  ) : (
                   <article key={t.key} className="anim-rise group flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md hover:shadow-brand-500/5" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="flex items-center justify-between">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-[var(--primary)] group-hover:text-white">
@@ -305,7 +338,8 @@ export default function DashboardPage() {
                       + Create
                     </Link>
                   </article>
-                ))}
+                  )
+                )}
                 <NewDocumentMenu tiles={tiles}>
                   <button type="button" className="flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-brand-200 bg-brand-50/40 p-3 text-[13px] font-semibold text-brand-700 hover:bg-brand-50">
                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-brand-200">
@@ -316,6 +350,24 @@ export default function DashboardPage() {
                 </NewDocumentMenu>
               </div>
             )}
+            {usage ? (
+              <div className="mt-4 rounded-2xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <p className="font-semibold text-slate-900">Free documents this month</p>
+                  <p className={cn("font-bold tabular-nums", usageFull ? "text-rose-600" : "text-slate-900")}>
+                    {Math.min(usage.used, usage.limit)} / {usage.limit}
+                  </p>
+                </div>
+                <div role="progressbar" aria-valuenow={usage.used} aria-valuemin={0} aria-valuemax={usage.limit} aria-label="Free documents used" className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className={cn("h-full rounded-full transition-all", usageFull ? "bg-rose-500" : "bg-[var(--primary)]")} style={{ width: `${Math.min(100, (usage.used / usage.limit) * 100)}%` }} />
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  {usageFull ? "You've used this month's free documents. " : ""}
+                  Resets on {new Date(usage.resetsAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}.{" "}
+                  <Link href="/dashboard/pricing" className="font-semibold text-brand-600 hover:underline">Gold and Platinum have no monthly limit</Link>
+                </p>
+              </div>
+            ) : null}
           </section>
         </div>
 
@@ -326,18 +378,18 @@ export default function DashboardPage() {
             <div className="relative">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-200/80">Your plan</p>
-                <span className="rounded-full bg-gradient-to-b from-white to-slate-300 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-800">{agent.subscriptionPlan}</span>
+                <span className="rounded-full bg-gradient-to-b from-white to-slate-300 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-800">{currentPlan}</span>
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <p className="text-lg font-bold">{planLabel(agent.subscriptionPlan)}</p>
-                <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", plan.badge === "Active" ? "text-emerald-300" : "text-amber-300")}>
-                  <span className={cn("h-2 w-2 rounded-full", plan.badge === "Active" ? "bg-emerald-400" : "bg-amber-400")} />
+                <p className="text-lg font-bold">{planLabel(currentPlan)}</p>
+                <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", plan.tone === "ok" ? "text-emerald-300" : "text-amber-300")}>
+                  <span className={cn("h-2 w-2 rounded-full", plan.tone === "ok" ? "bg-emerald-400" : "bg-amber-400")} />
                   {plan.badge}
                 </span>
               </div>
               <p className="mt-1 text-sm text-brand-100/80">{plan.detail}</p>
               <Link href="/dashboard/pricing" className="mt-4 inline-flex h-9 items-center gap-1 rounded-xl bg-white/10 px-3 text-[13px] font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
-                Compare plans <ArrowRight className="h-4 w-4" />
+                {plan.tone === "warn" && plan.badge !== "In review" ? "Renew now" : "Compare plans"} <ArrowRight className="h-4 w-4" />
               </Link>
               {access.summary?.showWarning ? (
                 <button type="button" onClick={access.openDialog} className="mt-2 block text-xs text-amber-300 hover:underline">
