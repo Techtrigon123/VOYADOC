@@ -21,6 +21,7 @@ import { accessLabel, effectivePlan, lowestPlanFor, planIncludes, planName } fro
 import type { DocumentAccess, DocumentKind } from "@/lib/agent/types";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import { useAgent } from "./AgentProvider";
+import { BackButton } from "@/components/ui/back-button";
 
 export function PageShell({ children, className, wide }: { children: React.ReactNode; className?: string; wide?: boolean }) {
   return <div className={cn("mx-auto w-full px-4 py-6 sm:px-6 sm:py-8", wide ? "max-w-[1400px]" : "max-w-6xl", className)}>{children}</div>;
@@ -37,19 +38,21 @@ export function PageHeader({
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
-  back?: { href: string; label: string };
+  /** Where the back button goes when there's no earlier page in the app. Defaults to the dashboard; `false` hides it. */
+  back?: { href: string; label?: string } | false;
 }) {
+  const fallback = back === false ? null : back?.href ?? "/dashboard";
+  // The eyebrow and description line up with the title text, not with the back button.
+  const indent = fallback ? "pl-12" : "";
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {back ? (
-          <Link href={back.href} className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600">
-            ← {back.label}
-          </Link>
-        ) : null}
-        {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--primary)]">{eyebrow}</p> : null}
-        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">{title}</h1>
-        {description ? <p className="mt-1 max-w-2xl text-sm text-slate-500">{description}</p> : null}
+        {eyebrow ? <p className={cn("text-[11px] font-semibold uppercase tracking-widest text-[var(--primary)]", indent)}>{eyebrow}</p> : null}
+        <div className="mt-0.5 flex items-center gap-3">
+          {fallback ? <BackButton fallback={fallback} label={back && back.label ? `Back to ${back.label.replace(/^back to /i, "")}` : "Go back"} /> : null}
+          <h1 className="min-w-0 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">{title}</h1>
+        </div>
+        {description ? <p className={cn("mt-1 max-w-2xl text-sm text-slate-500", indent)}>{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
@@ -74,7 +77,7 @@ export function SectionCard({
   aside?: React.ReactNode;
 }) {
   return (
-    <section id={id} className={cn("scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-6", className)}>
+    <section id={id} className={cn("scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(230,57,70,0.06)] sm:p-6", className)}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {Icon ? (

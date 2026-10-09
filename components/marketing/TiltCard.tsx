@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export default function TiltCard({
   children,
   className,
-  glow = "rgba(163,255,71,0.16)",
+  glow = "rgba(0,0,0,0.04)",
 }: {
   children: React.ReactNode;
   className?: string;

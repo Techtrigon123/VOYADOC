@@ -8,8 +8,8 @@ import { useTheme } from "@/lib/theme";
 
 const FALLBACK_FONT = '"Arial Black", Arial, sans-serif';
 
-const NEON = [163, 255, 71], BLACK = [5, 5, 5];
-const DEEP_LINE = "rgb(29,58,12)"; // dark green contour lines over the neon field
+const NEON = [230, 57, 70], BLACK = [230, 57, 70]; // the field is brand red #e63946
+const DEEP_LINE = "rgb(255,255,255)"; // soft white contour lines over the red field
 const mix = (a: number[], b: number[], k: number) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(",")})`;
 const smoothstep = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -33,9 +33,9 @@ function NeonField({ dark, progress }: { dark: RefObject<boolean>; progress: Ref
       context.fillStyle = mix(NEON, BLACK, k);
       context.fillRect(0, 0, width, height);
       const glow = context.createRadialGradient(width * 0.78, height * 0.18, 0, width * 0.6, height * 0.4, width * 0.85);
-      glow.addColorStop(0, "rgba(163,255,71,0.11)");
-      glow.addColorStop(0.45, "rgba(95,184,26,0.03)");
-      glow.addColorStop(1, "rgba(5,5,5,0)");
+      glow.addColorStop(0, "rgba(255,255,255,0.1)");
+      glow.addColorStop(0.45, "rgba(255,255,255,0.03)");
+      glow.addColorStop(1, "rgba(230,57,70,0)");
       context.fillStyle = glow;
       context.globalAlpha = k;
       context.fillRect(0, 0, width, height);
@@ -49,9 +49,9 @@ function NeonField({ dark, progress }: { dark: RefObject<boolean>; progress: Ref
           else context.lineTo(x, y);
         }
         const major = line % 6 === 0;
-        context.strokeStyle = k < 0.5 ? DEEP_LINE : major ? "#a3ff47" : "#5fb81a";
-        context.globalAlpha = k < 0.5 ? (major ? 0.35 : 0.15) * (1 - k * 2) : (major ? 0.22 : 0.09) * (k * 2 - 1);
-        context.lineWidth = major ? 1.1 : 0.7;
+        context.strokeStyle = k < 0.5 ? DEEP_LINE : "#ffffff";
+        context.globalAlpha = k < 0.5 ? (major ? 0.35 : 0.15) * (1 - k * 2) : (major ? 0.5 : 0.22) * (k * 2 - 1);
+        context.lineWidth = major ? 1.4 : 0.9;
         context.stroke();
       }
       context.globalAlpha = 1;
@@ -110,10 +110,6 @@ function OpeningFrame() {
         <p className="max-w-xl text-base text-slate-600 sm:text-lg">
           Branded hotel vouchers, e-tickets and GST invoices — as polished PDFs in seconds.
         </p>
-        <Link href="/signup" className="btn-glow inline-flex h-12 items-center gap-2 rounded-xl px-8 text-sm font-semibold">
-          Start free
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
     </>
   );
@@ -131,13 +127,13 @@ export default function HeroSection() {
   // so the camera never flies into a letter whose shape is about to change.
   const [font, setFont] = useState(FALLBACK_FONT);
   useEffect(() => {
-    const inter = getComputedStyle(document.documentElement).getPropertyValue("--font-inter").split(",")[0]?.trim();
-    if (!inter) return;
+    const brandFont = getComputedStyle(document.documentElement).getPropertyValue("--font-inter").split(",")[0]?.trim();
+    if (!brandFont) return;
     let live = true;
     document.fonts
-      .load(`900 100px ${inter}`, "VOYENTA")
+      .load(`900 100px ${brandFont}`, "VOUCHLIO")
       .then((faces) => {
-        if (live && faces.length) setFont(`${inter}, ${FALLBACK_FONT}`);
+        if (live && faces.length) setFont(`${brandFont}, ${FALLBACK_FONT}`);
       })
       .catch(() => {});
     return () => {
@@ -147,7 +143,7 @@ export default function HeroSection() {
 
   return (
     <GlyphPortal
-      word="VOYENTA"
+      word="VOUCHLIO"
       interactive={false}
       scrollLength={2.2}
       fontFamily={font}
@@ -160,14 +156,14 @@ export default function HeroSection() {
       front={<OpeningFrame />}
       className="text-sm"
       style={{
-        "--gp-paper": theme === "dark" ? "#0a0a0a" : "#ffffff",
-        "--gp-ink": theme === "dark" ? "#f5f5f5" : "#0a0a0a",
-        "--gp-field": "#050505",
-        "--gp-foreground": "#f5f5f5",
+        "--gp-paper": theme === "dark" ? "#0b0b0c" : "#ffffff",
+        "--gp-ink": "#e63946",
+        "--gp-field": "#e63946",
+        "--gp-foreground": "#000000",
       }}
     >
-      <div className="mx-auto w-full max-w-6xl">
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-brand-neon">Voyenta for travel businesses</p>
+      <div className="on-accent-text mx-auto w-full max-w-6xl">
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-brand-neon">Vouchlio for travel businesses</p>
         <h1 className="mb-6 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-7xl">
           Travel documents, <span className="text-brand-neon">simplified.</span>
         </h1>

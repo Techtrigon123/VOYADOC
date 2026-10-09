@@ -49,6 +49,10 @@ const DAILY_RULES: RateRule[] = [
   daily("payments:create", (p, m) => /^\/api\/agent\/documents\/[^/]+\/payments$/.test(p) && m === "POST", 300, "user"),
   daily("customers:create", (p, m) => p === "/api/agent/customers" && m === "POST", 200, "user"),
   daily("support:send", (p, m) => p === "/api/agent/support" && m === "POST", 50, "user"),
+  daily("support:tickets", (p, m) => p === "/api/agent/support/tickets" && m === "POST", 15, "user"),
+  daily("support:replies", (p, m) => /^\/api\/agent\/support\/tickets\/[^/]+$/.test(p) && m === "POST", 100, "user"),
+  daily("support:bugs", (p, m) => p === "/api/agent/support/bugs" && m === "POST", 10, "user"),
+  daily("support:callbacks", (p, m) => p === "/api/agent/support/callbacks" && m === "POST", 5, "user"),
   daily("plan:submit", (p, m) => p === "/api/agent/plan/submit" && m === "POST", 10, "user"),
   daily("profile:update", (p, m) => (p === "/api/agent/profile" || p === "/api/agent/setup") && m !== "GET", 100, "user"),
   daily("pdf", (p) => /^\/api\/agent\/documents\/[^/]+\/pdf$/.test(p), 1500, "user"),
@@ -163,6 +167,13 @@ export async function checkRateLimit(rule: RateRule, identity: string): Promise<
  * would let an attacker pick a fresh "IP" for every request and dodge per-IP limits.
  */
 export function clientIp(headers: Headers): string {
+  // On Vercel, trust only Vercel's own headers: it overwrites them on every request, while any
+  // other header (cf-connecting-ip included) arrives exactly as the client sent it, so an attacker
+  // could rotate it on every request to dodge the per-IP limits.
+  if (process.env.VERCEL) {
+    const ip = headers.get("x-vercel-forwarded-for") ?? headers.get("x-real-ip");
+    return ip?.split(",")[0].trim() || "unknown";
+  }
   const platform = headers.get("cf-connecting-ip") ?? headers.get("x-vercel-forwarded-for") ?? headers.get("x-real-ip");
   if (platform) return platform.split(",")[0].trim();
   const fwd = headers.get("x-forwarded-for");

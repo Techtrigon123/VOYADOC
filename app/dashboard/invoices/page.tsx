@@ -80,9 +80,6 @@ export default function InvoicesPage() {
               <button type="button" onClick={() => setExportOpen(true)} className={secondaryBtn}>
                 <Upload className="h-4 w-4" /> Export
               </button>
-              <button type="button" onClick={() => go({ type: kind, new: "1" })} className={primaryBtn}>
-                <Plus className="h-4 w-4" /> Create new {kind === "invoice" ? "invoice" : kind === "proforma" ? "proforma" : "receipt"}
-              </button>
             </>
           )
         }

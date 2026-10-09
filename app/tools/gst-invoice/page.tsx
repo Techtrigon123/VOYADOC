@@ -1,10 +1,12 @@
 import { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import ToolShell from "@/components/marketing/ToolShell";
 
-export const metadata: Metadata = {
-  title: "GST Invoice Generator",
-  description: "Generate professional GST/tax invoices with customer, business, pricing and tax details.",
-};
+export const metadata: Metadata = pageMeta({
+  title: "GST Invoice Generator for Travel Agencies",
+  description: "Generate GST-compliant tax invoices for travel bookings with GSTIN, SAC codes, CGST/SGST/IGST split and your agency branding. Download as PDF instantly.",
+  path: "/tools/gst-invoice",
+});
 
 export default function GstInvoicePage() {
   return (

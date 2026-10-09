@@ -15,7 +15,7 @@ const documents: (ImageInfo & { layout: string })[] = [
     description: "The confirmation your guest shows at check-in — hotel, stay dates, rooms and booking reference in one page.",
     includes: ["Guest & stay dates", "Rooms & meal plan", "Booking reference"],
     icon: BedDouble,
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=75&auto=format&fit=crop",
     layout: "lg:col-span-2 lg:row-span-2",
     feature: true,
   },
@@ -24,7 +24,7 @@ const documents: (ImageInfo & { layout: string })[] = [
     description: "A priced quotation your customer approves before paying.",
     includes: ["Line items", "Taxes shown", "Before payment"],
     icon: FileText,
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=75&auto=format&fit=crop",
     layout: "",
   },
   {
@@ -32,7 +32,7 @@ const documents: (ImageInfo & { layout: string })[] = [
     description: "A compliant invoice with GST worked out for you.",
     includes: ["CGST · SGST · IGST", "Place of supply", "Payments tracked"],
     icon: Landmark,
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=75&auto=format&fit=crop",
     layout: "",
   },
   {
@@ -40,7 +40,7 @@ const documents: (ImageInfo & { layout: string })[] = [
     description: "Proof of every payment, linked to its invoice.",
     includes: ["Amount & mode", "Transaction ref", "Balance due"],
     icon: ReceiptText,
-    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=75&auto=format&fit=crop",
     layout: "",
   },
   {
@@ -48,7 +48,7 @@ const documents: (ImageInfo & { layout: string })[] = [
     description: "A clear estimate of the trip — destinations, dates, services and a price breakdown your customer can say yes to.",
     includes: ["Destinations & dates", "Services included", "Price breakdown"],
     icon: Map,
-    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&q=75&auto=format&fit=crop",
     layout: "lg:col-span-2",
   },
 ];

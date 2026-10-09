@@ -10,6 +10,7 @@ import { Field, FileDrop, NativeSelect, PageHeader, PageShell, SectionCard, Text
 import { api, imageFileToDataUrl } from "@/lib/agent/client";
 import { ACTIVATION_ANCHORS, INDIAN_STATES, statusLabel } from "@/lib/agent/profile";
 import type { Agent } from "@/lib/agent/types";
+import VerificationBanner from "@/components/agent/VerificationBanner";
 
 const FIELDS = [
   "name", "landlineNumber", "brandName", "companyName", "address", "city", "state", "country", "pincode",
@@ -135,6 +136,7 @@ export default function EditProfilePage() {
 
   return (
     <PageShell>
+      <VerificationBanner className="mb-5" />
       <PageHeader
         back={{ href: "/dashboard/profile", label: "Back to Profile" }}
         title="Agent Profile"

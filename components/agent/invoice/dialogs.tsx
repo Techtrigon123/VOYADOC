@@ -224,7 +224,7 @@ export function NumberSettingsDialog({
       description="Choose how we build the next number for each document type. We look at your saved documents — including custom references you typed — and pick one higher than the largest matching number."
     >
       {info ? (
-        <div className="mt-3 rounded-2xl bg-brand-50/70 p-3 text-sm">
+        <div className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm">
           <p className="font-semibold text-slate-900">Next suggested numbers</p>
           <p className="mt-1 text-slate-600">
             Tax invoice: <span className="font-mono font-semibold">{info.invoice.next}</span> · Proforma: <span className="font-mono font-semibold">{info.proforma.next}</span> · Receipt:{" "}

@@ -1,22 +1,28 @@
+import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import { Clock, LifeBuoy, MessageSquare } from "lucide-react";
 import ContactForm from "./ContactForm";
 import BrandMark from "@/components/brand/BrandMark";
+import { BackButton } from "@/components/ui/back-button";
 
-export const metadata = {
-  title: "Contact us",
-  description: "Talk to the Voyenta team about plans, onboarding, or help with your account.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata: Metadata = pageMeta({
+  title: "Contact Us",
+  description: "Questions about Vouchlio plans, onboarding or your account? Contact our team by form or email and get help setting up your travel document workspace.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="h-16 flex items-center justify-between px-6 border-b border-[var(--border)] bg-white">
-        <Link href="/" className="flex items-center gap-2">
-          <BrandMark className="h-7" />
-          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
-        </Link>
+      <header className="h-16 flex items-center justify-between px-6 glass-nav sticky top-0 z-30 border-b">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/" />
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark className="h-7" />
+            <span className="font-bold text-base text-[var(--foreground)]">Vouchlio</span>
+          </Link>
+        </div>
         <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[var(--primary)]">Log in</Link>
       </header>
 
@@ -56,7 +62,7 @@ export default function ContactPage() {
       </main>
 
       <footer className="py-4 text-center text-xs text-[var(--muted-foreground)]">
-        © {new Date().getFullYear()} Voyenta
+        © {new Date().getFullYear()} Vouchlio
       </footer>
     </div>
   );

@@ -40,6 +40,7 @@ import {
   verifyTooltip,
 } from "@/lib/agent/profile";
 import { formatDay } from "@/lib/agent/client";
+import VerificationBanner from "@/components/agent/VerificationBanner";
 
 function Row({ label, value, icon: Icon }: { label: string; value?: string; icon: LucideIcon }) {
   return (
@@ -68,6 +69,7 @@ export default function ProfilePage() {
 
   return (
     <PageShell>
+      <VerificationBanner className="mb-5" />
       <PageHeader
         eyebrow="Your account"
         title="Agent Profile"
@@ -86,7 +88,7 @@ export default function ProfilePage() {
 
       <div className="space-y-5">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-          <div className="h-20 bg-gradient-to-r from-ink via-brand-900 to-brand-500" />
+          <div className="h-20 bg-slate-100" />
           <div className="flex flex-col gap-5 px-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:px-6">
             <div className="-mt-10 flex items-end gap-4">
               <span className="rounded-full bg-white p-1 shadow-md">
@@ -128,7 +130,7 @@ export default function ProfilePage() {
         </div>
 
         {actMsg ? (
-          <div className="flex flex-col gap-3 rounded-3xl border border-brand-200 bg-brand-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-semibold text-slate-900">Activate your account</p>
               <p className="text-sm text-slate-600">{actMsg}</p>

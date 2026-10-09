@@ -6,6 +6,7 @@ import { AgentProvider, useAgent } from "@/components/agent/AgentProvider";
 import { ActivationProvider } from "@/components/agent/ActivationGuide";
 import { DocumentAccessProvider } from "@/components/agent/DocumentAccessWarning";
 import AgentNavbar from "@/components/agent/AgentNavbar";
+import UpgradePopup from "@/components/agent/UpgradePopup";
 import { DashboardSkeleton, PageBodySkeleton } from "@/components/agent/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { needsQuickSetup } from "@/lib/agent/profile";
@@ -30,14 +31,15 @@ function Gate({ children }: { children: React.ReactNode }) {
         <div className="min-h-screen bg-slate-50">
           <Suspense
             fallback={
-              <div className="flex h-[75px] items-center border-b border-slate-200 bg-white px-4 sm:px-6">
+              <div className="flex h-16 items-center border-b border-slate-200 bg-white px-4 sm:px-6 lg:pl-[17rem]">
                 <Skeleton className="h-8 w-36" />
               </div>
             }
           >
             <AgentNavbar />
           </Suspense>
-          <main className="pb-28">
+          <UpgradePopup />
+          <main className="pb-28 transition-[padding] duration-200 lg:pl-[var(--sidebar-w,16rem)]">
             <Suspense fallback={<PageBodySkeleton />}>{children}</Suspense>
           </main>
         </div>

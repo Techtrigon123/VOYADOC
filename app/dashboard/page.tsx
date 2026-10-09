@@ -4,19 +4,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRight,
-  Car,
-  ChevronRight,
-  FileSpreadsheet,
+  Crown,
+  Gauge,
+  Layers,
+  Users,
   FileText,
   Hotel,
-  MessageCircle,
-  Plane,
   Plus,
   Printer,
-  Receipt,
-  Signpost,
-  Trophy,
   X,
   type LucideIcon,
   Lock,
@@ -31,23 +26,26 @@ import {
 import { useAgent } from "@/components/agent/AgentProvider";
 import { useActivation, focusAnchor } from "@/components/agent/ActivationGuide";
 import { useDocumentAccess } from "@/components/agent/DocumentAccessWarning";
-import { AgentAvatar } from "@/components/agent/AgentNavbar";
 import { PageShell } from "@/components/agent/ui";
 import { api } from "@/lib/agent/client";
 import {
-  agencyLine,
-  displayName,
   isActive,
   isSuspended,
   missingActivationFields,
-  statusLabel,
-  statusTooltip,
-  verifyTooltip,
 } from "@/lib/agent/profile";
 import { effectivePlan, lowestPlanFor, planIncludes, planLabel, planName, subscriptionState } from "@/lib/agent/plans";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import type { Agent, DocumentKind } from "@/lib/agent/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import VerificationBanner from "@/components/agent/VerificationBanner";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { documentHref } from "@/components/agent/nav-config";
+import { DOC_ICONS, DOC_TONES } from "@/components/agent/doc-style";
 
 interface Summary {
   documentCounts: { key: DocumentKind; count: number }[];
@@ -57,7 +55,15 @@ interface Summary {
   /** Silver only: new documents this month against the free allowance. */
   freeUsage: { used: number; limit: number; resetsAt: string } | null;
   ranking: { activityScore: number; rank: number | null; topTier: "top_10" | "top_20" | "top_30" | null };
+  /** Last eight weeks, oldest first. */
+  weekly: { weekStart: string; created: number; pdfs: number }[];
+  recent: { id: string; kind: DocumentKind; title: string; number: string | null; version: number; createdAt: string; updatedAt: string }[];
 }
+
+const CHART_CONFIG: ChartConfig = {
+  created: { label: "Documents created", color: "#e63946" },
+  pdfs: { label: "PDFs generated", color: "#0ea5e9" },
+};
 
 interface Tile {
   key: DocumentKind;
@@ -67,20 +73,22 @@ interface Tile {
 }
 
 const TILES: Tile[] = [
-  { key: "hotel_voucher", label: "Hotel vouchers", href: "/dashboard/vouchers/new", icon: Hotel },
-  { key: "air_ticket", label: "Air tickets", href: "/dashboard/flights/new", icon: Plane },
-  { key: "pickup_voucher", label: "Pickup vouchers", href: "/dashboard/pickup/new", icon: Car },
-  { key: "welcome_placard", label: "Welcome placards", href: "/dashboard/placards", icon: Signpost },
-  { key: "invoice", label: "Invoices", href: "/dashboard/invoices?type=invoice&new=1", icon: FileSpreadsheet },
-  { key: "proforma", label: "Proforma", href: "/dashboard/invoices?type=proforma&new=1", icon: FileText },
-  { key: "receipt", label: "Receipts", href: "/dashboard/invoices?type=receipt&new=1", icon: Receipt },
+  { key: "hotel_voucher", label: "Hotel vouchers", href: "/dashboard/vouchers/new", icon: DOC_ICONS.hotel_voucher },
+  { key: "air_ticket", label: "Air tickets", href: "/dashboard/flights/new", icon: DOC_ICONS.air_ticket },
+  { key: "pickup_voucher", label: "Pickup vouchers", href: "/dashboard/pickup/new", icon: DOC_ICONS.pickup_voucher },
+  { key: "welcome_placard", label: "Welcome placards", href: "/dashboard/placards", icon: DOC_ICONS.welcome_placard },
+  { key: "invoice", label: "Invoices", href: "/dashboard/invoices?type=invoice&new=1", icon: DOC_ICONS.invoice },
+  { key: "proforma", label: "Proforma", href: "/dashboard/invoices?type=proforma&new=1", icon: DOC_ICONS.proforma },
+  { key: "receipt", label: "Receipts", href: "/dashboard/invoices?type=receipt&new=1", icon: DOC_ICONS.receipt },
 ];
+
+const TILE_TONES = DOC_TONES;
 
 const TIER_LABEL = { top_10: "Top 10", top_20: "Top 20", top_30: "Top 30" } as const;
 
 function rankCopy(r?: Summary["ranking"]) {
   if (!r || r.activityScore <= 0) return { title: "Not ranked yet", detail: "Create your first document to join the activity board." };
-  if (r.topTier) return { title: TIER_LABEL[r.topTier], detail: `You're in the ${TIER_LABEL[r.topTier]} among active agents on Voyenta` };
+  if (r.topTier) return { title: TIER_LABEL[r.topTier], detail: `You're in the ${TIER_LABEL[r.topTier]} among active agents on Vouchlio` };
   if (r.rank != null) return { title: "On the activity board", detail: "Keep creating documents to reach Top 30 among active agents." };
   return { title: "Activity tracked", detail: "Save more documents to climb the activity board." };
 }
@@ -117,7 +125,7 @@ function planStatus(agent: Agent, pending: boolean) {
     return { detail: `Your ${paid} ended on ${shortDate(sub.expiresAt!)}. You're on Silver now — renew to unlock your services again.`, badge: "Ended", tone: "warn" as const };
   if (sub.status === "active")
     return { detail: sub.expiresAt ? `Your ${cycle} ${paid} is active until ${shortDate(sub.expiresAt)}.` : `Your ${paid} is active.`, badge: "Active", tone: "ok" as const };
-  return { detail: "Hotel vouchers, invoices, proforma invoices and receipts are included.", badge: "Active", tone: "ok" as const };
+  return { detail: "Hotel vouchers, invoices and proforma invoices are included.", badge: "Active", tone: "ok" as const };
 }
 
 function NewDocumentMenu({ tiles, children }: { tiles: Tile[]; children: React.ReactNode }) {
@@ -185,8 +193,6 @@ export default function DashboardPage() {
   const usage = summary?.freeUsage ?? null;
   const usageFull = !!usage && usage.used >= usage.limit;
   const rank = rankCopy(summary?.ranking);
-  const verifiedLabel = agent.isVerified ? "Verified" : agent.partnerType === "other" ? "In review" : "Not verified";
-  const profileLink = !active && !setup.profileComplete ? { href: "/dashboard/profile/edit", label: "Continue in profile" } : { href: "/dashboard/profile", label: "View full profile" };
 
   let docAction: { detail: string; label: string } | null = null;
   if (loading) docAction = { detail: "Checking documents…", label: "Create now" };
@@ -196,246 +202,270 @@ export default function DashboardPage() {
       ? { detail: `${total.toLocaleString("en-IN")} on file — your account should go Active soon`, label: "View documents" }
       : { detail: "Create a voucher, invoice, or other document", label: "Create a document" };
 
+  const stats: { label: string; value: string; hint: string; icon: LucideIcon; href?: string }[] = [
+    { label: "Total documents", value: total.toLocaleString("en-IN"), hint: rank.title, icon: FileText },
+    { label: "Saved customers", value: (summary?.customers ?? 0).toLocaleString("en-IN"), hint: "Ready to reuse on invoices", icon: Users },
+    usage
+      ? { label: "Free this month", value: `${Math.min(usage.used, usage.limit)} / ${usage.limit}`, hint: usageFull ? "Limit reached — upgrade for unlimited" : `Resets ${new Date(usage.resetsAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}`, icon: Gauge }
+      : { label: "Services", value: `${tiles.length} / ${allTiles.length}`, hint: "Included on your plan", icon: Layers },
+    { label: "Your plan", value: planLabel(currentPlan), hint: plan.badge, icon: Crown, href: "/dashboard/pricing" },
+  ];
+  const weekly = (summary?.weekly ?? []).map((w) => ({
+    week: new Date(w.weekStart).toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+    created: w.created,
+    pdfs: w.pdfs,
+  }));
+  const recent = summary?.recent ?? [];
+
   return (
-    <PageShell wide>
-      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-5">
-          {/* Overview */}
-          <section aria-labelledby="dashboard-heading" className="anim-rise overflow-hidden rounded-3xl border border-slate-200 bg-white">
-            <div className="relative bg-gradient-to-r from-brand-50 via-sky-50/40 to-white px-5 py-5 sm:px-6">
-              <div className="pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-brand-200/30 blur-3xl" aria-hidden />
-              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  <AgentAvatar agent={agent} size={60} />
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-600">Dashboard overview</p>
-                    <h1 id="dashboard-heading" className="truncate text-2xl font-bold tracking-tight text-slate-900">{displayName(agent)}</h1>
-                    <p className="truncate text-sm text-slate-500">{agencyLine(agent, "Your travel agency")}</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <span title={statusTooltip(agent)} className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold", active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600")}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", active ? "bg-emerald-500" : "bg-slate-400")} />
-                        {statusLabel(agent.status)}
-                      </span>
-                      <span title={verifyTooltip(agent)} className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold", agent.isVerified ? "bg-sky-50 text-sky-700" : "bg-amber-50 text-amber-700")}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", agent.isVerified ? "bg-sky-500" : "bg-amber-500")} />
-                        {verifiedLabel}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Link href={profileLink.href} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-brand-200">
-                    {profileLink.label} <ChevronRight className="h-4 w-4" />
-                  </Link>
-                  <NewDocumentMenu tiles={tiles}>
-                    <button type="button" className="inline-flex h-10 items-center justify-center gap-1.5 btn-glow rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm shadow-brand-500/30 hover:bg-brand-600">
-                      <Plus className="h-4 w-4" /> New document
-                    </button>
-                  </NewDocumentMenu>
-                </div>
-              </div>
-            </div>
+    <PageShell wide className="space-y-6">
+      <VerificationBanner />
 
-            <div className="border-t border-slate-100 px-5 py-4 sm:px-6">
-              {suspended ? (
-                <div>
-                  <p className="font-semibold text-rose-700">Your account is suspended</p>
-                  <p className="text-sm text-slate-500">Please contact support if you need help getting back in.</p>
-                </div>
-              ) : active ? (
-                <p className="text-sm text-slate-600">
-                  Your account is <span className="font-semibold text-emerald-700">Active</span>. Create and share documents from here.
-                </p>
-              ) : (
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-sm font-semibold text-slate-900">Finish setting up your account</h2>
-                    <span className="text-sm font-bold tabular-nums text-brand-600">{setup.percent}% to Active</span>
-                  </div>
-                  <div role="progressbar" aria-valuenow={setup.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Account setup progress" className="mt-2 h-2 overflow-hidden rounded-full bg-brand-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-[var(--primary)] transition-all" style={{ width: `${setup.percent}%` }} />
-                  </div>
-                  <p className="mt-2 text-xs text-slate-500">{setup.detail}</p>
-                  {docAction ? (
-                    <p className="mt-1 text-xs text-slate-500">
-                      {docAction.detail}{" "}
-                      <button type="button" onClick={() => focusAnchor("agent-activation-documents")} className="font-semibold text-brand-600 hover:underline">
-                        {docAction.label}
-                      </button>
-                    </p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {activation.needsPrompt ? (
-                      <button type="button" onClick={activation.openDialog} className="rounded-lg bg-brand-100 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-200">
-                        Show me where
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Document activity */}
-          <section id="agent-activation-documents" aria-labelledby="doc-stats-heading" className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <h2 id="doc-stats-heading" className="text-base font-semibold text-slate-900">Document activity</h2>
-                <p className="text-sm text-slate-500">Documents you&apos;ve created, by type</p>
-              </div>
-              {!loading && !error ? (
-                <p className="text-xs font-medium text-slate-500">
-                  <span className="font-bold text-slate-900">{total.toLocaleString("en-IN")}</span> total · {tiles.length} of {allTiles.length} services on your plan
+      {/* Account status: only while something needs attention */}
+      {suspended ? (
+        <Card className="border-rose-200 bg-rose-50">
+          <CardHeader>
+            <CardTitle className="text-base text-rose-700">Your account is suspended</CardTitle>
+            <CardDescription>Please contact support if you need help getting back in.</CardDescription>
+          </CardHeader>
+        </Card>
+      ) : !active ? (
+        <Card>
+          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="space-y-1.5">
+              <CardTitle className="text-base">Finish setting up your account</CardTitle>
+              <CardDescription>{setup.detail}</CardDescription>
+              {docAction ? (
+                <p className="text-xs text-slate-500">
+                  {docAction.detail}{" "}
+                  <button type="button" onClick={() => focusAnchor("agent-activation-documents")} className="font-semibold text-brand-600 hover:underline">
+                    {docAction.label}
+                  </button>
                 </p>
               ) : null}
             </div>
+            <div className="flex shrink-0 gap-2">
+              {activation.needsPrompt ? (
+                <Button variant="outline" size="sm" onClick={activation.openDialog}>
+                  Show me where
+                </Button>
+              ) : null}
+              <Button asChild size="sm">
+                <Link href="/dashboard/profile/edit">Complete profile</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="flex items-center gap-3">
+            <Progress value={setup.percent} aria-label="Account setup progress" />
+            <span className="shrink-0 text-xs tabular-nums text-slate-500">{setup.percent}% to Active</span>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((s) => {
+          const body = (
+            <Card className={cn("h-full transition", s.href && "hover:border-brand-300")}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-600">{s.label}</CardTitle>
+                <s.icon aria-hidden className="h-5 w-5 text-slate-400" />
+              </CardHeader>
+              <CardContent>
+                {loading ? <Skeleton className="h-8 w-24" /> : <p className="truncate text-2xl font-semibold tabular-nums text-black">{error ? "—" : s.value}</p>}
+                <p className="mt-0.5 truncate text-xs text-slate-500">{s.hint}</p>
+              </CardContent>
+            </Card>
+          );
+          return s.href ? (
+            <Link key={s.label} href={s.href} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">
+              {body}
+            </Link>
+          ) : (
+            <div key={s.label}>{body}</div>
+          );
+        })}
+      </div>
+      {access.summary?.showWarning ? (
+        <button type="button" onClick={access.openDialog} className="-mt-3 text-xs font-semibold text-rose-600 hover:underline">
+          {access.summary.totalAtRiskCount} file(s) losing access when your plan changes →
+        </button>
+      ) : null}
+
+      {/* Activity chart */}
+      <Card>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
+          <div className="space-y-1.5">
+            <CardTitle className="text-lg">Document activity</CardTitle>
+            <CardDescription>Documents created and PDFs generated over the last eight weeks</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : weekly.length === 0 ? (
+            <p className="grid h-64 place-items-center text-sm text-slate-500">{error ?? "No activity to show yet."}</p>
+          ) : (
+            <ChartContainer config={CHART_CONFIG} className="h-64 w-full">
+              <AreaChart data={weekly} margin={{ left: 4, right: 4, top: 8 }} accessibilityLayer>
+                <defs>
+                  <linearGradient id="dashCreated" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-created)" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="var(--color-created)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+                <ChartTooltip content={<ChartTooltipContent labelFormatter={(l) => `Week of ${l}`} />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                {/* The two series differ by form (dashed line vs filled area), not only by colour. */}
+                <Area dataKey="pdfs" type="monotone" stroke="var(--color-pdfs)" strokeDasharray="4 4" fill="none" strokeWidth={2} />
+                <Area dataKey="created" type="monotone" stroke="var(--color-created)" fill="url(#dashCreated)" strokeWidth={2} />
+              </AreaChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Services */}
+        <Card id="agent-activation-documents" className="scroll-mt-28">
+          <CardHeader>
+            <CardTitle as="h2" className="text-lg">Your services</CardTitle>
+            <CardDescription>
+              {tiles.length} of {allTiles.length} document types on your plan · share of your documents
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
             {loading ? (
-              <div role="status" aria-busy="true" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <span className="sr-only">Loading your numbers</span>
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="flex flex-col rounded-2xl border border-slate-200 p-3.5">
-                    <div className="flex items-center justify-between">
-                      <Skeleton className="h-9 w-9 rounded-xl" />
-                      <Skeleton className="h-6 w-8" />
-                    </div>
-                    <Skeleton className="mt-3 h-3 w-3/4" />
-                    <Skeleton className="mt-2 h-3 w-1/3" />
-                  </div>
-                ))}
-              </div>
-            ) : error ? (
-              <p className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>
+              Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
             ) : allTiles.length === 0 ? (
               <p className="text-sm text-slate-500">No document tools are enabled for your account yet. Contact support if you need access.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {allTiles.map((t, i) =>
-                  !planIncludes(currentPlan, t.key) ? (
-                    <article key={t.key} className="anim-rise flex flex-col rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-3.5" style={{ animationDelay: `${i * 35}ms` }}>
-                      <div className="flex items-center justify-between">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                          <t.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+              allTiles.map((t) => {
+                const included = planIncludes(currentPlan, t.key);
+                const count = counts.get(t.key) ?? 0;
+                const share = total ? Math.round((count / total) * 100) : 0;
+                const tone = TILE_TONES[t.key];
+                if (!included) {
+                  // Locked on this plan: shown disabled, with one clear way to unlock it.
+                  const need = planName(lowestPlanFor(t.key));
+                  return (
+                    <div key={t.key} aria-disabled="true" className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 ring-1 ring-slate-200">
+                          <t.icon className="h-4 w-4" />
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">
-                          <Lock className="h-3 w-3" /> {planName(lowestPlanFor(t.key))}
-                        </span>
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-medium text-slate-500">{t.label}</h3>
+                          <p className="flex items-center gap-1 text-xs text-slate-400">
+                            <Lock className="h-3 w-3" /> Available on {need}
+                          </p>
+                        </div>
                       </div>
-                      <p className="mt-2 text-[13px] font-medium text-slate-500">{t.label}</p>
-                      <Link href="/dashboard/pricing" aria-label={`Unlock ${t.label.toLowerCase()}`} className="mt-1 text-xs font-semibold text-slate-600 hover:text-brand-700">
-                        Upgrade to unlock
-                      </Link>
-                    </article>
-                  ) : (
-                  <article key={t.key} className="anim-rise group flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md hover:shadow-brand-500/5" style={{ animationDelay: `${i * 35}ms` }}>
-                    <div className="flex items-center justify-between">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-[var(--primary)] group-hover:text-white">
-                        <t.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                      </span>
-                      <span className="text-2xl font-bold tabular-nums text-slate-900">{(counts.get(t.key) ?? 0).toLocaleString("en-IN")}</span>
+                      <Button asChild size="sm" variant="outline" className="shrink-0">
+                        <Link href="/dashboard/pricing" aria-label={`Upgrade to ${need} to unlock ${t.label.toLowerCase()}`}>
+                          Upgrade to unlock
+                        </Link>
+                      </Button>
                     </div>
-                    <p className="mt-2 text-[13px] font-medium text-slate-600">{t.label}</p>
-                    <Link href={t.href} aria-label={`Create ${t.label.toLowerCase()}`} className="mt-1 text-xs font-semibold text-brand-600 hover:text-brand-700">
-                      + Create
-                    </Link>
-                  </article>
-                  )
-                )}
+                  );
+                }
+                return (
+                  <div key={t.key} className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="flex min-w-0 items-center gap-2.5 text-sm font-medium text-black">
+                        <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", tone.chip)}>
+                          <t.icon className="h-4 w-4" />
+                        </span>
+                        <span className="truncate">{t.label}</span>
+                      </h3>
+                      <Badge variant="success">{count.toLocaleString("en-IN")} created</Badge>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Progress value={share} aria-label={`${t.label}: ${share}% of your documents`} />
+                      <span className="w-9 shrink-0 text-right text-xs tabular-nums text-slate-500">{share}%</span>
+                    </div>
+                    <div className="flex justify-end">
+                      <Link href={t.href} className="text-xs font-semibold text-brand-600 hover:underline">
+                        + Create {t.label.toLowerCase().replace(/s$/, "")}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle as="h2" className="text-lg">Recent activity</CardTitle>
+            <CardDescription>Your latest documents</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : recent.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <p className="text-sm text-slate-500">You haven&apos;t created any documents yet.</p>
                 <NewDocumentMenu tiles={tiles}>
-                  <button type="button" className="flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-brand-200 bg-brand-50/40 p-3 text-[13px] font-semibold text-brand-700 hover:bg-brand-50">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-brand-200">
-                      <Plus className="h-4 w-4" />
-                    </span>
-                    New document
-                  </button>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4" /> Create your first document
+                  </Button>
                 </NewDocumentMenu>
               </div>
+            ) : (
+              <ol className="flex flex-col gap-1">
+                {recent.map((doc) => {
+                  const tile = TILES.find((t) => t.key === doc.kind);
+                  const Icon = tile?.icon ?? FileText;
+                  const edited = doc.version > 1 || new Date(doc.updatedAt).getTime() - new Date(doc.createdAt).getTime() > 60_000;
+                  return (
+                    <li key={doc.id}>
+                      <Link href={documentHref(doc.kind, doc.id)} className="flex items-start gap-3 rounded-lg p-2 transition hover:bg-slate-50">
+                        <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full", TILE_TONES[doc.kind]?.chip)}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm leading-snug">
+                            <span className="font-medium text-black">{doc.title || "Untitled"}</span>{" "}
+                            <span className="text-slate-500">
+                              {edited ? "updated" : "created"} · {(tile?.label ?? "Document").toLowerCase().replace(/s$/, "")}
+                              {doc.number ? ` ${doc.number}` : ""}
+                            </span>
+                          </p>
+                          <p className="text-xs text-slate-400">{timeAgo(doc.updatedAt)}</p>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
             )}
-            {usage ? (
-              <div className="mt-4 rounded-2xl border border-slate-200 p-4">
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <p className="font-semibold text-slate-900">Free documents this month</p>
-                  <p className={cn("font-bold tabular-nums", usageFull ? "text-rose-600" : "text-slate-900")}>
-                    {Math.min(usage.used, usage.limit)} / {usage.limit}
-                  </p>
-                </div>
-                <div role="progressbar" aria-valuenow={usage.used} aria-valuemin={0} aria-valuemax={usage.limit} aria-label="Free documents used" className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className={cn("h-full rounded-full transition-all", usageFull ? "bg-rose-500" : "bg-[var(--primary)]")} style={{ width: `${Math.min(100, (usage.used / usage.limit) * 100)}%` }} />
-                </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  {usageFull ? "You've used this month's free documents. " : ""}
-                  Resets on {new Date(usage.resetsAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}.{" "}
-                  <Link href="/dashboard/pricing" className="font-semibold text-brand-600 hover:underline">Gold and Platinum have no monthly limit</Link>
-                </p>
-              </div>
-            ) : null}
-          </section>
-        </div>
-
-        {/* Aside */}
-        <aside className="space-y-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ink via-[#0f1a08] to-brand-950 p-5 text-white">
-            <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-brand-500/30 blur-3xl" aria-hidden />
-            <div className="relative">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-200/80">Your plan</p>
-                <span className="rounded-full bg-gradient-to-b from-white to-slate-300 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-800">{currentPlan}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <p className="text-lg font-bold">{planLabel(currentPlan)}</p>
-                <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", plan.tone === "ok" ? "text-emerald-300" : "text-amber-300")}>
-                  <span className={cn("h-2 w-2 rounded-full", plan.tone === "ok" ? "bg-emerald-400" : "bg-amber-400")} />
-                  {plan.badge}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-brand-100/80">{plan.detail}</p>
-              <Link href="/dashboard/pricing" className="mt-4 inline-flex h-9 items-center gap-1 rounded-xl bg-white/10 px-3 text-[13px] font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
-                {plan.tone === "warn" && plan.badge !== "In review" ? "Renew now" : "Compare plans"} <ArrowRight className="h-4 w-4" />
-              </Link>
-              {access.summary?.showWarning ? (
-                <button type="button" onClick={access.openDialog} className="mt-2 block text-xs text-amber-300 hover:underline">
-                  {access.summary.totalAtRiskCount} file(s) losing access →
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 rounded-3xl border border-slate-200 bg-white p-5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-              <Trophy className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Usage rank</p>
-              {loading ? (
-                <div className="mt-1 space-y-1.5"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-48" /></div>
-              ) : error ? (
-                <p className="text-sm text-rose-600">{error}</p>
-              ) : (
-                <>
-                  <p className="text-base font-semibold text-slate-900">{rank.title}</p>
-                  <p className="text-sm text-slate-500">{rank.detail}</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-              <MessageCircle className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900">Need a hand?</p>
-              <p className="text-xs text-slate-500">Chat with our support team</p>
-            </div>
-            <Link href="/dashboard/support" className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-[13px] font-semibold hover:border-brand-200 hover:text-brand-600">
-              Chat
-            </Link>
-          </div>
-        </aside>
+          </CardContent>
+        </Card>
       </div>
 
       {!suspended && tiles.some((t) => t.key === "hotel_voucher") ? <QuickStartPopup /> : null}
     </PageShell>
   );
+}
+
+/** "just now", "5 min ago", "3h ago", "2 days ago", then a date. */
+function timeAgo(iso: string): string {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 7 * 86400) return `${Math.floor(s / 86400)} day${s < 2 * 86400 ? "" : "s"} ago`;
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 /* ─── Quick start: "Create a hotel voucher" corner popup ────────────────── */
@@ -507,7 +537,7 @@ function QuickStartPopup() {
       <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-600">Quick start</p>
       <p id="qs-title" className="text-base font-semibold text-slate-900">Create a hotel voucher</p>
       <p className="mt-0.5 min-h-8 text-xs text-slate-500" aria-live="polite">{caption}</p>
-      <div className="mt-2 rounded-2xl border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-3" role="img" aria-label={`Voucher workflow: ${caption}`}>
+      <div className="mt-2 rounded-2xl border border-slate-100 bg-white p-3" role="img" aria-label={`Voucher workflow: ${caption}`}>
         <div className={cn("rounded-xl border border-slate-200 bg-white p-2 transition-opacity", phase !== "fill" && "opacity-40")}>
           <p className="flex items-center gap-1 text-[10px] font-semibold text-slate-500"><Hotel className="h-3 w-3" /> Hotel voucher details</p>
           <div className="mt-1.5 space-y-1">
@@ -516,7 +546,7 @@ function QuickStartPopup() {
             <div className="h-1.5 w-2/3 rounded bg-slate-200" />
           </div>
         </div>
-        <div className="relative mx-auto mt-2 flex h-7 w-4/5 items-center justify-center gap-1 rounded-lg bg-slate-800 text-[9px] font-semibold text-slate-300">
+        <div className="on-accent relative mx-auto mt-2 flex h-7 w-4/5 items-center justify-center gap-1 rounded-lg bg-slate-800 text-[9px] font-semibold text-slate-300">
           <Printer className="h-3 w-3" /> Printer
           <span className={cn("absolute right-2 h-1.5 w-1.5 rounded-full", phase === "print" ? "animate-pulse bg-brand-400" : phase === "ready" ? "bg-emerald-400" : "bg-slate-500")} />
         </div>

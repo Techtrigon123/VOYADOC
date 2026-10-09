@@ -740,7 +740,7 @@ export default function VoucherEditorPage() {
             </dl>
           </div>
 
-          <div className="rounded-3xl border border-brand-200 bg-gradient-to-b from-brand-50 to-white p-5">
+          <div className="rounded-3xl border border-brand-200 bg-white p-5">
             <Field label="Who is preparing this voucher?" htmlFor="preparedBy" required hint="Enter your name. It will appear on the PDF and in your saved voucher history.">
               <TextInput id="preparedBy" value={data.preparedBy} onChange={(e) => patch({ preparedBy: e.target.value })} placeholder="Your name" />
             </Field>

@@ -324,7 +324,7 @@ export async function drawPlacard(canvas: HTMLCanvasElement, d: PlacardData, age
     ctx.fillStyle = "#0f172a";
     ctx.font = "800 96px Inter, Arial, sans-serif";
     ctx.textAlign = "center";
-    for (const dy of [-360, 0, 360]) ctx.fillText("Voyenta  -  Silver", 0, dy);
+    for (const dy of [-360, 0, 360]) ctx.fillText("Vouchlio  -  Silver", 0, dy);
     ctx.restore();
   }
 }

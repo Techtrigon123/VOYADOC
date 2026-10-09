@@ -1,13 +1,14 @@
 import { NextRequest } from "next/server";
 import { createPlanPayment, findPendingPlanPayment, hasColumn, updatePlanPayment } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
-import { isBillingCycle, isPaidPlan, normalizeCycle, PLAN_PRICES_INR } from "@/lib/agent/plans";
+import { isBillingCycle, isPaidPlan, normalizeCycle } from "@/lib/agent/plans";
+import { getAppSettings } from "@/lib/settings";
 
 const MAX_PROOF_BYTES = 3 * 1024 * 1024;
 
 /**
  * Submit (or edit) payment proof for a paid plan. Body: { planId, billingCycle?, paymentTransactionId, proof? }.
- * The amount always comes from PLAN_PRICES_INR, never from the client. Our team verifies the
+ * The amount always comes from the current prices (admin settings), never from the client. Our team verifies the
  * payment and activates the plan with approve_plan_payment() (see migration 0005).
  */
 export async function POST(req: NextRequest) {
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
         return fail("Upload a PNG, JPG, WebP image or PDF under 3 MB.");
     }
 
-    const amountInr = PLAN_PRICES_INR[planId][billingCycle];
+    const amountInr = (await getAppSettings()).pricing[planId][billingCycle];
     const cycleFields = cyclesStored ? { billingCycle } : {};
     const proofType = hasNewProof ? (proof as string).slice(5, (proof as string).indexOf(";")) : undefined;
     const payment = existing

@@ -1,6 +1,6 @@
 {
-  "name": "Voyenta",
-  "short_name": "Voyenta",
+  "name": "Vouchlio",
+  "short_name": "Vouchlio",
   "description": "Travel document software for travel agents, agencies and tour operators",
   "start_url": "/dashboard",
   "display": "standalone",

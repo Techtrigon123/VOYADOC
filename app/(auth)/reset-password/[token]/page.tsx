@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import AuthLogo from "@/components/auth/AuthLogo";
 import { KeyRound } from "lucide-react";
 
 const resetSchema = z.object({
@@ -53,10 +54,11 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
   };
 
   return (
-    <div className="w-full max-w-md">
-      <Card className="shadow-sm border-[var(--border)]">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold">Set a new password</CardTitle>
+    <div className="w-full max-w-[420px]">
+      <Card className="auth-card">
+        <CardHeader className="pb-4">
+          <AuthLogo />
+          <CardTitle as="h1" className="text-2xl font-bold">Set a new password</CardTitle>
           <CardDescription>
             Create a strong password for your account
           </CardDescription>

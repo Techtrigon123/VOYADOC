@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import LegalPage, { type LegalSection } from "@/components/legal/LegalPage";
-import { GRACE_DAYS, PLAN_PRICES_INR, formatInr } from "@/lib/agent/plans";
+import { GRACE_DAYS, formatInr } from "@/lib/agent/plans";
+import { getAppSettings, type Prices } from "@/lib/settings";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Refund Policy",
-  description:
-    "When and how Voyenta refunds Gold and Platinum plan payments, and how to request a refund for a duplicate or unverified UPI payment.",
-  alternates: { canonical: "/refunds" },
-};
+  description: "When and how Vouchlio refunds Gold and Platinum plan payments, and how to request a refund for a duplicate or unverified UPI payment.",
+  path: "/refunds",
+});
 
-const sections: LegalSection[] = [
+const buildSections = (pricing: Prices): LegalSection[] => [
   {
     id: "silver",
     title: "Silver plan",
@@ -22,8 +23,8 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          Gold ({formatInr(PLAN_PRICES_INR.gold.monthly)}/month or {formatInr(PLAN_PRICES_INR.gold.yearly)}/year) and Platinum
-          ({formatInr(PLAN_PRICES_INR.platinum.monthly)}/month or {formatInr(PLAN_PRICES_INR.platinum.yearly)}/year) are paid in
+          Gold ({formatInr(pricing.gold.monthly)}/month or {formatInr(pricing.gold.yearly)}/year) and Platinum
+          ({formatInr(pricing.platinum.monthly)}/month or {formatInr(pricing.platinum.yearly)}/year) are paid in
           advance. Your plan is activated once we verify your payment, and its benefits run for one month or one year from that
           date, depending on the billing you chose. Plans do not renew automatically, so you are never charged again without
           choosing to. After a plan ends it keeps working for a grace period ({GRACE_DAYS.monthly} days for monthly,{" "}
@@ -68,11 +69,12 @@ const sections: LegalSection[] = [
   },
 ];
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage() {
+  const sections = buildSections((await getAppSettings()).pricing);
   return (
     <LegalPage
       title="Refund Policy"
-      intro={<p>How refunds work for Voyenta plans, and how to ask for one.</p>}
+      intro={<p>How refunds work for Vouchlio plans, and how to ask for one.</p>}
       sections={sections}
     />
   );

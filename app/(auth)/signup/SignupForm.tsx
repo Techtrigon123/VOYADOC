@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import AuthLogo from "@/components/auth/AuthLogo";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -81,10 +82,11 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <Card className="shadow-sm border-[var(--border)]">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+    <div className="w-full max-w-[420px]">
+      <Card className="auth-card">
+        <CardHeader className="pb-4">
+          <AuthLogo />
+          <CardTitle as="h1" className="text-2xl font-bold">Create your account</CardTitle>
           <CardDescription>
             Free to start — no credit card required
           </CardDescription>
@@ -153,7 +155,7 @@ export default function SignupForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  data-password-toggle className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -225,22 +227,10 @@ export default function SignupForm() {
             </Button>
           </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[var(--border)]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-[var(--muted-foreground)]">
-                Already have an account?
-              </span>
-            </div>
-          </div>
-
-          <Link href="/login">
-            <Button variant="outline" className="w-full">
-              Log in instead
-            </Button>
-          </Link>
+          <p className="mt-4 text-center text-sm text-white">
+            Already have an account?{" "}
+            <Link href="/login">Sign in</Link>
+          </p>
         </CardContent>
       </Card>
     </div>

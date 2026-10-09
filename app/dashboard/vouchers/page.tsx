@@ -71,11 +71,6 @@ export default function VouchersPage() {
         eyebrow="Hotel vouchers"
         title="Your voucher PDFs"
         description="Latest PDF for each voucher. Open earlier PDFs from the same HCN when needed."
-        actions={
-          <Link href="/dashboard/vouchers/new" className={primaryBtn}>
-            <Plus className="h-4 w-4" /> Create voucher
-          </Link>
-        }
       />
 
       {totalGroups > 0 || filtering ? (

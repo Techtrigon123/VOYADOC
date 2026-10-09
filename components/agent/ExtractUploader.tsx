@@ -114,7 +114,7 @@ export function ExtractUploader<T>({ type, onFields }: { type: "voucher" | "tick
         : null;
 
   return (
-    <div className="rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-5">
+    <div className="rounded-3xl border border-brand-200 bg-white p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] text-white">

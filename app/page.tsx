@@ -5,19 +5,63 @@ import type { Metadata } from "next";
 import HomePage from "@/app/(marketing)/page";
 import { NavBarDemo } from "@/components/ui/navbar-demo";
 import Footer from "@/components/layout/Footer";
-import ThemeToggle from "@/components/marketing/ThemeToggle";
+import SmoothScroll from "@/components/marketing/SmoothScroll";
+import { faqs } from "@/components/marketing/faq-data";
+import { jsonLd, organizationLd } from "@/lib/seo";
+import { SITE } from "@/lib/site";
+
+const TITLE = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | Vouchlio";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
+  openGraph: { url: "/", title: TITLE, description: SITE.description },
+};
+
+/** Structured data: who we are, the site, the product, and the FAQ (eligible for rich results). */
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    organizationLd,
+    {
+      "@type": "WebSite",
+      "@id": `${SITE.url}/#website`,
+      url: SITE.url,
+      name: SITE.name,
+      description: SITE.tagline,
+      inLanguage: "en-IN",
+      publisher: { "@id": `${SITE.url}/#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: SITE.name,
+      url: SITE.url,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web browser",
+      description: SITE.description,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "INR", description: "Free plan" },
+      publisher: { "@id": `${SITE.url}/#organization` },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    },
+  ],
 };
 
 export default function RootPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }} />
       <NavBarDemo />
-      <HomePage />
+      <main id="main">
+        <HomePage />
+      </main>
       <Footer />
-      <ThemeToggle />
+      <SmoothScroll />
     </>
   );
 }

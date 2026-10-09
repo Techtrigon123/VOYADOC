@@ -6,15 +6,23 @@
  * with contact details on your Privacy Policy.
  */
 export const SITE = {
-  name: "Voyenta",
-  url: (process.env.NEXT_PUBLIC_APP_URL || "https://voyenta.com").replace(/\/+$/, ""),
+  name: "Vouchlio",
+  url: (process.env.NEXT_PUBLIC_APP_URL || "https://vouchlio.com").replace(/\/+$/, ""),
   tagline: "Travel document software for travel agents",
   description:
     "Create hotel vouchers, air tickets, pickup vouchers, welcome placards, GST invoices, proforma invoices and receipts as branded PDFs — built for Indian travel agents, tour operators and DMCs.",
 
+  /** TODO: full URLs of your real social profiles (e.g. "https://www.linkedin.com/company/vouchlio"). Empty ones are hidden. */
+  social: {
+    linkedin: "",
+    x: "",
+    instagram: "",
+    youtube: "",
+  },
+
   legal: {
     /** TODO: registered legal name of the business (e.g. "Techtrigon Solutions Pvt Ltd"). */
-    entityName: "Voyenta",
+    entityName: "Vouchlio",
     /** TODO: registered office address. */
     address: "Registered office address to be updated",
     /** TODO: city whose courts have jurisdiction over disputes. */

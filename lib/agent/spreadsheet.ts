@@ -4,7 +4,10 @@ export type Cell = string | number;
 
 export function toCsv(rows: Cell[][]): string {
   const esc = (v: Cell) => {
-    const s = String(v ?? "");
+    let s = String(v ?? "");
+    // Text starting with = + - @ (or tab/CR) runs as a formula when Excel opens the CSV — e.g. a
+    // guest name read from an uploaded file. A leading apostrophe makes Excel show it as plain text.
+    if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return "﻿" + rows.map((r) => r.map(esc).join(",")).join("\r\n");

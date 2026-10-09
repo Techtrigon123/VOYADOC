@@ -1,20 +1,27 @@
+import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import BrandMark from "@/components/brand/BrandMark";
+import { BackButton } from "@/components/ui/back-button";
 
-export const metadata = {
-  title: "About",
-  description: "Built to make travel documentation easier for travel agents, agencies and tour operators.",
-  alternates: { canonical: "/about" },
-};
+export const metadata: Metadata = pageMeta({
+  title: "About Vouchlio — Travel Document Software",
+  description: "Vouchlio is built in India for travel agents, tour operators and DMCs who want branded hotel vouchers, air tickets and GST invoices in minutes, not hours.",
+  path: "/about",
+  absoluteTitle: true,
+});
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="h-16 flex items-center px-6 border-b border-[var(--border)] bg-white">
-        <Link href="/" className="flex items-center gap-2">
-          <BrandMark className="h-7" />
-          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
-        </Link>
+      <header className="h-16 flex items-center px-6 glass-nav sticky top-0 z-30 border-b">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/" />
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark className="h-7" />
+            <span className="font-bold text-base text-[var(--foreground)]">Vouchlio</span>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-10 space-y-6">
@@ -41,7 +48,7 @@ export default function AboutPage() {
       </main>
 
       <footer className="py-4 text-center text-xs text-[var(--muted-foreground)]">
-        © {new Date().getFullYear()} Voyenta
+        © {new Date().getFullYear()} Vouchlio
       </footer>
     </div>
   );

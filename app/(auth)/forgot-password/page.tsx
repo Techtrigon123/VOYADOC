@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import AuthLogo from "@/components/auth/AuthLogo";
 import { Mail } from "lucide-react";
 
 const forgotSchema = z.object({
@@ -52,22 +53,23 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <Card className="shadow-sm border-[var(--border)]">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold">Reset your password</CardTitle>
+    <div className="w-full max-w-[420px]">
+      <Card className="auth-card">
+        <CardHeader className="pb-4">
+          <AuthLogo />
+          <CardTitle as="h1" className="text-2xl font-bold">Reset your password</CardTitle>
           <CardDescription>
             Enter your email and we&apos;ll send you a reset link
           </CardDescription>
         </CardHeader>
         <CardContent>
           {submitted ? (
-            <div className="text-center space-y-2">
+            <div className="space-y-3">
               <p className="text-sm text-[var(--muted-foreground)]">
                 If an account exists, a reset link has been sent.
               </p>
-              <Link href="/login">
-                <Button variant="outline" className="mt-2">Back to login</Button>
+              <Link href="/login" className="auth-pill inline-flex h-10 items-center px-5 text-sm font-semibold">
+                Back to sign in
               </Link>
             </div>
           ) : (
@@ -87,10 +89,10 @@ export default function ForgotPasswordPage() {
                 <Mail className="h-4 w-4" />
                 Send reset link
               </Button>
-              <p className="text-center text-xs text-[var(--muted-foreground)]">
+              <p className="text-center text-sm text-white">
                 Remember your password?{" "}
-                <Link href="/login" className="text-[var(--primary)] hover:underline">
-                  Log in
+                <Link href="/login">
+                  Sign in
                 </Link>
               </p>
             </form>

@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, KeyRound, Lock, LogOut, Menu, Search, Settings, UserRound, X } from "lucide-react";
+import {
+  ChevronDown,
+  KeyRound,
+  Lock,
+  LogOut,
+  PanelLeft,
+  Plus,
+  Search,
+  Settings,
+  Sparkles,
+  UserRound,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -13,18 +26,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Agent, PlanId } from "@/lib/agent/types";
-import { displayName, initials } from "@/lib/agent/profile";
+import { Badge } from "@/components/ui/badge";
+import type { Agent, DocumentKind, PlanId } from "@/lib/agent/types";
+import { displayName, initials, isActive, isSuspended, statusLabel, statusTooltip, verifyTooltip } from "@/lib/agent/profile";
+import { effectivePlan, lowestPlanFor, planIncludes, planLabel, planName } from "@/lib/agent/plans";
 import { useAgent } from "./AgentProvider";
 import { SearchPalette } from "./SearchPalette";
 import { isItemActive, lockedNavPlan, visibleNavItems, type NavItem } from "./nav-config";
 import BrandMark from "@/components/brand/BrandMark";
+import SupportMenu from "./support/SupportMenu";
+import { DOC_ICONS, DOC_TONES, NAV_ICONS, NAV_TONES, type Tone } from "./doc-style";
 
-const PLAN_STYLES: Record<PlanId, string> = {
-  silver: "from-slate-100 via-white to-slate-300 text-slate-700 ring-slate-300",
-  gold: "from-amber-200 via-yellow-50 to-amber-400 text-amber-900 ring-amber-300",
-  platinum: "from-indigo-100 via-white to-slate-300 text-indigo-900 ring-indigo-200",
-};
+/* ─── Shared pieces (also used by the dashboard and profile pages) ─────────── */
 
 export function PlanBadge({ plan, className }: { plan: PlanId; className?: string }) {
   return (
@@ -32,8 +45,7 @@ export function PlanBadge({ plan, className }: { plan: PlanId; className?: strin
       href="/dashboard/pricing"
       title={`${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan — compare plans`}
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-full bg-gradient-to-b px-3 text-[10px] font-extrabold uppercase tracking-[0.14em] shadow-sm ring-1 transition hover:brightness-105",
-        PLAN_STYLES[plan],
+        "inline-flex h-7 items-center gap-1 rounded-full bg-brand-50 px-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-600 ring-1 ring-brand-200 transition hover:bg-brand-100",
         className
       )}
     >
@@ -60,99 +72,318 @@ export function AgentAvatar({ agent, size = 36 }: { agent: Agent; size?: number 
   );
 }
 
-function NavPill({ item, active, currentType, lockedPlan }: { item: NavItem; active: boolean; currentType: string | null; lockedPlan: string | null }) {
-  const Icon = item.icon;
-  const pill = (
+/* ─── Sidebar ──────────────────────────────────────────────────────────── */
+
+const COLLAPSE_KEY = "vouchlio-sidebar-collapsed";
+
+const ACCOUNT_LINKS: { href: string; label: string; icon: LucideIcon; tone: Tone }[] = [
+  { href: "/dashboard/profile", label: "Profile", icon: NAV_ICONS.profile, tone: NAV_TONES.profile },
+  { href: "/dashboard/support", label: "Support", icon: NAV_ICONS.support, tone: NAV_TONES.support },
+];
+
+/** The new icon style: each icon sits in a small tinted chip in its own colour; solid when active. */
+function IconChip({ icon: Icon, tone, active, muted }: { icon: LucideIcon; tone: Tone; active: boolean; muted?: boolean }) {
+  return (
     <span
+      aria-hidden
       className={cn(
-        "group relative inline-flex flex-col items-center gap-1 rounded-2xl px-3.5 py-2 text-[13px] font-semibold transition-colors",
-        active ? "bg-brand-50 text-brand-600" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition",
+        muted ? "bg-slate-100 text-slate-400" : active ? cn(tone.solid, "shadow-sm") : cn(tone.chip, "group-hover:scale-105")
       )}
     >
-      <Icon className={cn("h-[18px] w-[18px]", active ? "text-brand-500" : "text-slate-500 group-hover:text-slate-800")} strokeWidth={1.9} />
-      <span className="flex items-center gap-0.5 leading-none">
-        {item.label}
-        {lockedPlan ? (
-          <Lock className="ml-0.5 h-3 w-3 text-slate-400" aria-label="Locked" />
-        ) : item.subItems ? (
-          <ChevronDown className="h-3 w-3 opacity-60 transition group-data-[state=open]:rotate-180" />
-        ) : null}
-      </span>
-      {active ? <span className="absolute -bottom-[9px] left-1/2 h-[3px] w-8 -translate-x-1/2 rounded-full bg-[var(--primary)]" /> : null}
+      <Icon className="h-4 w-4" strokeWidth={2} />
+    </span>
+  );
+}
+
+const toneFor = (item: NavItem): Tone => (item.kind ? DOC_TONES[item.kind] : NAV_TONES[item.key as keyof typeof NAV_TONES] ?? NAV_TONES.home);
+
+/** "New …" links for the create button: every unlocked service, with invoices split by type. */
+function createLinks(items: NavItem[], agent: Agent) {
+  return items.flatMap((item) => {
+    if (!item.kind || lockedNavPlan(item, agent)) return [];
+    if (item.key === "invoice")
+      return [
+        { href: "/dashboard/invoices?type=invoice&new=1", label: "Tax invoice", icon: DOC_ICONS.invoice, tone: DOC_TONES.invoice, kind: "invoice" as const },
+        { href: "/dashboard/invoices?type=proforma&new=1", label: "Proforma invoice", icon: DOC_ICONS.proforma, tone: DOC_TONES.proforma, kind: "proforma" as const },
+        { href: "/dashboard/invoices?type=receipt&new=1", label: "Payment receipt", icon: DOC_ICONS.receipt, tone: DOC_TONES.receipt, kind: "receipt" as const },
+      ].filter((c) => planIncludes(effectivePlan(agent), c.kind));
+    const first = item.subItems?.[0];
+    return first ? [{ href: first.href, label: first.label, icon: item.icon, tone: DOC_TONES[item.kind], kind: item.kind }] : [];
+  });
+}
+
+function subItemActive(itemKey: string, href: string, pathname: string, currentType: string | null) {
+  const [path, query] = href.split("?");
+  const type = new URLSearchParams(query ?? "").get("type");
+  if (type) return itemKey === "invoice" && pathname.startsWith(path) && currentType === type;
+  return pathname === path;
+}
+
+const rowClass = (active: boolean, collapsed: boolean) =>
+  cn(
+    "group relative flex items-center gap-3 rounded-lg py-1.5 text-sm font-medium transition-colors",
+    collapsed ? "justify-center px-0" : "px-3",
+    active ? "bg-brand-50 text-brand-600" : "text-slate-600 hover:bg-slate-100 hover:text-black"
+  );
+
+function NavRow({ item, agent, pathname, currentType, collapsed }: { item: NavItem; agent: Agent; pathname: string; currentType: string | null; collapsed: boolean }) {
+  const Icon = item.icon;
+  const active = isItemActive(item, pathname);
+  const locked = lockedNavPlan(item, agent);
+
+  const row = (
+    <span className={cn(rowClass(active, collapsed), locked && "opacity-60 hover:opacity-100")}>
+      {active && !collapsed ? <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-500" /> : null}
+      <IconChip icon={Icon} tone={toneFor(item)} active={active} muted={!!locked} />
+      {collapsed ? null : (
+        <>
+          <span className="flex-1 truncate">{item.label}</span>
+          {locked ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold capitalize text-slate-500">
+              <Lock className="h-3 w-3" /> {locked}
+            </span>
+          ) : item.subItems ? (
+            <ChevronDown className={cn("h-3.5 w-3.5 text-slate-400 transition", active && "rotate-180")} />
+          ) : null}
+        </>
+      )}
     </span>
   );
 
-  // A service outside the plan links to Pricing instead of opening its menu.
-  if (lockedPlan) {
+  if (locked)
     return (
-      <Link
-        href="/dashboard/pricing"
-        title={`${item.label} is on the ${lockedPlan === "gold" ? "Gold and Platinum plans" : "Platinum plan"} — upgrade to unlock`}
-        className="rounded-2xl opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
-      >
-        {pill}
+      <Link href="/dashboard/pricing" aria-label={`${item.label} (locked)`} title={`${item.label} is on the ${locked === "gold" ? "Gold and Platinum plans" : "Platinum plan"} — upgrade to unlock`}>
+        {row}
       </Link>
     );
-  }
-  if (!item.subItems) {
-    return (
-      <Link href={item.href} aria-current={active ? "page" : undefined} className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">
-        {pill}
+
+  return (
+    <div>
+      <Link href={item.href} aria-current={active ? "page" : undefined} aria-label={collapsed ? item.label : undefined} title={collapsed ? item.label : undefined}>
+        {row}
       </Link>
-    );
-  }
+      {active && item.subItems && !collapsed ? (
+        <ul className="mb-1 ml-[22px] mt-1 space-y-0.5 border-l border-slate-200 pl-3">
+          {item.subItems.map((sub) => {
+            const on = subItemActive(item.key, sub.href, pathname, currentType);
+            const subKind = new URLSearchParams(sub.href.split("?")[1] ?? "").get("type") as DocumentKind | null;
+            if (subKind && !planIncludes(effectivePlan(agent), subKind))
+              return (
+                <li key={sub.href}>
+                  <Link href="/dashboard/pricing" title={`${sub.label} need the ${planName(lowestPlanFor(subKind))} plan`} className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] text-slate-400 hover:bg-slate-100">
+                    {sub.label}
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold">
+                      <Lock className="h-3 w-3" /> {planName(lowestPlanFor(subKind))}
+                    </span>
+                  </Link>
+                </li>
+              );
+            return (
+              <li key={sub.href}>
+                <Link
+                  href={sub.href}
+                  aria-current={on ? "page" : undefined}
+                  className={cn("block rounded-lg px-2.5 py-1.5 text-[13px] transition-colors", on ? "font-semibold text-brand-600" : "text-slate-500 hover:bg-slate-100 hover:text-black")}
+                >
+                  {sub.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function AccountMenu({ agent, align = "end", children }: { agent: Agent; align?: "start" | "end"; children: React.ReactNode }) {
+  const router = useRouter();
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label={`More ${item.label} options`}>
-        {pill}
+      <DropdownMenuTrigger className="w-full rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label="Account menu">
+        {children}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" sideOffset={12} className="w-72 rounded-2xl border-slate-200 p-1.5 shadow-xl">
-        {item.subItems.map((sub) => {
-          const SubIcon = sub.icon;
-          const subType = new URLSearchParams(sub.href.split("?")[1] ?? "").get("type");
-          const subActive = subType ? item.key === "invoice" && active && currentType === subType : false;
-          return (
-            <DropdownMenuItem key={sub.href} asChild className="cursor-pointer rounded-xl p-0 focus:bg-brand-50">
-              <Link href={sub.href} className={cn("flex items-start gap-3 px-3 py-2.5", subActive && "bg-brand-50")}>
-                <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", subActive ? "bg-[var(--primary)] text-white" : "bg-brand-100 text-brand-600")}>
-                  <SubIcon className="h-4 w-4" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold text-slate-900">{sub.label}</span>
-                  <span className="block text-xs text-slate-500">{sub.description}</span>
-                </span>
-              </Link>
-            </DropdownMenuItem>
-          );
-        })}
+      <DropdownMenuContent align={align} sideOffset={10} className="w-64 rounded-2xl p-1.5 shadow-xl">
+        <DropdownMenuLabel className="px-3 py-2">
+          <p className="truncate text-sm font-semibold text-slate-900">{displayName(agent)}</p>
+          <p className="truncate text-xs font-normal text-slate-500">{agent.email}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/profile")}>
+          <UserRound className="mr-2 h-4 w-4 text-slate-500" /> Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/profile/edit")}>
+          <Settings className="mr-2 h-4 w-4 text-slate-500" /> Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/change-password")}>
+          <KeyRound className="mr-2 h-4 w-4 text-slate-500" /> Change password
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer rounded-xl py-2 text-rose-600 focus:bg-rose-50 focus:text-rose-700">
+          <a href="/api/auth/logout">
+            <LogOut className="mr-2 h-4 w-4" /> Log out
+          </a>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
+function SidebarContent({ agent, onClose, collapsed = false }: { agent: Agent; onClose?: () => void; collapsed?: boolean }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const currentType = searchParams.get("type");
+  const items = visibleNavItems(agent);
+  const home = items.find((i) => i.key === "home");
+  const services = items.filter((i) => i.kind);
+  const pricing = items.find((i) => i.key === "pricing");
+  const creates = createLinks(items, agent);
+  const plan = effectivePlan(agent);
+  const groupLabel = (text: string) =>
+    collapsed ? <span aria-hidden className="mx-auto mb-2 block h-px w-6 bg-slate-200" /> : <p className="px-3 pb-1.5 text-xs font-medium text-slate-400">{text}</p>;
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className={cn("flex h-16 shrink-0 items-center border-b border-slate-200", collapsed ? "justify-center px-2" : "justify-between px-4")}>
+        <Link href="/dashboard" className="flex items-center gap-2" aria-label="Vouchlio dashboard">
+          <BrandMark className="h-8" />
+          {collapsed ? null : <span className="text-[17px] font-bold tracking-tight text-black">Vouchlio</span>}
+        </Link>
+        {onClose ? (
+          <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
+            <X className="h-5 w-5" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className={cn("pb-2 pt-4", collapsed ? "px-2" : "px-3")}>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="New document"
+              title={collapsed ? "New document" : undefined}
+              className={cn("btn-glow flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold", collapsed && "px-0")}
+            >
+              <Plus className="h-4 w-4" /> {collapsed ? null : "New document"}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side={collapsed ? "right" : "bottom"} sideOffset={8} className="w-[14.5rem] rounded-2xl p-1.5 shadow-xl">
+            {creates.length === 0 ? (
+              <DropdownMenuItem disabled>No document tools are enabled yet</DropdownMenuItem>
+            ) : (
+              creates.map((c) => (
+                <DropdownMenuItem key={c.href} onSelect={() => router.push(c.href)} className="cursor-pointer gap-3 rounded-xl py-2.5">
+                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", c.tone.chip)}>
+                    <c.icon className="h-4 w-4" />
+                  </span>
+                  {c.label}
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <nav aria-label="Main" className={cn("flex-1 space-y-5 overflow-y-auto py-2", collapsed ? "px-2" : "px-3")}>
+        {home ? <NavRow item={home} agent={agent} pathname={pathname} currentType={currentType} collapsed={collapsed} /> : null}
+        {services.length ? (
+          <div>
+            {groupLabel("Documents")}
+            <div className="space-y-0.5">
+              {services.map((item) => (
+                <NavRow key={item.key} item={item} agent={agent} pathname={pathname} currentType={currentType} collapsed={collapsed} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <div>
+          {groupLabel("Account")}
+          <div className="space-y-0.5">
+            {pricing ? <NavRow item={pricing} agent={agent} pathname={pathname} currentType={currentType} collapsed={collapsed} /> : null}
+            {ACCOUNT_LINKS.map(({ href, label, icon: Icon, tone }) => {
+              const active = pathname === href || pathname.startsWith(`${href}/`);
+              return (
+                <Link key={href} href={href} aria-current={active ? "page" : undefined} aria-label={collapsed ? label : undefined} title={collapsed ? label : undefined} className={rowClass(active, collapsed)}>
+                  {active && !collapsed ? <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-500" /> : null}
+                  <IconChip icon={Icon} tone={tone} active={active} />
+                  {collapsed ? null : label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      <div className={cn("shrink-0 space-y-3 border-t border-slate-200", collapsed ? "p-2" : "p-3")}>
+        {plan === "platinum" || collapsed ? null : (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-black">
+              <Sparkles className="h-3.5 w-3.5 text-brand-500" /> {planLabel(plan)}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              {plan === "silver" ? "Unlock air tickets, unlimited documents and your logo on every PDF." : "Go Platinum for every service and custom voucher designs."}
+            </p>
+            <Link href="/dashboard/pricing" className="mt-2 inline-flex text-xs font-semibold text-brand-600 hover:underline">
+              Upgrade plan →
+            </Link>
+          </div>
+        )}
+        <AccountMenu agent={agent} align="start">
+          <span className={cn("flex items-center gap-3 rounded-lg p-1.5 transition hover:bg-slate-100", collapsed && "justify-center")}>
+            <AgentAvatar agent={agent} size={collapsed ? 32 : 36} />
+            {collapsed ? null : (
+              <>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-black">{displayName(agent)}</span>
+                  <span className="block truncate text-xs text-slate-500">{agent.email}</span>
+                </span>
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              </>
+            )}
+          </span>
+        </AccountMenu>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Navbar: collapsible sidebar (desktop), drawer (mobile), sticky header ─ */
+
 export default function AgentNavbar() {
   const { agent } = useAgent();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const lastY = useRef(0);
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return typeof window !== "undefined" && localStorage.getItem(COLLAPSE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  // Close the drawer after navigating (adjusting state during render, not in an effect).
+  const route = `${pathname}?${searchParams.toString()}`;
+  const [lastRoute, setLastRoute] = useState(route);
+  if (lastRoute !== route) {
+    setLastRoute(route);
+    setMobileOpen(false);
+  }
 
-  // Hide while scrolling down, reveal on scroll up.
+  // The page content is offset by the sidebar width (DashboardShell reads --sidebar-w).
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      setHidden(y > 120 && y > lastY.current + 4);
-      if (y < lastY.current - 4 || y < 120) setHidden(false);
-      lastY.current = y;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    document.documentElement.style.setProperty("--sidebar-w", collapsed ? "4rem" : "16rem");
+    try {
+      localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [collapsed]);
 
-  // "/" or Ctrl/⌘+K opens search (not while typing in a field).
+  // "/" or Ctrl/⌘+K opens search (not while typing in a field); Ctrl/⌘+B toggles the sidebar.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -161,149 +392,88 @@ export default function AgentNavbar() {
         e.preventDefault();
         setSearchOpen(true);
       }
+      if (e.key === "b" && (e.metaKey || e.ctrlKey) && !typing) {
+        e.preventDefault();
+        setCollapsed((v) => !v);
+      }
+      if (e.key === "Escape") setMobileOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname, searchParams]);
-
   if (!agent) return null;
-  const items = visibleNavItems(agent);
-  const currentType = searchParams.get("type");
+
+  const onDashboard = pathname === "/dashboard";
+  const current = visibleNavItems(agent).find((i) => i.key !== "home" && isItemActive(i, pathname));
+  const title = onDashboard
+    ? `Welcome back, ${displayName(agent).split(" ")[0]}`
+    : current?.label ?? ACCOUNT_LINKS.find((l) => pathname.startsWith(l.href))?.label ?? "Dashboard";
+  const active = isActive(agent.status);
+  const suspended = isSuspended(agent.status);
+  const toggle = () => {
+    if (window.matchMedia("(min-width: 1024px)").matches) setCollapsed((v) => !v);
+    else setMobileOpen(true);
+  };
 
   return (
     <>
-      <header
-        className={cn(
-          "sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-transform duration-300",
-          hidden && !mobileOpen && "-translate-y-full"
-        )}
-      >
-        <div className="h-[3px] bg-gradient-to-r from-ink via-brand-500 to-brand-neon" />
-        <div className="mx-auto flex h-[72px] max-w-[1400px] items-center gap-3 px-4 sm:px-6">
-          <Link href="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="Voyenta dashboard">
-            <BrandMark className="h-9" />
-            <span className="hidden text-[17px] font-bold tracking-tight text-slate-900 sm:inline">Voyenta</span>
-          </Link>
+      {/* Desktop sidebar */}
+      <aside className={cn("glass-nav fixed inset-y-0 left-0 z-40 hidden border-r transition-[width] duration-200 lg:block", collapsed ? "w-16" : "w-64")}>
+        <SidebarContent agent={agent} collapsed={collapsed} />
+      </aside>
 
-          <nav aria-label="Main" className="mx-auto hidden items-center gap-0.5 lg:flex">
-            {items.map((item, i) => (
-              <React.Fragment key={item.key}>
-                {i === 1 || item.key === "pricing" ? <span className="mx-1.5 h-8 w-px bg-slate-200" aria-hidden /> : null}
-                <NavPill item={item} active={isItemActive(item, pathname)} currentType={currentType} lockedPlan={lockedNavPlan(item, agent)} />
-              </React.Fragment>
-            ))}
-          </nav>
+      {/* Mobile drawer */}
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="anim-fade absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} aria-hidden />
+          <aside className="anim-drawer absolute inset-y-0 left-0 w-[17rem] max-w-[85vw] border-r border-slate-200 bg-white shadow-2xl">
+            <SidebarContent agent={agent} onClose={() => setMobileOpen(false)} />
+          </aside>
+        </div>
+      ) : null}
 
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search documents"
-              title="Search (/ or Ctrl+K)"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 hover:bg-brand-50 hover:text-brand-600"
-            >
-              <Search className="h-5 w-5" />
+      {/* Header */}
+      <header className="glass-nav sticky top-0 z-30 border-b transition-[padding] duration-200 lg:pl-[var(--sidebar-w,16rem)]">
+        <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen || !collapsed}
+            title="Toggle sidebar (Ctrl B)"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
+          >
+            <PanelLeft className="h-[18px] w-[18px]" />
+          </button>
+          <span aria-hidden className="hidden h-5 w-px bg-slate-200 sm:block" />
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate text-lg font-semibold text-black">{title}</p>
+            {onDashboard ? (
+              <span className="hidden items-center gap-1.5 md:flex">
+                <Badge variant={active ? "success" : suspended ? "destructive" : "secondary"} title={statusTooltip(agent)}>
+                  {statusLabel(agent.status)}
+                </Badge>
+                <Badge variant={agent.isVerified ? "info" : "warning"} title={verifyTooltip(agent)}>
+                  {agent.isVerified ? "Verified" : agent.partnerType === "other" ? "In review" : "Not verified"}
+                </Badge>
+              </span>
+            ) : null}
+          </div>
+
+          <div className="ml-auto flex items-center gap-1">
+            <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search documents" title="Search (/ or Ctrl+K)" className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100">
+              <Search className="h-[18px] w-[18px]" />
             </button>
-
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label="Account menu">
-                <span className="flex items-center rounded-full p-0.5 ring-2 ring-brand-100 transition hover:ring-brand-200">
-                  <AgentAvatar agent={agent} size={40} />
-                </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-2xl p-1.5 shadow-xl">
-                <DropdownMenuLabel className="px-3 py-2">
-                  <p className="truncate text-sm font-semibold text-slate-900">{displayName(agent)}</p>
-                  <p className="truncate text-xs font-normal text-slate-500">{agent.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/profile")}>
-                  <UserRound className="mr-2 h-4 w-4 text-slate-500" /> Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/profile/edit")}>
-                  <Settings className="mr-2 h-4 w-4 text-slate-500" /> Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer rounded-xl py-2" onSelect={() => router.push("/dashboard/change-password")}>
-                  <KeyRound className="mr-2 h-4 w-4 text-slate-500" /> Change password
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer rounded-xl py-2 text-rose-600 focus:bg-rose-50 focus:text-rose-700">
-                  <a href="/api/auth/logout">
-                    <LogOut className="mr-2 h-4 w-4" /> Log out
-                  </a>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <PlanBadge plan={agent.subscription?.plan ?? agent.subscriptionPlan} className="hidden sm:inline-flex" />
-
-            <button
-              type="button"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 lg:hidden"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            <SupportMenu />
+            <PlanBadge plan={agent.subscription?.plan ?? agent.subscriptionPlan} className="ml-1 hidden sm:inline-flex" />
+            <div className="ml-1">
+              <AccountMenu agent={agent}>
+                <AgentAvatar agent={agent} size={32} />
+              </AccountMenu>
+            </div>
           </div>
         </div>
-
-        {mobileOpen ? (
-          <div className="anim-slide-down max-h-[calc(100dvh-75px)] overflow-y-auto border-t border-slate-100 bg-white px-4 pb-6 pt-3 lg:hidden">
-            <nav aria-label="Main" className="grid gap-1">
-              {items.map((item) => {
-                const Icon = item.icon;
-                const active = isItemActive(item, pathname);
-                const lockedPlan = lockedNavPlan(item, agent);
-                if (lockedPlan)
-                  return (
-                    <Link key={item.key} href="/dashboard/pricing" className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-slate-500">
-                      <Icon className="h-5 w-5" /> {item.label}
-                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-slate-500">
-                        <Lock className="h-3 w-3" /> {lockedPlan}
-                      </span>
-                    </Link>
-                  );
-                return (
-                  <div key={item.key} className={cn("rounded-2xl", active && "bg-brand-50/70")}>
-                    <Link
-                      href={item.href}
-                      className={cn("flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold", active ? "text-brand-600" : "text-slate-800")}
-                    >
-                      <Icon className="h-5 w-5" /> {item.label}
-                    </Link>
-                    {item.subItems ? (
-                      <div className="flex flex-wrap gap-2 px-3 pb-3 pl-11">
-                        {item.subItems.map((sub) => (
-                          <Link key={sub.href} href={sub.href} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:border-brand-300 hover:text-brand-600">
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </nav>
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
-              <AgentAvatar agent={agent} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{displayName(agent)}</p>
-                <p className="truncate text-xs text-slate-500">{agent.email}</p>
-              </div>
-              <PlanBadge plan={agent.subscription?.plan ?? agent.subscriptionPlan} />
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link href="/dashboard/profile" className="rounded-xl border border-slate-200 px-3 py-2 text-center text-sm font-medium">Profile</Link>
-              <a href="/api/auth/logout" className="rounded-xl border border-rose-200 px-3 py-2 text-center text-sm font-medium text-rose-600">Log out</a>
-            </div>
-          </div>
-        ) : null}
       </header>
       <SearchPalette open={searchOpen} onOpenChange={setSearchOpen} />
     </>

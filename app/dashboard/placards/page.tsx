@@ -77,11 +77,6 @@ export default function PlacardsPage() {
         eyebrow="Placard"
         title="Welcome Placard"
         description="Your saved welcome boards — open, edit, share, or delete anytime. Saving an edit creates a new version of the same placard."
-        actions={
-          <Link href="/dashboard/placards/new" className={primaryBtn}>
-            <Plus className="h-4 w-4" /> New placard
-          </Link>
-        }
       />
       {docs === null ? (
         <ListSkeleton label="Loading welcome placards" />

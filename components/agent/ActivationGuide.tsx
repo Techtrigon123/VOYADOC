@@ -80,25 +80,8 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   return (
     <ActivationContext.Provider value={value}>
       {children}
-      {show && agent && progress ? (
-        <>
-          <ActivationDialog open={open} onOpenChange={onOpenChange} steps={progress.steps} progress={progress} />
-          {!open ? (
-            <div className="pointer-events-none fixed bottom-20 left-1/2 z-40 -translate-x-1/2 sm:bottom-6">
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                aria-label="Open steps to activate your account"
-                className="prompt-glow pointer-events-auto inline-flex h-11 items-center gap-2 btn-glow rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:bg-brand-600"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">Activate account</span>
-                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs tabular-nums">{progress.percent}%</span>
-              </button>
-            </div>
-          ) : null}
-        </>
-      ) : null}
+      {/* No floating "Activate account" button: the dialog opens from the dashboard's setup card. */}
+      {show && agent && progress ? <ActivationDialog open={open} onOpenChange={onOpenChange} steps={progress.steps} progress={progress} /> : null}
     </ActivationContext.Provider>
   );
 }
@@ -149,7 +132,7 @@ function ActivationDialog({
           aria-describedby="activation-description"
           className="fixed inset-x-0 bottom-0 z-[70] flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-brand-100 bg-white shadow-2xl anim-sheet sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl"
         >
-          <div className="relative border-b border-slate-100 bg-gradient-to-br from-brand-50 via-white to-white px-5 pb-4 pt-6 sm:px-6">
+          <div className="relative border-b border-slate-100 bg-white px-5 pb-4 pt-6 sm:px-6">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[var(--primary)]">
               <Sparkles className="h-3.5 w-3.5" /> Activate your account
             </p>

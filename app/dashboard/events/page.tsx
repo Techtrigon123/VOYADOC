@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { BackButton } from "@/components/ui/back-button";
 
 interface DocumentItem {
   _id: string;
@@ -28,8 +29,11 @@ export default function EventsPage() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Documents</h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-0.5">Your recent travel documents</p>
+          <div className="flex items-center gap-3">
+            <BackButton fallback="/dashboard" />
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Documents</h1>
+          </div>
+          <p className="text-sm text-[var(--muted-foreground)] mt-0.5 pl-12">Your recent travel documents</p>
         </div>
         <Link href="/tools/hotel-voucher">
           <Button size="sm">
@@ -64,7 +68,7 @@ export default function EventsPage() {
               {documents.map((doc: DocumentItem) => (
                 <Link
                   key={doc._id}
-                  href={`/dashboard/documents/${doc._id}`}
+                  href={`/dashboard/events/${doc._id}`}
                   className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
                 >
                   <div className="min-w-0 flex-1">

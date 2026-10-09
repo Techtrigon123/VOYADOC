@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
 import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Field, PageShell, TextInput, primaryBtn } from "@/components/agent/ui";
@@ -32,9 +33,12 @@ export default function ChangePasswordPage() {
   return (
     <PageShell className="max-w-md">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
-          <KeyRound className="h-5 w-5" />
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+            <KeyRound className="h-5 w-5" />
+          </span>
+          <BackButton fallback="/dashboard/profile" label="Back to profile" />
+        </div>
         <h1 className="mt-3 text-xl font-bold text-slate-900">Change password</h1>
         <p className="mt-1 text-sm text-slate-500">Choose a new password. You will stay signed in on this device.</p>
 

@@ -99,8 +99,8 @@ export async function createDoc(opts: {
 }): Promise<Ctx> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(clean(opts.title));
-  pdf.setProducer("Voyenta");
-  pdf.setCreator(clean(opts.agent.brandName || opts.agent.companyName || "Voyenta"));
+  pdf.setProducer("Vouchlio");
+  pdf.setCreator(clean(opts.agent.brandName || opts.agent.companyName || "Vouchlio"));
   const fonts: Fonts = {
     regular: await pdf.embedFont(StandardFonts.Helvetica),
     bold: await pdf.embedFont(StandardFonts.HelveticaBold),
@@ -370,7 +370,7 @@ export function numberedList(c: Ctx, lines: string[], size = 8) {
 /** Diagonal Silver watermark + footer on every page. Call last. */
 export async function finish(c: Ctx): Promise<Uint8Array> {
   const pages = c.pdf.getPages();
-  const mark = "Voyenta  -  Silver";
+  const mark = "Vouchlio  -  Silver";
   pages.forEach((p, i) => {
     const { width, height } = p.getSize();
     if (c.plan === "silver") {
@@ -388,7 +388,7 @@ export async function finish(c: Ctx): Promise<Uint8Array> {
         });
       }
     }
-    const footer = clean(c.footer || `Generated with Voyenta for ${agencyName(c.agent)}`);
+    const footer = clean(c.footer || `Generated with Vouchlio for ${agencyName(c.agent)}`);
     p.drawLine({ start: { x: MARGIN, y: 32 }, end: { x: width - MARGIN, y: 32 }, thickness: 0.5, color: LINE });
     p.drawText(footer, { x: MARGIN, y: 20, size: 7, font: c.fonts.regular, color: GREY });
     const pn = `Page ${i + 1} of ${pages.length}`;

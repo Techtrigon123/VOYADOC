@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function CTASection() {
   return (
-    <section className="py-24 bg-[var(--sidebar-bg)]">
+    <section className="on-accent py-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
           Ready to simplify your travel documents?

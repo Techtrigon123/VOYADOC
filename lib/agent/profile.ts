@@ -257,6 +257,11 @@ export function computeAutoVerified(a: Partial<Agent>): boolean {
 
 export function verifyMessage(a: Partial<Agent>): string | null {
   if (a.isVerified) return null;
+  if (a.verification) {
+    if (a.verification.status === "pending" || a.verification.status === "checked") return "Your profile is with our team for review. You'll get the Verified badge once it's approved.";
+    if (a.verification.status === "denied") return "Your profile wasn't approved yet. Update your details and it goes back for review.";
+    return "Complete your profile (company name, brand logo, address and mobile) to send it for review.";
+  }
   if (a.partnerType === "other") {
     return String(a.brandLogo ?? "").trim()
       ? "Your profile is under review. Our team will award the Verified badge after checking your details."
@@ -269,6 +274,10 @@ export function verifyMessage(a: Partial<Agent>): string | null {
 }
 
 export function verifyTooltip(a: Partial<Agent>): string {
+  if (a.verification) {
+    if (a.isVerified) return "Verified — the Vouchlio team reviewed and approved your business details.";
+    return verifyMessage(a) ?? "";
+  }
   if (a.isVerified)
     return a.partnerType === "other"
       ? "Verified by our team after reviewing your profile."

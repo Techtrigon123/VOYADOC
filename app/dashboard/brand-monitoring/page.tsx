@@ -4,13 +4,17 @@ import React from "react";
 import { Globe2, Bell, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function BrandMonitoringPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">Document Management</h1>
-        <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/dashboard" />
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Document Management</h1>
+        </div>
+        <p className="text-sm text-[var(--muted-foreground)] mt-0.5 pl-12">
           Organize and manage your travel documents in one centralized workspace.
         </p>
       </div>

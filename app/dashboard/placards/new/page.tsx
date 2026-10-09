@@ -14,6 +14,7 @@ import { drawPlacard, isLandscape, placardFileName, placardPdf, placardPng, reso
 import { PLACARD_FONTS, PLACARD_THEMES, defaultPlacard, validatePlacard, type PlacardCustom, type PlacardData } from "@/lib/agent/documents";
 import type { DocumentSummary } from "@/lib/agent/types";
 import { FormSkeleton } from "@/components/agent/skeletons";
+import { canDownloadStatus, DOWNLOAD_BLOCKED_MESSAGE } from "@/lib/agent/verification-shared";
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
@@ -96,7 +97,10 @@ export default function PlacardEditorPage() {
     return true;
   };
 
+  const canDownload = canDownloadStatus(agent?.verification?.status);
+
   const exportPng = async () => {
+    if (!canDownload) return void toast.error(DOWNLOAD_BLOCKED_MESSAGE);
     setBusy("png");
     try {
       saveBlob(await placardPng(data, agent), placardFileName(data, "png"));
@@ -110,6 +114,11 @@ export default function PlacardEditorPage() {
   const saveAndDownload = async () => {
     setBusy("pdf");
     const wasEdit = !!editId;
+    if (!canDownload) {
+      if (await save()) toast.message("Placard saved", { description: DOWNLOAD_BLOCKED_MESSAGE });
+      setBusy(null);
+      return;
+    }
     if (await save()) {
       try {
         saveBlob(await placardPdf(data, agent), placardFileName(data, "pdf"));
@@ -122,6 +131,7 @@ export default function PlacardEditorPage() {
   };
 
   const print = async () => {
+    if (!canDownload) return void toast.error(DOWNLOAD_BLOCKED_MESSAGE);
     const win = window.open("", "_blank");
     setBusy("print");
     const wasEdit = !!editId;

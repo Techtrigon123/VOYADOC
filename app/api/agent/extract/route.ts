@@ -6,6 +6,7 @@ import { extractAvailable, extractFromFile, ExtractError } from "@/lib/agent/ext
 import { AI_LIMITS, limitMessage, reserveAiCall, reserveMicros, settleAiCall } from "@/lib/ai-budget";
 import { contentMatchesType, pdfPageCount } from "@/lib/agent/upload-check";
 import { serviceBlock } from "@/lib/agent/entitlements";
+import { getAppSettings } from "@/lib/settings";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MEDIA = ["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"] as const;
@@ -51,7 +52,8 @@ export async function GET(req: NextRequest) {
   const { user, response } = await requireAgent();
   if (response) return response;
   const kind: Kind = req.nextUrl.searchParams.get("type") === "ticket" ? "ticket" : "voucher";
-  return ok({ available: extractAvailable(), ...usage(user, kind) });
+  await getAppSettings();
+  return ok({ available: extractAvailable() && AI_LIMITS.enabled(), ...usage(user, kind) });
 }
 
 /** multipart/form-data: file, type=voucher|ticket */
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
     const { user, response } = await requireAgent();
     if (response) return response;
 
+    await getAppSettings(); // load admin AI limits before checking them
     const form = await req.formData().catch(() => null);
     const file = form?.get("file");
     const kind: Kind = form?.get("type") === "ticket" ? "ticket" : "voucher";

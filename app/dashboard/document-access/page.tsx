@@ -20,6 +20,11 @@ export default function DocumentAccessPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
 
+  const [prices, setPrices] = useState(PLAN_PRICES_INR as { gold: { monthly: number; yearly: number }; platinum: { monthly: number; yearly: number } });
+  useEffect(() => {
+    void api<{ prices?: typeof prices }>("/api/agent/plan").then((r) => r.success && r.data?.prices && setPrices(r.data.prices));
+  }, []);
+
   useEffect(() => {
     void api<AccessSummary>("/api/agent/document-access").then((r) => {
       if (r.success && r.data) setSummary(r.data);
@@ -155,16 +160,16 @@ export default function DocumentAccessPage() {
 
           {!paid ? (
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5">
+              <div className="rounded-3xl border border-brand-200 bg-white p-5">
                 <Sparkles className="h-6 w-6 text-brand-500" />
-                <p className="mt-2 text-lg font-bold text-slate-900">Gold · from {formatInr(PLAN_PRICES_INR.gold.monthly)}/mo</p>
-                <p className="text-sm text-slate-600">Keep every file forever — no {summary.retentionDays}-day limit — and add air tickets. Reopen locked vouchers and invoices. {formatInr(PLAN_PRICES_INR.gold.yearly)} if you pay yearly.</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Gold · from {formatInr(prices.gold.monthly)}/mo</p>
+                <p className="text-sm text-slate-600">Keep every file forever — no {summary.retentionDays}-day limit — and add air tickets. Reopen locked vouchers and invoices. {formatInr(prices.gold.yearly)} if you pay yearly.</p>
                 <Link href="/dashboard/pricing?plan=gold" className={`${primaryBtn} mt-4`}>Choose Gold</Link>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
                 <Crown className="h-6 w-6 text-slate-700" />
-                <p className="mt-2 text-lg font-bold text-slate-900">Platinum · from {formatInr(PLAN_PRICES_INR.platinum.monthly)}/mo</p>
-                <p className="text-sm text-slate-600">All 7 services, including pickup vouchers and welcome placards, plus unlimited PDF uploads. {formatInr(PLAN_PRICES_INR.platinum.yearly)} if you pay yearly.</p>
+                <p className="mt-2 text-lg font-bold text-slate-900">Platinum · from {formatInr(prices.platinum.monthly)}/mo</p>
+                <p className="text-sm text-slate-600">All 7 services, including pickup vouchers and welcome placards, plus unlimited PDF uploads. {formatInr(prices.platinum.yearly)} if you pay yearly.</p>
                 <Link href="/dashboard/pricing?plan=platinum" className={`${secondaryBtn} mt-4`}>Choose Platinum</Link>
               </div>
               <p className="text-sm text-slate-500 md:col-span-2">

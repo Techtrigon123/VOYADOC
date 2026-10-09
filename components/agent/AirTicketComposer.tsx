@@ -395,7 +395,7 @@ export function AirTicketComposer({ editId }: { editId?: string }) {
                   <TextInput inputMode="decimal" value={data.discount} onChange={(e) => patch({ discount: e.target.value })} placeholder="0.00" />
                 </Field>
               </div>
-              <p className="mt-3 rounded-2xl bg-brand-50 px-4 py-3 text-sm">
+              <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm">
                 Grand total: <span className="font-bold text-brand-700">{money(total, data.currency)}</span>
               </p>
             </div>

@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/profile-reminder", "schedule": "30 4 * * *" }
+  ]
+}

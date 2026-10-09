@@ -116,6 +116,13 @@ export interface UserRecord {
   subscriptionPlan: PlanId;
   subscriptionExpiresAt?: Date;
   subscriptionCycle?: "monthly" | "yearly";
+  /** Profile review (migration 0007). Undefined until the migration is run. */
+  verificationStatus?: string;
+  verificationSubmittedAt?: Date | string;
+  verificationNote?: string;
+  verificationFingerprint?: Record<string, string>;
+  verificationCheckedFingerprint?: Record<string, string>;
+  verificationChanges?: string[];
   airTicketingEnabled: boolean;
   travelServiceVoucherEnabled: boolean;
   welcomePlacardEnabled: boolean;
@@ -135,9 +142,12 @@ export type UserPatch = Partial<Omit<UserRecord, "id" | "createdAt" | "updatedAt
 const USER_BASE_COLUMNS =
   "id,name,email,organization,role,mobile,landline_number,brand_name,company_name,partner_type,partner_type_other,address,city,state,country,pincode,gst_number,iata_number,brand_logo,company_stamp,bank_account_holder,bank_name,bank_account_number,bank_ifsc_code,bank_branch_address,payment_upi,status,is_verified,agent_level,subscription_plan,subscription_expires_at,air_ticketing_enabled,travel_service_voucher_enabled,welcome_placard_enabled,document_number_settings,extract_usage,created_at,updated_at";
 
-/** User columns, including subscription_cycle once migration 0005 has been run. */
+/** User columns, plus subscription_cycle (migration 0005) and profile review (0007) once they're in. */
+const VERIFICATION_COLUMNS =
+  "verification_status,verification_submitted_at,verification_note,verification_fingerprint,verification_checked_fingerprint,verification_changes";
 async function userColumns(): Promise<string> {
-  return (await hasColumn("users", "subscription_cycle")) ? `${USER_BASE_COLUMNS},subscription_cycle` : USER_BASE_COLUMNS;
+  const [cycle, review] = await Promise.all([hasColumn("users", "subscription_cycle"), hasColumn("users", "verification_status")]);
+  return [USER_BASE_COLUMNS, cycle ? "subscription_cycle" : "", review ? VERIFICATION_COLUMNS : ""].filter(Boolean).join(",");
 }
 
 export async function findUserById(id: string): Promise<UserRecord | null> {
@@ -299,6 +309,25 @@ export async function searchDocuments(agentId: string, q: string, limit = 20) {
 export async function documentCounts(agentId: string): Promise<{ key: DocumentKind; count: number }[]> {
   const rows = check(await db().rpc("agent_document_counts", { p_agent: agentId }));
   return ((rows ?? []) as { kind: DocumentKind; count: number | string }[]).map((r) => ({ key: r.kind, count: Number(r.count) }));
+}
+
+/**
+ * Weekly activity for the dashboard chart: documents created and PDFs generated in each of the
+ * last `weeks` weeks (oldest first). Week buckets are 7-day windows ending now.
+ */
+export async function weeklyActivity(agentId: string, weeks = 8): Promise<{ weekStart: string; created: number; pdfs: number }[]> {
+  const WEEK = 7 * 86400000;
+  const now = Date.now();
+  const since = new Date(now - weeks * WEEK).toISOString();
+  const [created, pdfs] = await Promise.all([
+    db().from("agent_documents").select("created_at").eq("agent_id", agentId).gte("created_at", since).limit(5000),
+    db().from("agent_documents").select("pdf_generated_at").eq("agent_id", agentId).gte("pdf_generated_at", since).limit(5000),
+  ]);
+  const buckets = Array.from({ length: weeks }, (_, i) => ({ weekStart: new Date(now - (weeks - i) * WEEK).toISOString(), created: 0, pdfs: 0 }));
+  const slot = (iso: string) => Math.min(weeks - 1, Math.floor((new Date(iso).getTime() - (now - weeks * WEEK)) / WEEK));
+  for (const r of (check(created) ?? []) as { created_at: string }[]) buckets[slot(r.created_at)].created++;
+  for (const r of (check(pdfs) ?? []) as { pdf_generated_at: string }[]) buckets[slot(r.pdf_generated_at)].pdfs++;
+  return buckets;
 }
 
 export async function activityRank(agentId: string, since: Date): Promise<{ activityScore: number; rank: number | null }> {

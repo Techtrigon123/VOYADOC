@@ -1,47 +1,66 @@
 @import "tailwindcss";
 
+/* ─── Vouchlio colour system ─────────────────────────────────────────────────
+   Accent red #e63946 — warm, energetic, decisive — for buttons, active states, icons, links
+   and emphasis surfaces. Black for all text. White for pages and everything else. Other shades
+   are only lighter strengths of these (grey = black at lower strength; pink tints = the red at
+   lower strength). Black on the red is 5:1, so text stays black even on red surfaces. */
 :root {
+  --accent-red: #e63946;
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  /* Black is the primary colour; neon green (--color-brand-neon) is the accent. */
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #f3fce8;
-  --secondary-foreground: #1d3a0c;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --accent: #f3fce8;
-  --accent-foreground: #1d3a0c;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #5fb81a;
-  --radius: 0.5rem;
-  --sidebar-bg: #0a0a0a;
-  --sidebar-fg: #e5e5e5;
+  --popover-foreground: #000000;
+  --primary: #e63946;
+  --primary-foreground: #000000;
+  --secondary: #fdebec;
+  --secondary-foreground: #000000;
+  --muted: #f7f7f7;
+  --muted-foreground: #595959;
+  --accent: #fdebec;
+  --accent-foreground: #000000;
+  --destructive: #e63946;
+  --destructive-foreground: #000000;
+  --border: #e5e5e5;
+  --input: #d1d1d1;
+  --ring: #e63946;
+  --radius: 0.75rem;
+  --sidebar-bg: #e63946;
+  --sidebar-fg: #000000;
 }
 
-/* Brand scale: neon light green on black.
-   neon/300/400 are for dark surfaces and glows; 600+ are dark enough for green text on white (≥4.5:1). */
+/* Every Tailwind colour family the app uses is mapped onto two scales, so existing classes keep
+   working: neutral families (slate, gray, …) become black at different strengths; brand, red and
+   rose become the accent red; every other family keeps its normal colour. */
 @theme {
-  --color-brand-50: #f3fce8;
-  --color-brand-100: #e4f9cc;
-  --color-brand-200: #caf29d;
-  --color-brand-300: #b2f46a;
-  --color-brand-400: #93e33f;
-  --color-brand-500: #5fb81a;
-  --color-brand-600: #3b7d0c;
-  --color-brand-700: #2f640d;
-  --color-brand-800: #264f10;
-  --color-brand-900: #1d3a0c;
-  --color-brand-950: #0c1f04;
-  --color-brand-neon: #a3ff47;
-  --color-ink: #0a0a0a;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  --color-ink: #e63946;
+  --color-black: #000000;
+  --color-brand-neon: #ffffff; /* icons on red chips (bg-ink) */
+
+  /* Accent red: 50–400 are the red at 6–60% on white (soft fills, borders); 500+ full red. */
+  --color-brand-50: #fef3f4;  --color-brand-100: #fdebec; --color-brand-200: #fbdbde; --color-brand-300: #f8c4c8; --color-brand-400: #f08890;
+  --color-brand-500: #e63946; --color-brand-600: #e63946; --color-brand-700: #e63946; --color-brand-800: #e63946; --color-brand-900: #e63946; --color-brand-950: #e63946;
+  --color-red-50: #fef3f4;    --color-red-100: #fdebec;   --color-red-200: #fbdbde;   --color-red-300: #f8c4c8;   --color-red-400: #f08890;
+  --color-red-500: #e63946;   --color-red-600: #e63946;   --color-red-700: #e63946;   --color-red-800: #e63946;   --color-red-900: #e63946;
+  --color-rose-50: #fef3f4;   --color-rose-100: #fdebec;  --color-rose-200: #fbdbde;  --color-rose-300: #f8c4c8;  --color-rose-400: #f08890;
+  --color-rose-500: #e63946;  --color-rose-600: #e63946;  --color-rose-700: #e63946;  --color-rose-800: #e63946;  --color-rose-900: #e63946;
+
+  /* Black at strengths: 50–300 surfaces and borders, 400 icons, 500 secondary text (7:1), 600+ black. */
+  --color-slate-50: #f7f7f7;  --color-slate-100: #f0f0f0; --color-slate-200: #e5e5e5; --color-slate-300: #d1d1d1; --color-slate-400: #8f8f8f;
+  --color-slate-500: #595959; --color-slate-600: #000000; --color-slate-700: #000000; --color-slate-800: #000000; --color-slate-900: #000000; --color-slate-950: #000000;
+  --color-gray-50: #f7f7f7;   --color-gray-100: #f0f0f0;  --color-gray-200: #e5e5e5;  --color-gray-300: #d1d1d1;  --color-gray-400: #8f8f8f;
+  --color-gray-500: #595959;  --color-gray-600: #000000;  --color-gray-700: #000000;  --color-gray-800: #000000;  --color-gray-900: #000000;  --color-gray-950: #000000;
+  --color-neutral-50: #f7f7f7; --color-neutral-100: #f0f0f0; --color-neutral-200: #e5e5e5; --color-neutral-300: #d1d1d1; --color-neutral-400: #8f8f8f;
+  --color-neutral-500: #595959; --color-neutral-600: #000000; --color-neutral-700: #000000; --color-neutral-800: #000000; --color-neutral-900: #000000; --color-neutral-950: #000000;
+  --color-zinc-50: #f7f7f7;   --color-zinc-100: #f0f0f0;  --color-zinc-200: #e5e5e5;  --color-zinc-300: #d1d1d1;  --color-zinc-400: #8f8f8f;
+  --color-zinc-500: #595959;  --color-zinc-600: #000000;  --color-zinc-700: #000000;  --color-zinc-800: #000000;  --color-zinc-900: #000000;  --color-zinc-950: #000000;
+
+  /* Status and decorative families (emerald, amber, sky, indigo, …) keep Tailwind’s own colours,
+     so avatars, star ratings and status badges stay colourful. */
 }
 
 @theme inline {
@@ -61,7 +80,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
@@ -76,6 +94,31 @@
 
 html {
   scroll-behavior: smooth;
+  /* In-page links (#pricing, #faq …) stop below the floating navbar. */
+  scroll-padding-top: 6rem;
+}
+
+/* ── Interaction polish ───────────────────────────────────────────────────
+   Smooth hover changes and a soft press on every button. In the base layer, so any component
+   that sets its own transition or transform utilities still wins. Uses the `scale` property
+   (not `transform`) so it composes with translate-based positioning. */
+@layer base {
+  :where(button, [role="button"], a[class*="rounded"], summary, input[type="checkbox"], select) {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale, translate;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  :where(button, [role="button"], a.btn-glow, a.btn-neon, a[class*="rounded-full"], a[class*="rounded-xl"], a[class*="rounded-lg"]):not(:disabled):active {
+    scale: 0.97;
+    transition-duration: 90ms;
+  }
+  :where(button, a, [role="button"], summary):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(button, [role="button"], a):not(:disabled):active { scale: 1; }
+  }
 }
 
 body {
@@ -95,11 +138,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d1d1d1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #8f8f8f;
 }
 
 /* Focus ring utility */
@@ -128,85 +171,54 @@ button, a, input, select, textarea {
 @keyframes anim-sheet-up { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes anim-slide-down { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes anim-rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
-@keyframes prompt-glow { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(143,227,61,.45), 0 0 0 0 rgba(143,227,61,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(143,227,61,.45), 0 0 0 10px rgba(143,227,61,0) } }
-@keyframes prompt-glow-amber { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 0 rgba(251,191,36,.45) } 50% { box-shadow: 0 8px 24px -6px rgba(15,23,42,.4), 0 0 0 10px rgba(251,191,36,0) } }
-@keyframes anchor-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(143,227,61,0) } 30% { box-shadow: 0 0 0 6px rgba(143,227,61,.35) } }
+@keyframes prompt-glow { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(230,57,70,.45), 0 0 0 0 rgba(230,57,70,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(230,57,70,.45), 0 0 0 10px rgba(230,57,70,0) } }
+@keyframes prompt-glow-amber { 0%, 100% { box-shadow: 0 8px 24px -6px rgba(230,57,70,.4), 0 0 0 0 rgba(230,57,70,.35) } 50% { box-shadow: 0 8px 24px -6px rgba(230,57,70,.4), 0 0 0 10px rgba(230,57,70,0) } }
+@keyframes anchor-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0) } 30% { box-shadow: 0 0 0 6px rgba(230,57,70,.35) } }
 
 .anim-fade { animation: anim-fade .18s ease-out }
 .anim-pop { animation: anim-pop .2s cubic-bezier(.2,.8,.2,1) }
 .anim-sheet { animation: anim-sheet-up .24s cubic-bezier(.2,.8,.2,1) }
 @media (min-width: 640px) { .anim-sheet { animation: anim-pop .2s cubic-bezier(.2,.8,.2,1) } }
 .anim-slide-down { animation: anim-slide-down .2s ease-out }
+.anim-drawer { animation: anim-drawer .24s cubic-bezier(.2,.8,.2,1) }
+@keyframes anim-drawer { from { transform: translateX(-100%) } to { transform: translateX(0) } }
 .anim-rise { animation: anim-rise .3s ease-out both }
 .prompt-glow { animation: prompt-glow 2.4s ease-in-out infinite }
 .prompt-glow-amber { animation: prompt-glow-amber 2.4s ease-in-out infinite }
 .ring-anchor-flash { animation: anchor-flash 1.1s ease-in-out 2; border-radius: 1rem }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade, .anim-pop, .anim-sheet, .anim-slide-down, .anim-rise, .prompt-glow, .prompt-glow-amber, .ring-anchor-flash { animation: none }
+  .anim-fade, .anim-pop, .anim-sheet, .anim-slide-down, .anim-drawer, .anim-rise, .prompt-glow, .prompt-glow-amber, .ring-anchor-flash { animation: none }
 }
 
 /* Voucher quick-start printer animation */
 @keyframes printer-feed { 0% { transform: translateY(-100%) } 100% { transform: translateY(0) } }
 .printer-sheet { animation: printer-feed 2.6s ease-in-out both }
 
-/* ─── Glow buttons (Uiverse "desktop" button) ─────────────────────────────
-   Black fill, 1px stroke that glows from the bottom edge, soft glow beneath.
-   Hover widens the stroke and glow (1.2s ease). Applied with the btn-glow class.
-   Unlayered so it wins over bg-/text- utilities; size, spacing and radius
-   utilities on each button still apply. Set --glow-color to 255 255 255 for a white glow on dark pages. */
-@property --stroke-w { syntax: "<percentage>"; inherits: true; initial-value: 10.7%; }
-@property --glow-w { syntax: "<percentage>"; inherits: true; initial-value: 15%; }
-
+/* ─── Primary buttons (class name kept from the old glow button) ───────────
+   Solid red #e63946 with black text (5:1) and a soft red shadow; on a red surface it turns black
+   with white text. Unlayered so it wins over bg-/text- utilities; size, spacing and radius
+   utilities on each button still apply. */
 .btn-glow {
-  --glow-color: 163 255 71; /* neon green (rgb) — set 255 255 255 for white */
-  --stroke-w: 10.7%;
-  --glow-w: 15%;
+  --btn-bg: #e63946;
+  --btn-fg: #000000;
   position: relative;
-  isolation: isolate;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
   font-weight: 500;
-  letter-spacing: 0.025em;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
-  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.01em;
   border: 1px solid transparent;
-  /* Stroke: the 1px border shows this gradient. Base tint matches the original. */
-  background:
-    radial-gradient(var(--stroke-w) 50% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0) 100%) border-box,
-    rgb(15 23 42 / 0.12) border-box;
-  box-shadow: none;
-  transition: --stroke-w 1200ms ease-in-out, --glow-w 1200ms ease-in-out, transform 150ms ease, opacity 150ms;
+  box-shadow: 0 1px 2px rgb(230 57 70 / 0.12), 0 8px 20px -10px rgb(230 57 70 / 0.45);
+  transition: box-shadow 0.3s ease, transform 0.15s ease, opacity 0.15s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-/* Fill (inside the stroke) */
-.btn-glow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: #000;
-  pointer-events: none;
-}
-/* Soft glow under the bottom edge */
-.btn-glow::after {
-  content: "";
-  position: absolute;
-  /* Pushed below the button so the glow reads on light backgrounds too. */
-  inset: 30% 4% -10px 4%;
-  z-index: -2;
-  border-radius: inherit;
-  background: radial-gradient(var(--glow-w) 70% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0.35) 45%, rgb(var(--glow-color) / 0) 100%);
-  filter: blur(12px);
-  pointer-events: none;
-}
-.btn-glow:hover { color: #fff; --stroke-w: 60.1%; --glow-w: 60.6%; }
-.btn-glow:active { transform: scale(0.95); }
-.btn-glow:focus-visible { outline: 2px solid rgb(var(--glow-color)); outline-offset: 2px; }
-.btn-glow:disabled, .btn-glow[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; --stroke-w: 10.7%; --glow-w: 15%; }
+.btn-glow:hover { color: var(--btn-fg); box-shadow: 0 1px 2px rgb(230 57 70 / 0.16), 0 16px 30px -12px rgb(230 57 70 / 0.55); transform: translateY(-1px); }
+.btn-glow:active { transform: scale(0.98); }
+.btn-glow:focus-visible { outline: 2px solid var(--btn-bg); outline-offset: 2px; }
+.btn-glow:disabled, .btn-glow[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-glow svg { position: relative; }
-/* The pulsing attention ring would hide the glow while hovered. */
 .btn-glow.prompt-glow:hover { animation: none; }
+@media (prefers-reduced-motion: reduce) { .btn-glow, .btn-glow:hover { transition: none; transform: none; } }
 
 /* ─── Marquee (components/ui/marquee-01-utils/marquee.tsx) ─────────────── */
 @theme inline {
@@ -229,16 +241,16 @@ button, a, input, select, textarea {
 .legal-prose ul { list-style: disc; padding-left: 1.25rem; }
 .legal-prose ul > li + li { margin-top: 0.375rem; }
 .legal-prose a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
-.legal-prose strong { color: #0f172a; font-weight: 600; }
+.legal-prose strong { color: #000000; font-weight: 600; }
 .legal-prose table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.legal-prose th, .legal-prose td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
-.legal-prose th { background: #f8fafc; font-weight: 600; color: #0f172a; }
+.legal-prose th, .legal-prose td { border: 1px solid #e5e5e5; padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
+.legal-prose th { background: #f7f7f7; font-weight: 600; color: #000000; }
 
 /* ── Skeleton loaders ─────────────────────────────────────────── */
 .skeleton {
   position: relative;
   overflow: hidden;
-  background-color: rgb(241 245 249);
+  background-color: #f0f0f0;
   border-radius: 0.5rem;
 }
 .skeleton::after {
@@ -256,182 +268,274 @@ button, a, input, select, textarea {
   .skeleton::after { animation: none; }
 }
 
-/* ── Neon button: the main call to action on black surfaces ──────── */
+/* ── Light button: the main call to action on red surfaces ──────── */
 .btn-neon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #a3ff47;
-  color: #0a0a0a;
+  background: #ffffff;
+  color: #000000;
   font-weight: 600;
-  box-shadow: 0 0 0 1px rgb(163 255 71 / 0.4), 0 10px 40px -10px rgb(163 255 71 / 0.55);
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.25);
+  transition: box-shadow 0.2s, transform 0.2s;
 }
-.btn-neon:hover { background: #b8ff70; box-shadow: 0 0 0 1px rgb(163 255 71 / 0.6), 0 14px 48px -10px rgb(163 255 71 / 0.75); transform: translateY(-1px); }
+.btn-neon:hover { box-shadow: 0 14px 36px -12px rgb(0 0 0 / 0.3); transform: translateY(-1px); }
 .btn-neon:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .btn-neon, .btn-neon:hover { transition: none; transform: none; } }
 
 
-/* ── Site theme (light / dark) ─────────────────────────────────────
-   The toggle on the home page sets <html data-theme>; the choice applies to every page.
-   Dark mode redefines the colour variables Tailwind utilities read, so bg-slate-50,
-   text-slate-900, hover: and /opacity variants all switch without per-page edits.
-   Rules are unlayered so they win over Tailwind utilities. Use `dark:` for one-off tweaks,
-   and `keep-light` on anything that represents printed paper (document previews). */
+/* ── Red surfaces ──────────────────────────────────────────────────────
+   Add `on-accent` to a footer, hero, call-to-action band or emphasis card: it becomes #e63946
+   with black text. It redefines the colour variables Tailwind utilities read, so text-slate-900,
+   bg-brand-50, hover: and /opacity variants all adapt without per-component edits.
+   `on-accent-text` gives the same colours to content already sitting on red, without painting a
+   background. Menus and dialogs opened from these render outside, on white.
+   The site has one theme: `dark:` classes never apply. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-.theme-toggle { background: #ffffff; color: #0a0a0a; border-color: rgb(0 0 0 / 0.1); box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.35); }
-.theme-toggle:hover { background: #0a0a0a; color: #a3ff47; }
+.on-accent,
+.on-accent-text {
+  --background: #e63946;
+  --foreground: #000000;
+  --card: rgb(255 255 255 / 0.14);
+  --card-foreground: #000000;
+  --muted: rgb(255 255 255 / 0.14);
+  --muted-foreground: rgb(0 0 0 / 0.78);
+  --secondary: rgb(255 255 255 / 0.2);
+  --secondary-foreground: #000000;
+  --accent: rgb(255 255 255 / 0.2);
+  --accent-foreground: #000000;
+  --border: rgb(0 0 0 / 0.14);
+  --input: rgb(0 0 0 / 0.2);
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --ring: #000000;
 
+  --color-ink: rgb(255 255 255 / 0.16);
+  --color-brand-neon: #000000; /* highlighted words on red read black too */
+  --color-brand-50: rgb(255 255 255 / 0.16);  --color-brand-100: rgb(255 255 255 / 0.22); --color-brand-200: rgb(255 255 255 / 0.3);
+  --color-brand-300: rgb(0 0 0 / 0.35); --color-brand-400: #000000; --color-brand-500: #000000; --color-brand-600: #000000;
+  --color-brand-700: #000000; --color-brand-800: #000000; --color-brand-900: #000000; --color-brand-950: #000000;
+  --color-slate-50: rgb(255 255 255 / 0.14); --color-slate-100: rgb(255 255 255 / 0.2); --color-slate-200: rgb(0 0 0 / 0.14);
+  --color-slate-300: rgb(0 0 0 / 0.8); --color-slate-400: rgb(0 0 0 / 0.65); --color-slate-500: rgb(0 0 0 / 0.78);
+  --color-slate-600: rgb(0 0 0 / 0.85); --color-slate-700: #000000; --color-slate-800: #000000; --color-slate-900: #000000; --color-slate-950: #000000;
+  --color-neutral-300: rgb(0 0 0 / 0.8); --color-neutral-400: rgb(0 0 0 / 0.65); --color-neutral-500: rgb(0 0 0 / 0.78);
+  --color-white: #000000; /* text-white / border-white on red read as black (bg-white is handled below) */
+
+  color: #000000;
+}
+.on-accent { background-color: #e63946; }
+/* White chips and panels inside a red surface stay light and glassy. */
+:is(.on-accent, .on-accent-text) :is(.bg-white, .hover\:bg-white:hover) { background-color: rgb(255 255 255 / 0.85); }
+:is(.on-accent, .on-accent-text) :is(.bg-white\/5, .bg-white\/10, .bg-white\/80, .bg-white\/85, .bg-white\/90, .bg-white\/95) { background-color: rgb(255 255 255 / 0.18); }
+:is(.on-accent, .on-accent-text) :is(.border-white\/10, .border-white\/15, .border-white\/20) { border-color: rgb(0 0 0 / 0.14); }
+/* Light text shades (written for dark cards) read as black on red. */
+:is(.on-accent, .on-accent-text) :is(.text-slate-100, .text-slate-200, .text-neutral-100, .text-neutral-200, .text-gray-100, .text-gray-200, .text-zinc-100, .text-zinc-200) { color: #000000; }
+:is(.on-accent, .on-accent-text) .btn-glow { --btn-bg: #000000; --btn-fg: #ffffff; }
+:is(.on-accent, .on-accent-text) .btn-neon { background: #000000; color: #ffffff; }
+:is(.on-accent, .on-accent-text) .skeleton { background-color: rgb(255 255 255 / 0.2); }
+/* Logo: red ticket on white, white ticket on red (see components/brand/BrandMark). */
+.brand-mark-dark { display: none; }
+.on-accent .brand-mark-light { display: none; }
+.on-accent .brand-mark-dark { display: block; }
+
+/* ── Glass navigation ──────────────────────────────────────────────────
+   Frosted white glass for every navbar and top bar: content scrolling underneath blurs through. */
+.glass-nav {
+  background-color: rgb(255 255 255 / 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-color: rgb(255 255 255 / 0.6);
+  box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.7);
+  color: #000000;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-nav { background-color: rgb(255 255 255 / 0.95); }
+}
+
+/* ── iOS-style glass (floating marketing navbar) ───────────────────────
+   On top of .glass-nav: lighter, more saturated frost; soft light blobs drifting slowly behind the
+   glass; and a fine matte grain. Blobs and grain sit behind the content (z-index -1, isolated). */
+.glass-ios {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: rgb(255 255 255 / 0.4);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) brightness(1.06);
+  backdrop-filter: blur(28px) saturate(190%) brightness(1.06);
+  border-color: rgb(255 255 255 / 0.6);
+  box-shadow:
+    0 12px 40px -14px rgb(0 0 0 / 0.22),
+    0 2px 6px -2px rgb(0 0 0 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.25);
+}
+.glass-ios::before {
+  content: "";
+  position: absolute;
+  inset: -60% -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(28% 70% at 18% 50%, rgb(255 255 255 / 0.6), transparent 70%),
+    radial-gradient(24% 80% at 78% 40%, rgb(230 57 70 / 0.16), transparent 70%),
+    radial-gradient(20% 70% at 52% 75%, rgb(255 255 255 / 0.4), transparent 70%);
+  filter: blur(22px);
+  animation: glass-blob 16s ease-in-out infinite alternate;
+}
+.glass-ios::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes glass-blob {
+  0% { transform: translate3d(-6%, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(5%, -6%, 0) rotate(5deg) scale(1.05); }
+  100% { transform: translate3d(9%, 4%, 0) rotate(-4deg) scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-ios::before { animation: none; }
+}
+
+/* Printed-paper previews keep their own document colours. */
+.keep-light {
+  color-scheme: light;
+  --color-slate-50: #f8fafc; --color-slate-100: #f1f5f9; --color-slate-200: #e2e8f0; --color-slate-300: #cbd5e1; --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b; --color-slate-600: #475569; --color-slate-700: #334155; --color-slate-800: #1e293b; --color-slate-900: #0f172a;
+  --color-black: #000000;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────────
+   Switched from the footer (components/layout/ThemeSwitch.tsx); the choice is saved and applied
+   before first paint by THEME_SCRIPT. Same idea as the light palette: neutrals flip (surfaces
+   dark, text light), Vouchlio red stays red, status colours become dark-friendly tints.
+   Rules are unlayered so they win over Tailwind utilities. `.keep-light` (printed-paper previews)
+   and the red/black surfaces (on-accent, footer) keep their own colours. */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --surface: #111111;
-  --background: #0a0a0a;
-  --foreground: #f5f5f5;
-  --card: #111111;
-  --card-foreground: #f5f5f5;
-  --popover: #141414;
-  --popover-foreground: #f5f5f5;
-  --muted: #141414;
-  --muted-foreground: #a3a3a3;
-  --border: #262626;
-  --input: #262626;
-  --primary: #a3ff47;
-  --primary-foreground: #0a0a0a;
-  --secondary: #141414;
-  --secondary-foreground: #f5f5f5;
-  --accent: #141414;
-  --accent-foreground: #f5f5f5;
-  --ring: #93e33f;
+  --background: #0b0b0c;
+  --foreground: #f4f4f5;
+  --card: #141416;
+  --card-foreground: #f4f4f5;
+  --popover: #18181b;
+  --popover-foreground: #f4f4f5;
+  --secondary: #1f1f22;
+  --secondary-foreground: #f4f4f5;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #2a1416;
+  --accent-foreground: #f4f4f5;
+  --border: #27272a;
+  --input: #3f3f46;
 
-  /* Neutrals: surfaces get darker, text gets lighter. */
-  --color-slate-50: #141414;
-  --color-slate-100: #1b1b1b;
-  --color-slate-200: #2a2a2a;
-  --color-slate-300: #3d3d3d;
-  --color-slate-400: #8f8f8f;
-  --color-slate-500: #a3a3a3;
-  --color-slate-600: #bdbdbd;
-  --color-slate-700: #d4d4d4;
-  --color-slate-800: #e5e5e5;
-  --color-slate-900: #f5f5f5;
-  --color-gray-50: #141414;
-  --color-gray-100: #1b1b1b;
-  --color-gray-200: #2a2a2a;
+  --color-slate-50: #141416;  --color-slate-100: #1c1c1f; --color-slate-200: #27272a; --color-slate-300: #3f3f46; --color-slate-400: #71717a;
+  --color-slate-500: #a1a1aa; --color-slate-600: #d4d4d8; --color-slate-700: #e4e4e7; --color-slate-800: #f4f4f5; --color-slate-900: #fafafa; --color-slate-950: #ffffff;
+  --color-gray-50: #141416;   --color-gray-100: #1c1c1f;  --color-gray-200: #27272a;  --color-gray-300: #3f3f46;  --color-gray-400: #71717a;
+  --color-gray-500: #a1a1aa;  --color-gray-600: #d4d4d8;  --color-gray-700: #e4e4e7;  --color-gray-800: #f4f4f5;  --color-gray-900: #fafafa;
+  --color-neutral-50: #141416; --color-neutral-100: #1c1c1f; --color-neutral-200: #27272a; --color-neutral-300: #3f3f46; --color-neutral-400: #71717a;
+  --color-neutral-500: #a1a1aa; --color-neutral-600: #d4d4d8; --color-neutral-700: #e4e4e7; --color-neutral-800: #f4f4f5; --color-neutral-900: #fafafa;
 
-  /* Brand: tints become dark green, text shades become neon. (900/950 stay dark for gradients.) */
-  --color-brand-50: #111a09;
-  --color-brand-100: #172410;
-  --color-brand-200: #233a12;
-  --color-brand-300: #35561a;
-  --color-brand-400: #7bd12e;
-  --color-brand-500: #93e33f;
-  --color-brand-600: #a3ff47;
-  --color-brand-700: #b8ff70;
-  --color-brand-800: #c9ff94;
+  /* Red tints become deep red glows; red text gets a touch lighter to read on black. */
+  --color-brand-50: rgb(230 57 70 / 0.12); --color-brand-100: rgb(230 57 70 / 0.18); --color-brand-200: rgb(230 57 70 / 0.28);
+  --color-brand-300: rgb(230 57 70 / 0.45); --color-brand-400: #f08890; --color-brand-600: #ff6b75; --color-brand-700: #ff8a92;
+  --color-rose-50: rgb(230 57 70 / 0.12); --color-rose-100: rgb(230 57 70 / 0.18); --color-rose-200: rgb(230 57 70 / 0.28); --color-rose-600: #ff6b75; --color-rose-700: #ff8a92;
+  --color-red-50: rgb(230 57 70 / 0.12); --color-red-100: rgb(230 57 70 / 0.18); --color-red-600: #ff6b75; --color-red-700: #ff8a92;
 
-  /* Status colours: pale tints become dim tints, dark text becomes light text. */
-  --color-amber-50: color-mix(in srgb, #f59e0b 12%, #0a0a0a);
-  --color-amber-100: color-mix(in srgb, #f59e0b 20%, #0a0a0a);
-  --color-amber-200: color-mix(in srgb, #f59e0b 32%, #0a0a0a);
-  --color-amber-600: #fcd34d; --color-amber-700: #fcd34d; --color-amber-800: #fde68a; --color-amber-900: #fef3c7;
-  --color-rose-50: color-mix(in srgb, #f43f5e 12%, #0a0a0a);
-  --color-rose-100: color-mix(in srgb, #f43f5e 20%, #0a0a0a);
-  --color-rose-200: color-mix(in srgb, #f43f5e 32%, #0a0a0a);
-  --color-rose-600: #fda4af; --color-rose-700: #fda4af; --color-rose-800: #fecdd3;
-  --color-red-50: color-mix(in srgb, #ef4444 12%, #0a0a0a);
-  --color-red-100: color-mix(in srgb, #ef4444 20%, #0a0a0a);
-  --color-red-700: #fca5a5;
-  --color-emerald-50: color-mix(in srgb, #10b981 12%, #0a0a0a);
-  --color-emerald-100: color-mix(in srgb, #10b981 20%, #0a0a0a);
-  --color-emerald-200: color-mix(in srgb, #10b981 32%, #0a0a0a);
-  --color-emerald-600: #6ee7b7; --color-emerald-700: #6ee7b7; --color-emerald-800: #a7f3d0;
-  --color-sky-50: color-mix(in srgb, #0ea5e9 12%, #0a0a0a);
-  --color-sky-100: color-mix(in srgb, #0ea5e9 20%, #0a0a0a);
-  --color-sky-200: color-mix(in srgb, #0ea5e9 32%, #0a0a0a);
-  --color-sky-700: #7dd3fc;
-  --color-blue-50: color-mix(in srgb, #3b82f6 12%, #0a0a0a);
-  --color-blue-100: color-mix(in srgb, #3b82f6 20%, #0a0a0a);
-  --color-blue-200: color-mix(in srgb, #3b82f6 32%, #0a0a0a);
-  --color-blue-600: #93c5fd; --color-blue-700: #93c5fd;
-  --color-indigo-50: color-mix(in srgb, #6366f1 12%, #0a0a0a);
-  --color-indigo-100: color-mix(in srgb, #6366f1 20%, #0a0a0a);
-  --color-indigo-200: color-mix(in srgb, #6366f1 32%, #0a0a0a);
-  --color-indigo-600: #a5b4fc; --color-indigo-700: #a5b4fc; --color-indigo-900: #e0e7ff;
-  --color-purple-50: color-mix(in srgb, #a855f7 12%, #0a0a0a);
-  --color-purple-100: color-mix(in srgb, #a855f7 20%, #0a0a0a);
-  --color-purple-200: color-mix(in srgb, #a855f7 32%, #0a0a0a);
-  --color-purple-600: #d8b4fe; --color-purple-700: #d8b4fe;
-  --color-violet-100: color-mix(in srgb, #8b5cf6 20%, #0a0a0a);
-  --color-violet-700: #c4b5fd;
-  --color-teal-50: color-mix(in srgb, #14b8a6 12%, #0a0a0a);
-  --color-teal-600: #5eead4;
-  --color-yellow-50: color-mix(in srgb, #eab308 12%, #0a0a0a);
+  --color-emerald-50: color-mix(in srgb, #10b981 14%, #0b0b0c); --color-emerald-100: color-mix(in srgb, #10b981 22%, #0b0b0c);
+  --color-emerald-600: #34d399; --color-emerald-700: #6ee7b7; --color-emerald-800: #a7f3d0;
+  --color-amber-50: color-mix(in srgb, #f59e0b 14%, #0b0b0c); --color-amber-100: color-mix(in srgb, #f59e0b 22%, #0b0b0c);
+  --color-amber-600: #fbbf24; --color-amber-700: #fcd34d; --color-amber-800: #fde68a;
+  --color-sky-50: color-mix(in srgb, #0ea5e9 14%, #0b0b0c); --color-sky-100: color-mix(in srgb, #0ea5e9 22%, #0b0b0c);
+  --color-sky-600: #38bdf8; --color-sky-700: #7dd3fc;
+  --color-blue-50: color-mix(in srgb, #3b82f6 14%, #0b0b0c); --color-blue-100: color-mix(in srgb, #3b82f6 22%, #0b0b0c); --color-blue-700: #93c5fd;
+  --color-indigo-50: color-mix(in srgb, #6366f1 14%, #0b0b0c); --color-indigo-600: #818cf8;
+  --color-violet-50: color-mix(in srgb, #8b5cf6 14%, #0b0b0c); --color-violet-100: color-mix(in srgb, #8b5cf6 22%, #0b0b0c); --color-violet-600: #a78bfa; --color-violet-700: #c4b5fd;
+  --color-teal-50: color-mix(in srgb, #14b8a6 14%, #0b0b0c); --color-teal-600: #2dd4bf;
+  --color-orange-50: color-mix(in srgb, #f97316 14%, #0b0b0c); --color-orange-600: #fb923c;
 }
-
+html[data-theme="dark"] body { background-color: #0b0b0c; }
 /* White surfaces (bg-white can't use a variable: text-white shares --color-white). */
-html[data-theme="dark"] :is(.bg-white, .hover\:bg-white:hover) { background-color: var(--surface); }
-html[data-theme="dark"] .bg-white\/80 { background-color: rgb(17 17 17 / 0.8); }
-html[data-theme="dark"] .bg-white\/85 { background-color: rgb(17 17 17 / 0.85); }
-html[data-theme="dark"] .bg-white\/90 { background-color: rgb(17 17 17 / 0.9); }
-html[data-theme="dark"] .bg-white\/95 { background-color: rgb(17 17 17 / 0.95); }
-html[data-theme="dark"] .from-white { --tw-gradient-from: var(--surface); }
-html[data-theme="dark"] .via-white { --tw-gradient-via: var(--surface); }
-html[data-theme="dark"] .to-white { --tw-gradient-to: var(--surface); }
-html[data-theme="dark"] .border-black\/10 { border-color: rgb(255 255 255 / 0.12); }
-html[data-theme="dark"] .border-white\/40 { border-color: rgb(255 255 255 / 0.1); }
-
-/* Classes that must keep their light-mode colour: they sit on dark surfaces or carry white text. */
-html[data-theme="dark"] .text-slate-300 { color: #d4d4d4; }
-html[data-theme="dark"] .bg-slate-800 { background-color: #262626; }
-html[data-theme="dark"] :is(.bg-slate-900, .hover\:bg-slate-900:hover) { background-color: #1f1f1f; }
-html[data-theme="dark"] .hover\:bg-slate-800:hover { background-color: #2e2e2e; }
-html[data-theme="dark"] .bg-slate-900\/40 { background-color: rgb(0 0 0 / 0.6); }
-html[data-theme="dark"] .text-brand-50 { color: #f3fce8; }
-html[data-theme="dark"] .text-brand-100 { color: #e4f9cc; }
-html[data-theme="dark"] .text-brand-100\/80 { color: rgb(228 249 204 / 0.8); }
-html[data-theme="dark"] .text-brand-200 { color: #caf29d; }
-html[data-theme="dark"] .text-brand-200\/80 { color: rgb(202 242 157 / 0.8); }
-html[data-theme="dark"] .bg-rose-600 { background-color: #e11d48; }
-html[data-theme="dark"] .hover\:bg-rose-700:hover { background-color: #be123c; }
-html[data-theme="dark"] .bg-emerald-600 { background-color: #059669; }
-html[data-theme="dark"] :is(.bg-emerald-700, .hover\:bg-emerald-700:hover) { background-color: #047857; }
-html[data-theme="dark"] .bg-sky-600 { background-color: #0284c7; }
-html[data-theme="dark"] .hover\:bg-red-600:hover { background-color: #dc2626; }
-html[data-theme="dark"] .border-ink { border-color: #a3ff47; }
-html[data-theme="dark"] .ring-ink { --tw-ring-color: #a3ff47; }
-
-/* Glow buttons keep their neon glow; a faint white edge keeps them visible on black. */
-html[data-theme="dark"] .btn-glow {
-  background:
-    radial-gradient(var(--stroke-w) 50% at 50% 100%, rgb(var(--glow-color)) 0%, rgb(var(--glow-color) / 0) 100%) border-box,
-    rgb(255 255 255 / 0.16) border-box;
-}
-
-/* Hand-written components in this file */
-html[data-theme="dark"] .skeleton { background-color: #1b1b1b; }
+html[data-theme="dark"] :is(.bg-white, .hover\:bg-white:hover) { background-color: #141416; }
+html[data-theme="dark"] :is(.bg-white\/70, .bg-white\/80, .bg-white\/85, .bg-white\/90, .bg-white\/95) { background-color: rgb(20 20 22 / 0.85); }
+html[data-theme="dark"] .text-black { color: #fafafa; }
+html[data-theme="dark"] .skeleton { background-color: #1c1c1f; }
 html[data-theme="dark"] .skeleton::after { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent); }
-html[data-theme="dark"] .legal-prose strong,
-html[data-theme="dark"] .legal-prose th { color: #f5f5f5; }
-html[data-theme="dark"] .legal-prose th { background: #141414; }
-html[data-theme="dark"] :is(.legal-prose th, .legal-prose td) { border-color: #262626; }
-
-/* The logo keeps its original colours; on dark surfaces it sits on a small white tile. */
-html[data-theme="dark"] .brand-mark:not(footer .brand-mark) { background: #ffffff; border-radius: 0.5rem; padding: 3px 5px; box-sizing: content-box; }
-
-/* Printed-paper previews stay white in dark mode. */
-html[data-theme="dark"] .keep-light {
-  --surface: #ffffff;
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  color-scheme: light;
+html[data-theme="dark"] .legal-prose :is(strong, th) { color: #fafafa; }
+html[data-theme="dark"] .legal-prose th { background: #18181b; }
+html[data-theme="dark"] :is(.legal-prose th, .legal-prose td) { border-color: #27272a; }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3f3f46; }
+/* Glass becomes smoky. */
+html[data-theme="dark"] .glass-nav {
+  background-color: rgb(20 20 22 / 0.6);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  color: #fafafa;
 }
+html[data-theme="dark"] .glass-ios {
+  background-color: rgb(24 24 27 / 0.5);
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow: 0 12px 40px -14px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+html[data-theme="dark"] .glass-ios::before { opacity: 0.35; }
+/* Red / black surfaces and printed-paper previews keep their own look. */
+html[data-theme="dark"] footer.bg-black { --color-slate-300: #d1d1d1; --color-slate-400: #8f8f8f; --color-slate-500: #a1a1aa; }
+html[data-theme="dark"] :is(.on-accent, .on-accent-text) .text-black { color: #000000; }
+html[data-theme="dark"] .keep-light {
+  --background: #ffffff; --foreground: #0f172a; --card: #ffffff; --border: #e2e8f0;
+  color: #0f172a;
+}
+html[data-theme="dark"] .keep-light :is(.bg-white) { background-color: #ffffff; }
+html[data-theme="dark"] .keep-light .text-black { color: #000000; }
 
-html[data-theme="dark"] .theme-toggle { background: #141414; color: #a3ff47; border-color: rgb(255 255 255 / 0.12); box-shadow: 0 10px 30px -10px rgb(163 255 71 / 0.35); }
-html[data-theme="dark"] .theme-toggle:hover { background: #a3ff47; color: #0a0a0a; }
+/* ── Sign-in / sign-up glass card (app/(auth)) ─────────────────────────
+   Frosted card over a full-screen travel photo: white text, dark pill inputs, pill buttons.
+   Scoped to .auth-card so the shared form components keep their normal look elsewhere. */
+.auth-card {
+  --foreground: #ffffff;
+  --card-foreground: #ffffff;
+  --muted-foreground: rgb(255 255 255 / 0.75);
+  --border: rgb(255 255 255 / 0.22);
+  --input: rgb(255 255 255 / 0.08);
+  --ring: #e63946;
+  --primary: #e63946;
+  color: #ffffff;
+  background: linear-gradient(160deg, rgb(140 148 170 / 0.5), rgb(60 66 86 / 0.55));
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 1.25rem;
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+.auth-card label { color: #ffffff; font-weight: 600; }
+.auth-card input:not([type="checkbox"]) {
+  height: 2.5rem;
+  border-radius: 9999px;
+  border-color: rgb(255 255 255 / 0.06);
+  background-color: #151a24;
+  color: #ffffff;
+  padding-inline: 1rem;
+  box-shadow: none;
+}
+.auth-card input:not([type="checkbox"])::placeholder { color: rgb(255 255 255 / 0.7); font-style: italic; }
+.auth-card input:not([type="checkbox"]):focus-visible { border-color: #e63946; --tw-ring-offset-width: 0px; }
+.auth-card input:-webkit-autofill { -webkit-text-fill-color: #ffffff; -webkit-box-shadow: 0 0 0 1000px #151a24 inset; caret-color: #ffffff; }
+.auth-card button[type="submit"] { border-radius: 9999px; background: #e63946; color: #000000; font-weight: 700; }
+.auth-card button[type="submit"]:hover:not(:disabled) { background: #ec5662; }
+.auth-card .auth-pill { border-radius: 9999px; background: #ffffff; color: #000000; }
+.auth-card .auth-pill:hover { background: rgb(255 255 255 / 0.88); }
+.auth-card a:not(.auth-pill) { color: rgb(255 255 255 / 0.85); }
+.auth-card a:not(.auth-pill):hover { color: #ffffff; text-decoration: underline; }
+.auth-card button[role="checkbox"] { border-color: rgb(255 255 255 / 0.85); background: transparent; }
+.auth-card button[role="checkbox"][data-state="checked"] { background: #ffffff; color: #000000; }
+.auth-card .text-red-500 { color: #ffc2c7; }
+.auth-card [data-password-toggle] { color: rgb(255 255 255 / 0.7); }
 
 /* Live chat bubble (components/ChatWidget.tsx) sits bottom-right: lift anything else anchored there. */
 html.has-chat-widget .chat-aware {
@@ -445,7 +549,7 @@ html.has-chat-widget .chat-aware {
   transition: transform 0.25s ease-out, box-shadow 0.3s ease;
 }
 .doc-card:hover {
-  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(163 255 71 / 0.08);
+  box-shadow: 0 30px 60px -20px rgb(230 57 70 / 0.35), 0 0 0 1px rgb(230 57 70 / 0.08);
 }
 @media (prefers-reduced-motion: reduce) {
   .doc-card {
@@ -453,30 +557,10 @@ html.has-chat-widget .chat-aware {
   }
 }
 
-/* How-it-works spider diagram (components/marketing/HowItWorksSection.tsx) */
-.spider-line {
-  stroke-dasharray: 6 10;
-  stroke-linecap: round;
-  animation: spider-flow 1.4s linear infinite;
-  filter: drop-shadow(0 0 4px rgb(163 255 71 / 0.6));
-}
-@keyframes spider-flow {
-  to {
-    stroke-dashoffset: -32;
-  }
-}
-.spider-orbit {
-  animation: spider-spin 24s linear infinite;
-}
-@keyframes spider-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .spider-line,
-  .spider-orbit {
-    animation: none;
-  }
-}
 
+
+/* Services carousel (components/marketing/FeaturesSection.tsx): the active dot fills over one slide. */
+@keyframes carousel-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}

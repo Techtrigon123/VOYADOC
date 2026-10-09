@@ -44,11 +44,6 @@ export default function PickupListPage() {
         eyebrow="Transport Voucher"
         title="Pickup Voucher"
         description="Create a pickup slip, then Save & Generate PDF. Saved PDFs appear below for view, edit, or delete."
-        actions={
-          <Link href="/dashboard/pickup/new" className={primaryBtn}>
-            <Plus className="h-4 w-4" /> New Pickup Voucher
-          </Link>
-        }
       />
 
       {docs === null ? (

@@ -4,6 +4,8 @@ import { getSession, passwordVersion } from "@/lib/auth/jwt";
 import { documentExists, findUserWithPassword, updateUser, type DocRecord, type UserRecord } from "@/lib/db/repo";
 import type { Agent, DocumentSummary } from "./types";
 import { computeAutoVerified, missingActivationFields } from "./profile";
+import { verificationTransition } from "./verification";
+import { isVerifiedStatus, type VerificationStatus } from "./verification-shared";
 import { documentAccess, effectivePlan, subscriptionState } from "./plans";
 
 export function ok<T>(data: T, init?: { status?: number; message?: string }) {
@@ -68,6 +70,9 @@ export function serializeAgent(u: UserRecord): Agent {
     paymentUpi: u.paymentUpi,
     status: u.status ?? "INACTIVE",
     isVerified: !!u.isVerified,
+    ...(u.verificationStatus
+      ? { verification: { status: u.verificationStatus as VerificationStatus, note: u.verificationStatus === "denied" ? u.verificationNote ?? null : null, changes: u.verificationChanges ?? [] } }
+      : {}),
     agentLevel: u.agentLevel,
     subscriptionPlan: effectivePlan(u),
     subscriptionExpiresAt: u.subscriptionExpiresAt?.toISOString(),
@@ -87,18 +92,21 @@ export function serializeAgent(u: UserRecord): Agent {
 }
 
 /**
- * Recompute Verified + Active after a profile or document change.
+ * Recompute Verified + Active (and the profile-review status) after a profile or document change.
  * Active = the four activation fields are filled AND at least one document exists.
- * Returns the (possibly updated) user.
+ * Verified = approved by the Vouchlio team in the admin portal (migration 0007); before that
+ * migration, the old automatic rule applies. Returns the (possibly updated) user.
  */
 export async function refreshAgentState(user: UserRecord): Promise<UserRecord> {
   if (user.status === "SUSPENDED") return user;
   const plain = serializeAgent(user);
-  const verified = computeAutoVerified(plain);
-  const status =
-    missingActivationFields(plain).length === 0 && (await documentExists(user.id)) ? "ACTIVE" : "INACTIVE";
-  if (verified !== user.isVerified || status !== user.status) {
-    return updateUser(user.id, { isVerified: verified, status });
+  const complete = missingActivationFields(plain).length === 0;
+  const review = verificationTransition(user, complete);
+  const nextStatus = (review?.verificationStatus ?? user.verificationStatus) as VerificationStatus | undefined;
+  const verified = user.verificationStatus !== undefined ? isVerifiedStatus(nextStatus) : computeAutoVerified(plain);
+  const status = complete && (await documentExists(user.id)) ? "ACTIVE" : "INACTIVE";
+  if (review || verified !== user.isVerified || status !== user.status) {
+    return updateUser(user.id, { ...(review ?? {}), isVerified: verified, status });
   }
   return user;
 }

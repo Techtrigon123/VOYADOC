@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
 import { useParams, useRouter } from "next/navigation";
 import { Download, Loader2, Mail, MessageCircle, Pencil, Plane, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -85,9 +86,9 @@ export default function AirTicketDetailPage() {
 
   return (
     <PageShell wide>
-      <Link href="/dashboard/flights" className="mb-3 inline-flex text-sm font-medium text-slate-500 hover:text-brand-600">← Airline tickets</Link>
       <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
+          <BackButton fallback="/dashboard/flights" label="Back to airline tickets" />
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
             <Plane className="h-5 w-5" />
           </span>

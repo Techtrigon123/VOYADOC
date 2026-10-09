@@ -51,7 +51,7 @@ const reviews = [
     name: "Anita Reddy",
     role: "Consultant, South India Travels",
     initials: "AR",
-    color: "bg-rose-100 text-rose-700",
+    color: "bg-brand-100 text-brand-700",
     quote:
       "Switched from manual Word templates to this platform. The PDF quality is excellent and our documents look much more professional now.",
     rating: 5,

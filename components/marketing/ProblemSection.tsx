@@ -19,17 +19,17 @@ const PAINS: { text: string; icon: LucideIcon }[] = [
 function PainCard({ text, icon: Icon, index }: { text: string; icon: LucideIcon; index: number }) {
   return (
     <TiltCard
-      glow="rgba(251,113,133,0.16)"
-      className="rounded-3xl border border-white/10 bg-ink p-5 shadow-lg shadow-black/10 transition-colors hover:border-rose-400/40"
+      glow="rgba(0,0,0,0.04)"
+      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-lg shadow-black/5 transition-colors hover:border-brand-300"
     >
       <div className="relative z-[2] flex h-full flex-col justify-between gap-5">
         <div className="flex items-center justify-between">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-rose-400 transition duration-300 group-hover:-translate-y-1 group-hover:bg-rose-500 group-hover:text-white">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-100 bg-brand-50 text-brand-600 transition duration-300 group-hover:-translate-y-1 group-hover:bg-brand-500 group-hover:text-black">
             <Icon className="h-5 w-5" />
           </span>
-          <span className="text-xs font-bold tabular-nums text-white/25 transition group-hover:text-rose-300">0{index + 1}</span>
+          <span className="text-xs font-bold tabular-nums text-slate-300 transition group-hover:text-brand-600">0{index + 1}</span>
         </div>
-        <p className="text-[15px] font-medium leading-snug text-neutral-100">{text}</p>
+        <p className="text-[15px] font-medium leading-snug text-black">{text}</p>
       </div>
     </TiltCard>
   );
@@ -59,21 +59,21 @@ export default function ProblemSection() {
 
           {/* Centre of attention */}
           <AnimatedCard delay={120} className="lg:order-2">
-            <TiltCard className="min-h-[380px] rounded-[2rem] border border-white/10 bg-ink shadow-2xl shadow-black/20 transition-colors hover:border-brand-neon/40 lg:min-h-full">
+            <TiltCard className="min-h-[380px] rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-black/10 transition-colors hover:border-brand-300 lg:min-h-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=80"
+                src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=75&auto=format&fit=crop"
                 alt="Travel planning with maps, notes and guidebooks"
                 loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-[1200ms] ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10" aria-hidden />
-              <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-transparent transition duration-300 group-hover:ring-brand-neon/40" aria-hidden />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#000000]/85 via-[#000000]/45 to-[#000000]/5" aria-hidden />
+              <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-transparent transition duration-300 group-hover:ring-brand-500/50" aria-hidden />
               <div className="relative z-[2] flex h-full min-h-[380px] flex-col justify-end p-7 sm:p-9">
-                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-brand-neon backdrop-blur-md transition duration-300 group-hover:-translate-y-1 group-hover:bg-brand-neon group-hover:text-ink">
+                <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#ffffff]/25 bg-[#ffffff]/90 text-brand-600 backdrop-blur-md transition duration-300 group-hover:-translate-y-1 group-hover:bg-brand-500 group-hover:text-[#ffffff]">
                   <FileStack className="h-6 w-6" />
                 </span>
-                <p className="max-w-md text-xl font-semibold leading-snug text-white sm:text-2xl">
+                <p className="max-w-md text-xl font-semibold leading-snug text-[#ffffff] sm:text-2xl">
                   Your travel business already has enough to manage. Document preparation shouldn&apos;t slow you down.
                 </p>
               </div>

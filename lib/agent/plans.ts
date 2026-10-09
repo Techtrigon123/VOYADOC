@@ -41,10 +41,10 @@ export const SERVICE_LABELS: Record<DocumentKind, string> = {
   welcome_placard: "Welcome placards",
 };
 
-/** Services open on each plan: Silver 4 of 7, Gold 5 of 7, Platinum all 7. */
+/** Services open on each plan: Silver 3 of 7, Gold 4 of 7, Platinum all 7 (payment receipts are Platinum-only). */
 export const PLAN_SERVICES: Record<PlanId, readonly DocumentKind[]> = {
-  silver: ["hotel_voucher", "invoice", "proforma", "receipt"],
-  gold: ["hotel_voucher", "invoice", "proforma", "receipt", "air_ticket"],
+  silver: ["hotel_voucher", "invoice", "proforma"],
+  gold: ["hotel_voucher", "invoice", "proforma", "air_ticket"],
   platinum: ALL_SERVICES,
 };
 
@@ -208,7 +208,7 @@ export const PLANS: PlanDefinition[] = [
     cta: "Get started free",
     subscriptionNote: "No credit card · upgrade anytime",
     highlights: [
-      { value: "4 of 7", label: "Services" },
+      { value: "3 of 7", label: "Services" },
       { value: `${FREE_MONTHLY_DOCUMENTS}/month`, label: "New documents" },
       { value: "30 days", label: "History saved" },
     ],
@@ -224,7 +224,7 @@ export const PLANS: PlanDefinition[] = [
     featured: true,
     badge: "Popular",
     highlights: [
-      { value: "5 of 7", label: "Services" },
+      { value: "4 of 7", label: "Services" },
       { value: "Unlimited", label: "New documents" },
       { value: "Forever", label: "Document history" },
     ],
@@ -274,21 +274,24 @@ export const PLAN_COMPARISON: { label: string; silver: boolean | string; gold: b
   { label: "Grace period after the plan ends", silver: "—", gold: `${GRACE_DAYS.monthly} days (monthly) · ${GRACE_DAYS.yearly} days (yearly)`, platinum: `${GRACE_DAYS.monthly} days (monthly) · ${GRACE_DAYS.yearly} days (yearly)` },
 ];
 
-const price = (plan: PaidPlanId) =>
-  `${formatInr(PLAN_PRICES_INR[plan].monthly)} a month or ${formatInr(PLAN_PRICES_INR[plan].yearly)} a year`;
+type PriceTable = Record<PaidPlanId, Record<BillingCycle, number>>;
 
-export const PRICING_FAQ = [
+const price = (plan: PaidPlanId, prices: PriceTable = PLAN_PRICES_INR) =>
+  `${formatInr(prices[plan].monthly)} a month or ${formatInr(prices[plan].yearly)} a year`;
+
+/** Pricing FAQ, worded with the given prices (the live ones come from /api/agent/plan). */
+export const pricingFaq = (prices: PriceTable = PLAN_PRICES_INR) => [
   {
     q: "What is included in the Silver plan?",
-    a: `Silver is free and opens 4 of the 7 services: hotel vouchers, invoices, proforma invoices and payment receipts. You can create up to ${FREE_MONTHLY_DOCUMENTS} new documents each calendar month (the count resets on the 1st, India time); editing a saved document doesn't count. History is kept for ${SILVER_RETENTION_DAYS} days and PDFs carry a watermark.`,
+    a: `Silver is free and opens 3 of the 7 services: hotel vouchers, invoices and proforma invoices. You can create up to ${FREE_MONTHLY_DOCUMENTS} new documents each calendar month (the count resets on the 1st, India time); editing a saved document doesn't count. History is kept for ${SILVER_RETENTION_DAYS} days and PDFs carry a watermark.`,
   },
   {
     q: "What does Gold add?",
-    a: `Gold (${price("gold")}, GST inclusive) opens air tickets as a fifth service, removes the monthly document limit and the watermark, adds your logo, keeps history forever and includes ${EXTRACT_LIMITS.goldPerYear} upload auto-fills a year.`,
+    a: `Gold (${price("gold", prices)}, GST inclusive) opens air tickets as a fourth service, removes the monthly document limit and the watermark, adds your logo, keeps history forever and includes ${EXTRACT_LIMITS.goldPerYear} upload auto-fills a year.`,
   },
   {
     q: "What does Platinum add?",
-    a: `Platinum (${price("platinum")}, GST inclusive) opens all 7 services — including pickup vouchers and welcome placards — with unlimited upload auto-fill and vouchers designed only for your agency.`,
+    a: `Platinum (${price("platinum", prices)}, GST inclusive) opens all 7 services — including payment receipts, pickup vouchers and welcome placards — with unlimited upload auto-fill and vouchers designed only for your agency.`,
   },
   {
     q: "Monthly or yearly — what's the difference?",
@@ -311,3 +314,5 @@ export const PRICING_FAQ = [
     a: "Your account, customer details, and documents are stored securely and used only to run the service. We do not sell personal data. See our Privacy Policy.",
   },
 ];
+
+export const PRICING_FAQ = pricingFaq();

@@ -183,27 +183,31 @@ export function PaymentDetailsSkeleton() {
   );
 }
 
-/** Whole dashboard shell while the session loads: navbar + page body. */
+/** Whole dashboard shell while the session loads: sidebar, top bar and page body. */
 export function DashboardSkeleton() {
   return (
     <Loading label="Loading your dashboard" className="min-h-screen bg-slate-50">
-      <div className="flex h-[75px] items-center gap-6 border-b border-slate-200 bg-white px-4 sm:px-6">
-        <Skeleton className="h-8 w-36" />
-        <div className="hidden flex-1 items-center gap-5 lg:flex">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} className="h-3.5 w-16" />
+      <div className="fixed inset-y-0 left-0 hidden w-64 space-y-3 border-r border-slate-200 bg-white p-5 lg:block">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-11 w-full rounded-xl" />
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-full rounded-xl" />
+        ))}
+      </div>
+      <div className="flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6 lg:pl-[17rem]">
+        <Skeleton className="h-10 w-full max-w-md rounded-xl" />
+        <Skeleton className="ml-auto h-9 w-9 rounded-full" />
+      </div>
+      <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:pl-[17.5rem]">
+        <Skeleton className="h-40 w-full rounded-3xl" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <Skeleton className="hidden h-9 w-48 rounded-lg md:block" />
-          <Skeleton className="h-9 w-9 rounded-full" />
-        </div>
-      </div>
-      <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-        <Skeleton className="h-32 w-full rounded-3xl" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-[112px] rounded-2xl" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-2xl" />
           ))}
         </div>
       </div>

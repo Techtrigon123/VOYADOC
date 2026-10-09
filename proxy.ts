@@ -15,6 +15,7 @@ function maxBodyBytes(pathname: string): number {
   if (pathname === "/api/agent/plan/submit") return 5 * MB; // 3 MB payment proof
   if (pathname === "/api/agent/profile") return 5 * MB; // logo + stamp images
   if (pathname.startsWith("/api/agent/documents")) return 1 * MB;
+  if (pathname === "/api/agent/support/bugs") return 4 * MB; // 2.5 MB screenshot as base64
   return 256 * 1024;
 }
 
@@ -96,6 +97,15 @@ async function limitApi(request: NextRequest): Promise<NextResponse> {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Force HTTPS once deployed. Hosts like Vercel already redirect, but behind other proxies the
+  // original scheme only arrives in x-forwarded-proto. HSTS (next.config.ts) covers later visits.
+  if (process.env.NODE_ENV === "production" && request.headers.get("x-forwarded-proto") === "http") {
+    const url = request.nextUrl.clone();
+    url.protocol = "https:";
+    url.port = "";
+    return NextResponse.redirect(url, 308);
+  }
 
   if (pathname.startsWith("/api/")) return limitApi(request);
 

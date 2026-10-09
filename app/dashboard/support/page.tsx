@@ -48,7 +48,7 @@ export default function SupportPage() {
             <Headphones className="h-[18px] w-[18px]" />
           </span>
           <div>
-            <p className="text-sm font-semibold text-slate-900">Voyenta support</p>
+            <p className="text-sm font-semibold text-slate-900">Vouchlio support</p>
             <p className="text-xs text-slate-500">We usually reply within a few hours on working days.</p>
           </div>
         </div>

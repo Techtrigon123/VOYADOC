@@ -30,7 +30,7 @@ const testimonials: MarqueeReview[] = [
   {
     name: "Vikram Singh",
     username: "Director, Rajasthan Heritage Tours",
-    avatarClassName: "bg-rose-100 text-rose-700",
+    avatarClassName: "bg-brand-100 text-brand-700",
     body: "“We handle hundreds of bookings monthly. Having a centralized workspace for travel documents has made our team much more efficient.”",
   },
   {

@@ -49,11 +49,11 @@ function SetupInner() {
 export default function SetupPage() {
   return (
     <AgentProvider>
-      <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-brand-50/80 via-white to-white">
+      <div className="relative flex min-h-screen flex-col bg-white">
         <header className="flex h-16 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
             <BrandMark className="h-8" />
-            <span className="font-bold text-slate-900">Voyenta</span>
+            <span className="font-bold text-slate-900">Vouchlio</span>
           </Link>
           <a href="/api/auth/logout" className="text-sm font-medium text-slate-500 hover:text-slate-900">Log out</a>
         </header>

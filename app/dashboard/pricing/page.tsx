@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { BackButton } from "@/components/ui/back-button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Check, ChevronDown, Crown, FileUp, Gem, Loader2, Lock, Pencil, ShieldCheck, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +19,7 @@ import {
   PLAN_COMPARISON,
   PLAN_PRICES_INR,
   PLANS,
-  PRICING_FAQ,
+  pricingFaq,
   SERVICE_LABELS,
   subscriptionState,
   type BillingCycle,
@@ -47,6 +48,8 @@ interface PlanInfo {
   monthlyAvailable?: boolean;
   pending: PendingPayment | null;
   paymentConfig?: { planId: PaidPlanId; planName: string; cycle: BillingCycle; amountInr: number; upiId: string | null; payee: string; qr: string | null };
+  /** Live prices (set by admins); falls back to PLAN_PRICES_INR. */
+  prices?: Record<PaidPlanId, Record<BillingCycle, number>>;
 }
 
 const PLAN_ICONS = { silver: ShieldCheck, gold: Sparkles, platinum: Gem };
@@ -54,8 +57,8 @@ const PLAN_ICONS = { silver: ShieldCheck, gold: Sparkles, platinum: Gem };
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 /** Yearly saving against paying monthly for 12 months, as a whole percentage. */
-const yearlySaving = (plan: PaidPlanId) => {
-  const { monthly, yearly } = PLAN_PRICES_INR[plan];
+const yearlySaving = (plan: PaidPlanId, prices: Record<PaidPlanId, Record<BillingCycle, number>> = PLAN_PRICES_INR) => {
+  const { monthly, yearly } = prices[plan];
   return Math.round((1 - yearly / (monthly * 12)) * 100);
 };
 
@@ -89,6 +92,7 @@ export default function PricingPage() {
     if (isPaidPlan(p)) setCheckout(p);
   }, [params]);
 
+  const prices = info?.prices ?? PLAN_PRICES_INR;
   const monthlyAvailable = info?.monthlyAvailable !== false;
   const cycle: BillingCycle = monthlyAvailable ? pickedCycle : "yearly";
 
@@ -98,7 +102,8 @@ export default function PricingPage() {
 
   return (
     <PageShell wide>
-      <section className="relative overflow-hidden rounded-[2rem] border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 px-6 py-10 text-center sm:px-10">
+      <BackButton fallback="/dashboard" className="mb-4" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-brand-100 bg-white px-6 py-10 text-center sm:px-10">
         <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-brand-200/40 blur-3xl" aria-hidden />
         <p className="relative text-[11px] font-semibold uppercase tracking-widest text-brand-600">Built for travel agents who mean business</p>
         <h1 className="relative mx-auto mt-2 max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Send vouchers &amp; tickets your clients actually trust</h1>
@@ -143,7 +148,7 @@ export default function PricingPage() {
               )}
             >
               {c}
-              {c === "yearly" ? <span className={cn("ml-1.5 text-[11px] font-bold normal-case", cycle === c ? "text-brand-neon" : "text-brand-600")}>Save up to {Math.max(yearlySaving("gold"), yearlySaving("platinum"))}%</span> : null}
+              {c === "yearly" ? <span className={cn("ml-1.5 text-[11px] font-bold normal-case", cycle === c ? "text-brand-neon" : "text-brand-600")}>Save up to {Math.max(yearlySaving("gold", prices), yearlySaving("platinum", prices))}%</span> : null}
             </button>
           ))}
         </div>
@@ -155,7 +160,7 @@ export default function PricingPage() {
           const Icon = PLAN_ICONS[p.id];
           const isCurrent = p.id === current;
           const isRenewal = p.id === sub.paidPlan;
-          const amount = p.prices ? p.prices[cycle] : null;
+          const amount = p.id === "silver" ? null : prices[p.id][cycle];
           return (
             <div
               key={p.id}
@@ -189,7 +194,7 @@ export default function PricingPage() {
                   {amount === null
                     ? "No subscription · no credit card"
                     : cycle === "yearly"
-                      ? `Save ${yearlySaving(p.id as PaidPlanId)}% vs monthly · ${GRACE_DAYS.yearly}-day grace period`
+                      ? `Save ${yearlySaving(p.id as PaidPlanId, prices)}% vs monthly · ${GRACE_DAYS.yearly}-day grace period`
                       : `Billed monthly · ${GRACE_DAYS.monthly}-day grace period`}
                 </p>
               </div>
@@ -264,7 +269,7 @@ export default function PricingPage() {
       <section className="mx-auto mt-12 max-w-3xl">
         <h2 className="text-center text-2xl font-bold text-slate-900">Pricing questions</h2>
         <div className="mt-6 divide-y divide-slate-200 overflow-hidden rounded-3xl border border-slate-200 bg-white">
-          {PRICING_FAQ.map((f, i) => (
+          {pricingFaq(prices).map((f, i) => (
             <div key={f.q}>
               <button type="button" onClick={() => setFaqOpen(faqOpen === i ? null : i)} aria-expanded={faqOpen === i} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left font-medium text-slate-900 hover:bg-slate-50">
                 {f.q}
@@ -276,18 +281,19 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="mt-12 rounded-3xl bg-gradient-to-r from-[var(--primary)] to-amber-500 px-6 py-8 text-center text-white">
+      <section className="mt-12 rounded-3xl border border-slate-200 bg-white px-6 py-8 text-center text-black shadow-sm">
         <h2 className="text-2xl font-bold">Ready to look more professional?</h2>
-        <p className="mt-1 text-brand-50">Start free on Silver. Upgrade to Gold or Platinum when your business is ready.</p>
+        <p className="mt-1 text-slate-500">Start free on Silver. Upgrade to Gold or Platinum when your business is ready.</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <Link href="/dashboard" className="inline-flex h-10 items-center rounded-xl bg-white px-5 text-sm font-semibold text-brand-600">Go to workspace</Link>
-          <Link href="/dashboard/support" className="inline-flex h-10 items-center rounded-xl bg-white/15 px-5 text-sm font-semibold text-white ring-1 ring-white/40">Talk to sales</Link>
+          <Link href="/dashboard" className="btn-glow inline-flex h-10 items-center rounded-xl px-5 text-sm">Go to workspace</Link>
+          <Link href="/dashboard/support" className="inline-flex h-10 items-center rounded-xl bg-white px-5 text-sm font-semibold text-black ring-1 ring-slate-200 hover:ring-brand-300">Talk to sales</Link>
         </div>
       </section>
 
       {checkout ? (
         <CheckoutDialog
           planId={checkout}
+          prices={prices}
           cycle={cycle}
           monthlyAvailable={monthlyAvailable}
           pending={info?.pending?.planId === checkout ? info.pending : null}
@@ -304,6 +310,7 @@ export default function PricingPage() {
 
 function CheckoutDialog({
   planId,
+  prices,
   cycle: initialCycle,
   monthlyAvailable,
   pending,
@@ -311,6 +318,7 @@ function CheckoutDialog({
   onSubmitted,
 }: {
   planId: PaidPlanId;
+  prices: Record<PaidPlanId, Record<BillingCycle, number>>;
   cycle: BillingCycle;
   monthlyAvailable: boolean;
   pending: PendingPayment | null;
@@ -415,7 +423,7 @@ function CheckoutDialog({
             ) : !config || config.cycle !== cycle ? (
               <PaymentDetailsSkeleton />
             ) : (
-              <div className="rounded-2xl border border-brand-200 bg-brand-50/50 p-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs text-slate-500">Amount due ({config.cycle === "monthly" ? "1 month" : "1 year"} · GST inclusive)</p>
                 <p className="text-2xl font-bold text-slate-900">{formatInr(config.amountInr)}</p>
                 {config.qr ? (
@@ -453,7 +461,7 @@ function CheckoutDialog({
                   >
                     <span className="block font-semibold capitalize text-slate-900">{c}</span>
                     <span className="block text-xs text-slate-500">
-                      {formatInr(PLAN_PRICES_INR[planId][c])} · {GRACE_DAYS[c]}-day grace
+                      {formatInr(prices[planId][c])} · {GRACE_DAYS[c]}-day grace
                     </span>
                   </button>
                 ))}

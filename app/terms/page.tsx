@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import LegalPage, { type LegalSection } from "@/components/legal/LegalPage";
 import { SITE } from "@/lib/site";
-import { FREE_MONTHLY_DOCUMENTS, GRACE_DAYS, PLAN_PRICES_INR, SILVER_RETENTION_DAYS, formatInr } from "@/lib/agent/plans";
+import { FREE_MONTHLY_DOCUMENTS, GRACE_DAYS, SILVER_RETENTION_DAYS, formatInr } from "@/lib/agent/plans";
+import { getAppSettings, type Prices } from "@/lib/settings";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Terms and Conditions",
-  description:
-    "The terms for using Voyenta: accounts, Silver, Gold and Platinum plans, payments, your documents and customer data, acceptable use, liability and governing law.",
-  alternates: { canonical: "/terms" },
-};
+  description: "The terms for using Vouchlio: accounts, Silver, Gold and Platinum plans, payments, your documents and customer data, acceptable use and governing law.",
+  path: "/terms",
+});
 
 const { legal } = SITE;
 
-const sections: LegalSection[] = [
+const buildSections = (pricing: Prices): LegalSection[] => [
   {
     id: "agreement",
     title: "Agreement",
@@ -72,16 +73,16 @@ const sections: LegalSection[] = [
       <>
         <ul>
           <li>
-            <strong>Silver</strong> is free and includes hotel vouchers, invoices, proforma invoices and payment receipts, with up
+            <strong>Silver</strong> is free and includes hotel vouchers, invoices and proforma invoices, with up
             to {FREE_MONTHLY_DOCUMENTS} new documents per calendar month (India time). Documents stay open for{" "}
             {SILVER_RETENTION_DAYS} days from creation and are then locked (not deleted). PDFs carry a watermark, and upload
             auto-fill is limited per day.
           </li>
           <li>
-            <strong>Gold</strong> adds air tickets and costs {formatInr(PLAN_PRICES_INR.gold.monthly)} per month or{" "}
-            {formatInr(PLAN_PRICES_INR.gold.yearly)} per year. <strong>Platinum</strong> includes every service, including pickup
-            vouchers and welcome placards, and costs {formatInr(PLAN_PRICES_INR.platinum.monthly)} per month or{" "}
-            {formatInr(PLAN_PRICES_INR.platinum.yearly)} per year. Prices include GST. Features and limits are shown on the
+            <strong>Gold</strong> adds air tickets and costs {formatInr(pricing.gold.monthly)} per month or{" "}
+            {formatInr(pricing.gold.yearly)} per year. <strong>Platinum</strong> includes every service, including pickup
+            vouchers and welcome placards, and costs {formatInr(pricing.platinum.monthly)} per month or{" "}
+            {formatInr(pricing.platinum.yearly)} per year. Prices include GST. Features and limits are shown on the
             pricing page.
           </li>
           <li>
@@ -262,7 +263,8 @@ const sections: LegalSection[] = [
   },
 ];
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const sections = buildSections((await getAppSettings()).pricing);
   return (
     <LegalPage
       title="Terms and Conditions"

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
 import BrandMark from "@/components/brand/BrandMark";
+import { BackButton } from "@/components/ui/back-button";
 
 export const metadata = {
   title: "Page not found",
@@ -9,11 +10,14 @@ export const metadata = {
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="h-16 flex items-center px-6 border-b border-[var(--border)] bg-white">
-        <Link href="/" className="flex items-center gap-2">
-          <BrandMark className="h-7" />
-          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
-        </Link>
+      <header className="h-16 flex items-center px-6 glass-nav sticky top-0 z-30 border-b">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/" />
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark className="h-7" />
+            <span className="font-bold text-base text-[var(--foreground)]">Vouchlio</span>
+          </Link>
+        </div>
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">

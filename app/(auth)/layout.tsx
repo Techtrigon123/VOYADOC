@@ -1,28 +1,28 @@
 import Link from "next/link";
-import BrandMark from "@/components/brand/BrandMark";
+import { BackButton } from "@/components/ui/back-button";
+
+/** Travel photo behind the sign-in, sign-up and password pages. */
+const BACKDROP = "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=2000&q=75&auto=format&fit=crop";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top bar */}
-      <header className="h-16 flex items-center px-6 border-b border-[var(--border)] bg-white">
-        <Link href="/" className="flex items-center gap-2">
-          <BrandMark className="h-7" />
-          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
-        </Link>
-      </header>
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#0d1726]">
+      {/* Full-screen photo, darkened on the card side so the glass stays readable */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={BACKDROP} alt="" aria-hidden fetchPriority="high" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0d1726]/85 via-[#0d1726]/35 to-transparent" />
 
-      {/* Main */}
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        {children}
-      </main>
+      <div className="flex items-center px-4 pt-4 sm:px-8 sm:pt-6">
+        <BackButton fallback="/" className="border-white/30 bg-white/15 text-white backdrop-blur-md hover:border-white hover:text-white" />
+      </div>
 
-      {/* Footer */}
-      <footer className="py-4 text-center text-xs text-[var(--muted-foreground)]">
-        © {new Date().getFullYear()} Voyenta &nbsp;·&nbsp;{" "}
-        <Link href="/privacy" className="hover:underline">Privacy</Link>
+      <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:justify-start lg:px-[6vw]">{children}</main>
+
+      <footer className="px-4 pb-5 text-center text-xs text-white/70 sm:px-8 lg:text-left lg:px-[6vw]">
+        © {new Date().getFullYear()} Vouchlio &nbsp;·&nbsp;{" "}
+        <Link href="/privacy" className="hover:text-white hover:underline">Privacy</Link>
         &nbsp;·&nbsp;
-        <Link href="/terms" className="hover:underline">Terms</Link>
+        <Link href="/terms" className="hover:text-white hover:underline">Terms</Link>
       </footer>
     </div>
   );

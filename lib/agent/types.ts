@@ -43,6 +43,8 @@ export interface Agent {
   subscriptionPlan: PlanId;
   subscriptionExpiresAt?: string;
   subscriptionCycle?: "monthly" | "yearly";
+  /** Profile review by the Vouchlio team (undefined before migration 0007). */
+  verification?: import("./verification-shared").VerificationInfo;
   /** Computed plan status: active, in its grace period, lapsed… */
   subscription?: import("./plans").SubscriptionState;
   airTicketingEnabled: boolean;
@@ -91,5 +93,7 @@ export interface DocumentAccess {
 export interface ApiResult<T> {
   success: boolean;
   data?: T;
+  /** Optional success message from the server (shown in a toast). */
+  message?: string;
   error?: { code?: string; message: string };
 }

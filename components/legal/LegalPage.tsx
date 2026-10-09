@@ -2,6 +2,7 @@ import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 import { SITE } from "@/lib/site";
 import BrandMark from "@/components/brand/BrandMark";
+import { BackButton } from "@/components/ui/back-button";
 
 export interface LegalSection {
   id: string;
@@ -21,11 +22,14 @@ export default function LegalPage({
 }) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b border-[var(--border)] bg-white/90 backdrop-blur">
-        <Link href="/" className="flex items-center gap-2">
-          <BrandMark className="h-7" />
-          <span className="font-bold text-base text-[var(--foreground)]">Voyenta</span>
-        </Link>
+      <header className="glass-nav sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/" />
+          <Link href="/" className="flex items-center gap-2">
+            <BrandMark className="h-7" />
+            <span className="font-bold text-base text-[var(--foreground)]">Vouchlio</span>
+          </Link>
+        </div>
         <Link href="/signup" className="btn-glow inline-flex h-9 items-center rounded-lg px-4 text-sm">
           Start free
         </Link>

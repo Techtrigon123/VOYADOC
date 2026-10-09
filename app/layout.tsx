@@ -6,6 +6,7 @@ import ChatWidget from "@/components/ChatWidget";
 import ThemedToaster from "@/components/ThemedToaster";
 import { THEME_SCRIPT } from "@/lib/theme-script";
 import { SITE } from "@/lib/site";
+import { NavigationTracker } from "@/components/ui/back-button";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,13 +14,13 @@ const inter = Inter({
   display: "swap",
 });
 
-const defaultTitle = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | Voyenta";
+const defaultTitle = "Hotel Voucher, Air Ticket & Invoice Software for Travel Agents | Vouchlio";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: defaultTitle,
-    template: "%s | Voyenta",
+    template: "%s | Vouchlio",
   },
   description: SITE.description,
   applicationName: SITE.name,
@@ -37,11 +38,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: SITE.name }],
   creator: SITE.name,
-  alternates: { canonical: "/" },
+  // No site-wide canonical or og:url here: child pages would inherit "/" and tell Google they are
+  // copies of the home page. Each public page sets its own `alternates.canonical`.
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "/",
     siteName: SITE.name,
     title: defaultTitle,
     description: SITE.description,
@@ -63,10 +64,15 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/site.webmanifest",
+  // Google Search Console: set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the code from the
+  // "HTML tag" method (the content="..." value only), redeploy, then click Verify.
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#e63946",
 };
 
 export default function RootLayout({
@@ -81,6 +87,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="min-h-screen bg-[var(--background)] antialiased">
+        <NavigationTracker />
         {children}
         <CookieConsent />
         <ThemedToaster />

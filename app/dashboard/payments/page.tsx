@@ -4,13 +4,17 @@ import React from "react";
 import { CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function PaymentsPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">Billing</h1>
-        <p className="text-sm text-[var(--muted-foreground)] mt-0.5">Plan usage and billing history.</p>
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/dashboard" />
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Billing</h1>
+        </div>
+        <p className="text-sm text-[var(--muted-foreground)] mt-0.5 pl-12">Plan usage and billing history.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

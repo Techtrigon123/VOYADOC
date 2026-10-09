@@ -1,17 +1,5 @@
-import {
-  LayoutDashboard,
-  Hotel,
-  Plane,
-  Car,
-  Signpost,
-  FileText,
-  IndianRupee,
-  Plus,
-  History,
-  FileSpreadsheet,
-  Receipt,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, History, type LucideIcon } from "lucide-react";
+import { DOC_ICONS, NAV_ICONS } from "./doc-style";
 import type { Agent, DocumentKind } from "@/lib/agent/types";
 import { isFeatureEnabled } from "@/lib/agent/features";
 import { effectivePlan, lowestPlanFor, planIncludes } from "@/lib/agent/plans";
@@ -40,11 +28,11 @@ const createAndHistory = (noun: string, base: string, newHref: string): NavSubIt
 ];
 
 export const NAV_ITEMS: NavItem[] = [
-  { key: "home", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", match: "/dashboard" },
+  { key: "home", label: "Dashboard", icon: NAV_ICONS.home, href: "/dashboard", match: "/dashboard" },
   {
     key: "voucher",
     label: "Voucher",
-    icon: Hotel,
+    icon: DOC_ICONS.hotel_voucher,
     href: "/dashboard/vouchers",
     match: "/dashboard/vouchers",
     kind: "hotel_voucher",
@@ -53,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "flights",
     label: "Flights",
-    icon: Plane,
+    icon: DOC_ICONS.air_ticket,
     href: "/dashboard/flights",
     match: "/dashboard/flights",
     kind: "air_ticket",
@@ -65,7 +53,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "pickup",
     label: "Pickup",
-    icon: Car,
+    icon: DOC_ICONS.pickup_voucher,
     href: "/dashboard/pickup",
     match: "/dashboard/pickup",
     kind: "pickup_voucher",
@@ -77,7 +65,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "placard",
     label: "Placard",
-    icon: Signpost,
+    icon: DOC_ICONS.welcome_placard,
     href: "/dashboard/placards",
     match: "/dashboard/placards",
     kind: "welcome_placard",
@@ -89,17 +77,17 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "invoice",
     label: "Invoice",
-    icon: FileText,
+    icon: DOC_ICONS.invoice,
     href: "/dashboard/invoices?type=invoice",
     match: "/dashboard/invoices",
     kind: "invoice",
     subItems: [
-      { label: "All documents", description: "Tax invoices you have saved", href: "/dashboard/invoices?type=invoice", icon: FileSpreadsheet },
-      { label: "Proforma", description: "Quotations before payment", href: "/dashboard/invoices?type=proforma", icon: FileText },
-      { label: "Receipts", description: "Payment receipts", href: "/dashboard/invoices?type=receipt", icon: Receipt },
+      { label: "All documents", description: "Tax invoices you have saved", href: "/dashboard/invoices?type=invoice", icon: DOC_ICONS.invoice },
+      { label: "Proforma", description: "Quotations before payment", href: "/dashboard/invoices?type=proforma", icon: DOC_ICONS.proforma },
+      { label: "Receipts", description: "Payment receipts", href: "/dashboard/invoices?type=receipt", icon: DOC_ICONS.receipt },
     ],
   },
-  { key: "pricing", label: "Pricing", icon: IndianRupee, href: "/dashboard/pricing", match: "/dashboard/pricing" },
+  { key: "pricing", label: "Pricing", icon: NAV_ICONS.pricing, href: "/dashboard/pricing", match: "/dashboard/pricing" },
 ];
 
 export function visibleNavItems(agent: Agent): NavItem[] {

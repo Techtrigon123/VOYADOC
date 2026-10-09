@@ -4,8 +4,11 @@ import { Check, Lock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnimatedCard from "@/components/ui/AnimatedCard";
 import { ALL_SERVICES, GRACE_DAYS, PLANS, SERVICE_LABELS, formatInr } from "@/lib/agent/plans";
+import { getAppSettings } from "@/lib/settings";
 
-export default function PricingSection() {
+export default async function PricingSection() {
+  const { pricing } = await getAppSettings();
+  const plans = PLANS.map((p) => (p.id === "silver" ? p : { ...p, prices: pricing[p.id] }));
   return (
     <section id="pricing" className="py-24 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -20,7 +23,7 @@ export default function PricingSection() {
 
         {/* Plans grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {PLANS.map((plan, index) => {
+          {plans.map((plan, index) => {
             const featured = !!plan.featured;
             return (
               <AnimatedCard key={plan.id} delay={index * 100}>

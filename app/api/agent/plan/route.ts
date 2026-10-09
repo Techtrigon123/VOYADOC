@@ -3,12 +3,13 @@ import QRCode from "qrcode";
 import { findPendingPlanPayment, hasColumn } from "@/lib/db/repo";
 import { requireAgent, ok, fail } from "@/lib/agent/server";
 import { freeUsage } from "@/lib/agent/entitlements";
-import { isPaidPlan, normalizeCycle, PLAN_PRICES_INR, PLAN_SERVICES, planName, subscriptionState } from "@/lib/agent/plans";
+import { isPaidPlan, normalizeCycle, PLAN_SERVICES, planName, subscriptionState } from "@/lib/agent/plans";
+import { getAppSettings } from "@/lib/settings";
 
 /**
  * Plan status (subscription state, grace period, free allowance, open services),
  * plus UPI payment details when ?plan=gold|platinum&cycle=monthly|yearly.
- * Set PLAN_PAYMENT_UPI_ID and PLAN_PAYMENT_PAYEE_NAME in the environment.
+ * UPI details and prices come from the admin portal's settings (env PLAN_PAYMENT_UPI_ID / PLAN_PAYMENT_PAYEE_NAME as fallback).
  */
 export async function GET(req: NextRequest) {
   try {
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
       hasColumn("plan_payments", "billing_cycle"),
     ]);
     const subscription = subscriptionState(user);
+    const settings = await getAppSettings();
     const result: Record<string, unknown> = {
       plan: subscription.plan,
       subscriptionPlan: user.subscriptionPlan,
@@ -29,6 +31,7 @@ export async function GET(req: NextRequest) {
       freeUsage: usage,
       services: PLAN_SERVICES[subscription.plan],
       monthlyAvailable,
+      prices: settings.pricing,
       pending: pending
         ? {
             id: pending.id,
@@ -46,9 +49,9 @@ export async function GET(req: NextRequest) {
     const plan = req.nextUrl.searchParams.get("plan") ?? "";
     if (isPaidPlan(plan)) {
       const cycle = monthlyAvailable ? normalizeCycle(req.nextUrl.searchParams.get("cycle")) : "yearly";
-      const upiId = process.env.PLAN_PAYMENT_UPI_ID?.trim();
-      const payee = process.env.PLAN_PAYMENT_PAYEE_NAME?.trim() || "Voyenta";
-      const amountInr = PLAN_PRICES_INR[plan][cycle];
+      const upiId = settings.payments.upiId ?? undefined;
+      const payee = settings.payments.payeeName;
+      const amountInr = settings.pricing[plan][cycle];
       let qr: string | null = null;
       if (upiId) {
         const note = `${plan} ${cycle} plan ${user.email}`;

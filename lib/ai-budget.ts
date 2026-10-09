@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db/supabase";
+import { cachedAppSettings } from "@/lib/settings";
 
 /**
  * Spend controls for AI calls (upload auto-fill). See supabase/migrations/0004_ai_cost_controls.sql.
@@ -17,16 +18,19 @@ const num = (name: string, fallback: number) => {
   return Number.isFinite(v) && v >= 0 ? v : fallback;
 };
 
+/** A value set by a master admin in the portal (Settings → AI), if any. */
+const ov = <K extends "dailyBudgetUsd" | "monthlyBudgetUsd" | "userDailyCalls" | "freePoolDailyCalls">(k: K) => cachedAppSettings()?.ai[k] ?? null;
+
 export const AI_LIMITS = {
   /** Kill switch: set AI_EXTRACT_ENABLED=false to turn upload auto-fill off instantly. */
-  enabled: () => process.env.AI_EXTRACT_ENABLED !== "false",
+  enabled: () => process.env.AI_EXTRACT_ENABLED !== "false" && cachedAppSettings()?.ai.enabled !== false,
   /** Total AI spend allowed per UTC day / calendar month, in USD. */
-  dailyBudgetUsd: () => num("AI_DAILY_BUDGET_USD", 10),
-  monthlyBudgetUsd: () => num("AI_MONTHLY_BUDGET_USD", 150),
+  dailyBudgetUsd: () => ov("dailyBudgetUsd") ?? num("AI_DAILY_BUDGET_USD", 10),
+  monthlyBudgetUsd: () => ov("monthlyBudgetUsd") ?? num("AI_MONTHLY_BUDGET_USD", 150),
   /** Fair-use cap per account per day, on every plan (Platinum "unlimited" included). */
-  userDailyCalls: () => num("AI_USER_DAILY_LIMIT", 30),
+  userDailyCalls: () => ov("userDailyCalls") ?? num("AI_USER_DAILY_LIMIT", 30),
   /** Shared daily pool for all free (Silver) accounts together — stops mass sign-ups draining the budget. */
-  freePoolDailyCalls: () => num("AI_FREE_POOL_DAILY_LIMIT", 100),
+  freePoolDailyCalls: () => ov("freePoolDailyCalls") ?? num("AI_FREE_POOL_DAILY_LIMIT", 100),
   /** Largest PDF we send to the model, in pages (each page is billed). */
   maxPdfPages: () => num("AI_MAX_PDF_PAGES", 5),
 };

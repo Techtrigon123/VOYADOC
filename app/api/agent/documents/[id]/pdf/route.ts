@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAgent, serializeAgent, summarizeDocument, isUuid, fail } from "@/lib/agent/server";
 import { effectivePlan } from "@/lib/agent/plans";
 import { lockedDocument } from "@/lib/agent/entitlements";
+import { canDownloadStatus, DOWNLOAD_BLOCKED_MESSAGE, type VerificationStatus } from "@/lib/agent/verification-shared";
 import { renderDocumentPdf, pdfFileName } from "@/lib/pdf/render";
 import { getDocument, updateDocument } from "@/lib/db/repo";
 
@@ -22,6 +23,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
       const lock = lockedDocument(access, doc.kind);
       return fail(lock.message, lock.status, lock.code);
     }
+    if (!canDownloadStatus(user.verificationStatus as VerificationStatus | undefined))
+      return fail(DOWNLOAD_BLOCKED_MESSAGE, 403, "VERIFICATION_REQUIRED");
 
     const bytes = await renderDocumentPdf(doc.kind, doc.data, serializeAgent(user), effectivePlan(user), {
       paidAmount: Number(doc.paidAmount ?? 0),

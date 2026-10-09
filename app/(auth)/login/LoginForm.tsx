@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import AuthLogo from "@/components/auth/AuthLogo";
+import { OFFER_FLAG } from "@/components/agent/UpgradePopup";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const loginSchema = z.object({
@@ -70,6 +72,12 @@ export default function LoginForm() {
       }
 
       toast.success("Welcome back!");
+      // Show the plan offer once, on the first dashboard screen after signing in.
+      try {
+        sessionStorage.setItem(OFFER_FLAG, "1");
+      } catch {
+        /* storage blocked — skip the offer */
+      }
       const cb = searchParams.get("callbackUrl");
       router.push(safeCallback(cb));
       router.refresh();
@@ -81,12 +89,13 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <Card className="shadow-sm border-[var(--border)]">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+    <div className="w-full max-w-[420px]">
+      <Card className="auth-card">
+        <CardHeader className="pb-4">
+          <AuthLogo />
+          <CardTitle as="h1" className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription>
-            Log in to your Voyenta account
+            Log in to your Vouchlio account
           </CardDescription>
         </CardHeader>
 
@@ -107,15 +116,7 @@ export default function LoginForm() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-[var(--primary)] hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -129,7 +130,8 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  data-password-toggle
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -142,8 +144,9 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* Remember me */}
-            <div className="flex items-center gap-2">
+            {/* Remember me + forgot password, on one row */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
               {/* Radix checkbox is a <button>; drive it explicitly so the schema gets a boolean. */}
               <Checkbox
                 id="remember"
@@ -151,8 +154,12 @@ export default function LoginForm() {
                 onCheckedChange={(v) => setValue("remember", v === true)}
               />
               <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                Remember me for 30 days
+                Remember me
               </Label>
+              </div>
+              <Link href="/forgot-password" className="text-sm">
+                Forgot your password?
+              </Link>
             </div>
 
             {/* Submit */}
@@ -163,27 +170,14 @@ export default function LoginForm() {
               loading={isLoading}
             >
               <LogIn className="h-4 w-4" />
-              Log in
+              Sign in
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[var(--border)]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-[var(--muted-foreground)]">
-                 New to Voyenta?
-              </span>
-            </div>
-          </div>
-
-          <Link href="/signup">
-            <Button variant="outline" className="w-full">
-              Create a free account
-            </Button>
-          </Link>
+          <p className="mt-4 text-center text-sm text-white">
+            New user?{" "}
+            <Link href="/signup">Create an account</Link>
+          </p>
         </CardContent>
       </Card>
     </div>

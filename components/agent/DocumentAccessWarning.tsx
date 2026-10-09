@@ -135,7 +135,7 @@ export function DocumentAccessProvider({ children }: { children: React.ReactNode
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label="Your documents are losing access — open warning"
-                className="prompt-glow-amber pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
+                className="on-accent prompt-glow-amber pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
               >
                 <AlertTriangle className="h-4 w-4 text-amber-400" />
                 <span>Files losing access</span>
@@ -224,7 +224,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
   const locked = summary.samples.filter((s) => s.locked);
   return (
     <>
-      <div className="relative shrink-0 border-b border-slate-100 bg-gradient-to-br from-amber-50 via-white to-white px-5 pb-4 pt-5 pr-12">
+      <div className="relative shrink-0 border-b border-slate-100 bg-white px-5 pb-4 pt-5 pr-12">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
             <Clock className="h-5 w-5" />
@@ -258,7 +258,7 @@ export function AccessSummaryPanel({ summary, onDismiss, variant = "default" }: 
             <FileStrip items={locked} locked />
           </section>
         ) : null}
-        <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm text-slate-600">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
           <span className="font-semibold text-slate-900">Gold &amp; Platinum</span> partners get forever file access — no {summary.retentionDays}-day limit. We&apos;d love to welcome you when you&apos;re ready.
         </div>
       </div>

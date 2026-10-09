@@ -39,11 +39,6 @@ export default function FlightsPage() {
         eyebrow="Flights"
         title="Airline tickets"
         description="Offline e-tickets with manual PNR and airline ticket numbers"
-        actions={
-          <Link href="/dashboard/flights/new" className={primaryBtn}>
-            <Plus className="h-4 w-4" /> New ticket
-          </Link>
-        }
       />
       <form
         onSubmit={(e) => {

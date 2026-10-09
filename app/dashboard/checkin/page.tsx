@@ -5,13 +5,17 @@ import Link from "next/link";
 import { Hotel, Receipt, FileText, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function CheckinPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">Create Document</h1>
-        <p className="text-sm text-[var(--muted-foreground)] mt-0.5">Jump straight into a travel document.</p>
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/dashboard" />
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Create Document</h1>
+        </div>
+        <p className="text-sm text-[var(--muted-foreground)] mt-0.5 pl-12">Jump straight into a travel document.</p>
       </div>
 
       <Card>
